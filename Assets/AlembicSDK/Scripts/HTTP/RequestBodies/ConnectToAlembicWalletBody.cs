@@ -6,6 +6,6 @@ namespace AlembicSDK.Scripts.HTTP.RequestBodies
 	{
 		public SiweMessageLowerCase message { get; set; }
 		public string signature { get; set; }
-		public string ownerAddress { get; set; }
+		public string walletAddress { get; set; }
 	}
 }

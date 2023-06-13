@@ -62,19 +62,23 @@ namespace AlembicSDK.Scripts.Core
 
 			var account = _authAdaptor.GetAccount();
 			var ownerAddress = account.Address;
-			var nonce = await _api.GetNonce(ownerAddress);
+			var predictedWalletAddress = await _api.GetPredictedSafeAddress(ownerAddress);
+			_walletAddress = predictedWalletAddress ?? throw new Exception("Error while getting wallet address");
+			
+			var nonce = await _api.GetNonce(predictedWalletAddress);
 			if (nonce == null) throw new Exception("Error while getting nonce");
 
-			var message = CreateMessage(ownerAddress, nonce);
-			var signatureSiwe = SignSiweMessage(message);
+			var message = CreateMessage(predictedWalletAddress, nonce);
+			var messageToSign = SiweMessageStringBuilder.BuildMessage(message);
+			var signatureSiwe = SignMessage(messageToSign);
 
 			//SAFE ADDRESS
-			var walletAddress = await _api.ConnectToAlembicWallet(
+			var walletAddress =  await _api.ConnectToAlembicWallet(
 				message,
 				signatureSiwe,
-				ownerAddress
+				predictedWalletAddress
 			);
-			_walletAddress = walletAddress ?? throw new Exception("Error while connecting to Alembic Wallet");
+			if(walletAddress == null) throw new Exception("Error while connecting to Alembic Wallet");
 
 			_sponsoredAddresses = await _api.GetSponsoredAddresses();
 			if (_sponsoredAddresses == null) throw new Exception("Error while getting sponsored addresses");
@@ -150,7 +154,6 @@ namespace AlembicSDK.Scripts.Core
 			var to = _walletAddress;
 			const string value = "0";
 
-			var nonce = await Tools.Utils.GetNonce(_web3, _walletAddress);
 			var contract = _web3.Eth.GetContract(Constants.SAFE_ABI, _walletAddress);
 			var addOwnerWithThresholdFunction = contract.GetFunction("addOwnerWithThreshold");
 			var data = addOwnerWithThresholdFunction.GetData(newOwner, 1);
@@ -199,21 +202,12 @@ namespace AlembicSDK.Scripts.Core
 
 			var messageTyped = new SafeMessage
 			{
-				message = hashedMessage.ToHex()
+				message = hashedMessage.ToHex().EnsureHexPrefix()
 			};
 
 			var signer = _authAdaptor.GetSigner();
 			var signature = signer.SignTypedData(messageTyped, typedData);
 
-			return signature;
-		}
-
-		private string SignSiweMessage(SiweMessage message)
-		{
-			var messageToSign = SiweMessageStringBuilder.BuildMessage(message);
-			var messageSigner = new EthereumMessageSigner();
-			var signature =
-				messageSigner.EncodeUTF8AndSign(messageToSign, new EthECKey(_authAdaptor.GetAccount().PrivateKey));
 			return signature;
 		}
 
