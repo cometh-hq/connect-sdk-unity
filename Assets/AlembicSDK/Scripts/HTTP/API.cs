@@ -106,7 +106,7 @@ namespace AlembicSDK.Scripts.HTTP
 			return null;
 		}
 
-		public async Task<string> ConnectToAlembicWallet(SiweMessage message, string signature, string ownerAddress)
+		public async Task<string> ConnectToAlembicWallet(SiweMessage message, string signature, string walletAddress)
 		{
 			const string requestUri = "/wallets/connect";
 			var siweMessageLowerCase = new SiweMessageLowerCase(message);
@@ -114,7 +114,7 @@ namespace AlembicSDK.Scripts.HTTP
 			{
 				message = siweMessageLowerCase,
 				signature = signature,
-				ownerAddress = ownerAddress
+				walletAddress = walletAddress
 			};
 			var json = JsonConvert.SerializeObject(body);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
