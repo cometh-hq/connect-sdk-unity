@@ -5,7 +5,6 @@ using AlembicSDK.Scripts.Core;
 using AlembicSDK.Scripts.HTTP;
 using AlembicSDK.Scripts.Tools.Signers;
 using AlembicSDK.Scripts.Types;
-using Nethereum.Web3.Accounts;
 using UnityEngine;
 
 namespace AlembicSDK.Scripts.Adapters
@@ -15,18 +14,16 @@ namespace AlembicSDK.Scripts.Adapters
 		[SerializeField] private int chainId;
 		[SerializeField] private string jwtToken;
 		[SerializeField] private string apiKey;
-		
+
 		private string _account;
-		private AlembicAuthSigner _signer;
 		private API _api;
-		
+		private AlembicAuthSigner _signer;
+
 		private void Awake()
 		{
 			if (string.IsNullOrEmpty(jwtToken) || string.IsNullOrEmpty(apiKey) || chainId == 0)
-			{
 				Debug.LogError("Serialized fields empty");
-			}
-			
+
 			ChainId = chainId.ToString();
 			_api = new API(apiKey, chainId);
 		}
@@ -41,11 +38,8 @@ namespace AlembicSDK.Scripts.Adapters
 
 		public Task Logout()
 		{
-			if (_signer == null)
-			{
-				throw new Exception("No signer instance found");
-			}
-			
+			if (_signer == null) throw new Exception("No signer instance found");
+
 			PlayerPrefs.DeleteKey("privateKey");
 			_account = null;
 			_signer = null;
@@ -55,21 +49,15 @@ namespace AlembicSDK.Scripts.Adapters
 
 		public string GetAccount()
 		{
-			if (_signer == null)
-			{
-				throw new Exception("No signer instance found");
-			}
-			
+			if (_signer == null) throw new Exception("No signer instance found");
+
 			return _account;
 		}
 
 		public ISignerBase GetSigner()
 		{
-			if (_signer == null)
-			{
-				throw new Exception("No signer instance found");
-			}
-			
+			if (_signer == null) throw new Exception("No signer instance found");
+
 			return _signer;
 		}
 
@@ -77,10 +65,7 @@ namespace AlembicSDK.Scripts.Adapters
 		{
 			var walletAddress = GetAccount();
 
-			if (string.IsNullOrEmpty(walletAddress))
-			{
-				return null;
-			}
+			if (string.IsNullOrEmpty(walletAddress)) return null;
 
 			return new UserInfos
 			{

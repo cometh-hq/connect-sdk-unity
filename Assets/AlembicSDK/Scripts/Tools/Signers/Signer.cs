@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlembicSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
@@ -23,9 +24,10 @@ namespace AlembicSDK.Scripts.Tools.Signers
 			return SignTypedDataV4(message, typedData, _ethEcKey);
 		}
 
-		public Task<string> SignTypedData(DomainWithChainIdAndVerifyingContract domain, Dictionary<string, MemberDescription[]> types, SafeTx value)
+		public Task<string> SignTypedData(DomainWithChainIdAndVerifyingContract domain,
+			Dictionary<string, MemberDescription[]> types, SafeTx value)
 		{
-			throw new System.NotImplementedException();
+			throw new NotImplementedException();
 		}
 	}
 }

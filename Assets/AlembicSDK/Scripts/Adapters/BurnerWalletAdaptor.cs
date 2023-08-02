@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using AlembicSDK.Scripts.Adapters.Interfaces;
-using AlembicSDK.Scripts.Interfaces;
 using AlembicSDK.Scripts.Tools.Signers;
 using Nethereum.Signer;
 using Nethereum.Web3.Accounts;

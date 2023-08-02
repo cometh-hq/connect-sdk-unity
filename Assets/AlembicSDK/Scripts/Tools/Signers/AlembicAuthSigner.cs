@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlembicSDK.Scripts.HTTP;
 using AlembicSDK.Scripts.Tools.Signers;
@@ -10,14 +11,25 @@ namespace AlembicSDK.Scripts.Core
 {
 	public class AlembicAuthSigner : Eip712TypedDataSigner, ISignerBase
 	{
-		private string _address;
-		private readonly string _jwtToken;
 		private readonly API _api;
+		private readonly string _jwtToken;
+		private string _address;
 
 		public AlembicAuthSigner(string jwtToken, API api)
 		{
 			_jwtToken = jwtToken;
 			_api = api;
+		}
+
+		public string SignTypedData<T, TDomain>(T message, TypedData<TDomain> typedData)
+		{
+			throw new NotImplementedException();
+		}
+
+		public async Task<string> SignTypedData(DomainWithChainIdAndVerifyingContract domain,
+			Dictionary<string, MemberDescription[]> types, SafeTx value)
+		{
+			return await _api.SignTypedDataWithAlembicAuth(_jwtToken, domain, types, value);
 		}
 
 		public async Task<string> GetAddress()
@@ -31,25 +43,14 @@ namespace AlembicSDK.Scripts.Core
 			return _address;
 		}
 
-		public string SignTypedData<T, TDomain>(T message, TypedData<TDomain> typedData)
-		{
-			throw new System.NotImplementedException();
-		}
-
-		public async Task<string> SignTypedData(DomainWithChainIdAndVerifyingContract domain,
-			Dictionary<string, MemberDescription[]> types, SafeTx value)
-		{
-			return await _api.SignTypedDataWithAlembicAuth(_jwtToken, domain, types, value);
-		}
-
 		public async Task<string> SignTransaction()
 		{
-			throw new System.NotImplementedException();
+			throw new NotImplementedException();
 		}
-		
+
 		public async Task<string> SignMessage(string message)
 		{
-			throw new System.NotImplementedException();
+			throw new NotImplementedException();
 		}
 	}
 }

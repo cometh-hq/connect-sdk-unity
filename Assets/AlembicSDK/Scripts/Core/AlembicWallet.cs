@@ -30,6 +30,8 @@ namespace AlembicSDK.Scripts.Core
 		private readonly IAuthAdaptor _authAdaptor;
 		private readonly string _chainId;
 		private readonly Uri _uri = new("https://api.alembic.finance");
+		private readonly BigInteger BASE_GAS;
+		private readonly double REWARD_PERCENTILE;
 		private bool _connected;
 		private EventHandler _eventHandler;
 		private Constants.Network _network;
@@ -39,8 +41,6 @@ namespace AlembicSDK.Scripts.Core
 		private Web3 _web3;
 
 		private Web3Auth _web3Auth;
-		private readonly BigInteger BASE_GAS;
-		private readonly double REWARD_PERCENTILE;
 
 		public AlembicWallet(IAuthAdaptor authAdaptor, string apiKey)
 		{

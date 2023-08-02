@@ -129,7 +129,7 @@ namespace AlembicSDK.Scripts.HTTP
 			Debug.LogError("Error in ConnectToAlembicWallet");
 			return null;
 		}
-		
+
 		public async Task<string> ConnectToAlembicAuth(string jwtToken)
 		{
 			const string requestUri = "/key-store/connect";
@@ -139,20 +139,20 @@ namespace AlembicSDK.Scripts.HTTP
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 			var contentDeserializeObject =
 				JsonConvert.DeserializeObject<ConnectToAlembicAuthResponse>(contentReceived);
-			
+
 			if (contentDeserializeObject is { success: true }) return contentDeserializeObject.address;
-			
+
 			Debug.LogError("Error in ConnectToAlembicAuth");
 			return null;
 		}
-		
+
 		public async Task<string> SignTypedDataWithAlembicAuth(string jwtToken,
 			DomainWithChainIdAndVerifyingContract domain, Dictionary<string, MemberDescription[]> types, SafeTx value)
 		{
 			const string requestUri = "/key-store/signTypedData";
 			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
 			request.Headers.Add("Authorization", "Bearer " + jwtToken);
-			
+
 			var body = new SignTypedDataWithAlembicAuthBody
 			{
 				domain = domain,
@@ -162,7 +162,7 @@ namespace AlembicSDK.Scripts.HTTP
 			var json = JsonConvert.SerializeObject(body);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 			request.Content = content;
-			
+
 			var response = await api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 			return null;
