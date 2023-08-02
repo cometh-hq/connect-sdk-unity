@@ -64,7 +64,7 @@ namespace AlembicSDK.Scripts.Core
 			var ownerAddress = account.Address;
 			var predictedWalletAddress = await _api.GetPredictedSafeAddress(ownerAddress);
 			_walletAddress = predictedWalletAddress ?? throw new Exception("Error while getting wallet address");
-			
+
 			var nonce = await _api.GetNonce(predictedWalletAddress);
 			if (nonce == null) throw new Exception("Error while getting nonce");
 
@@ -73,12 +73,12 @@ namespace AlembicSDK.Scripts.Core
 			var signatureSiwe = SignMessage(messageToSign);
 
 			//SAFE ADDRESS
-			var walletAddress =  await _api.ConnectToAlembicWallet(
+			var walletAddress = await _api.ConnectToAlembicWallet(
 				message,
 				signatureSiwe,
 				predictedWalletAddress
 			);
-			if(walletAddress == null) throw new Exception("Error while connecting to Alembic Wallet");
+			if (walletAddress == null) throw new Exception("Error while connecting to Alembic Wallet");
 
 			_sponsoredAddresses = await _api.GetSponsoredAddresses();
 			if (_sponsoredAddresses == null) throw new Exception("Error while getting sponsored addresses");

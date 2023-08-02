@@ -8,6 +8,7 @@ using AlembicSDK.Scripts.HTTP.Responses;
 using AlembicSDK.Scripts.Tools;
 using AlembicSDK.Scripts.Types;
 using AlembicSDK.Scripts.Types.MessageTypes;
+using Nethereum.ABI.EIP712;
 using Nethereum.Siwe.Core;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -126,6 +127,44 @@ namespace AlembicSDK.Scripts.HTTP
 			if (contentDeserializeObject is { success: true }) return contentDeserializeObject.walletAddress;
 
 			Debug.LogError("Error in ConnectToAlembicWallet");
+			return null;
+		}
+		
+		public async Task<string> ConnectToAlembicAuth(string jwtToken)
+		{
+			const string requestUri = "/key-store/connect";
+			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+			request.Headers.Add("Authorization", "Bearer " + jwtToken);
+			var response = await api.SendAsync(request);
+			var contentReceived = response.Content.ReadAsStringAsync().Result;
+			var contentDeserializeObject =
+				JsonConvert.DeserializeObject<ConnectToAlembicAuthResponse>(contentReceived);
+			
+			if (contentDeserializeObject is { success: true }) return contentDeserializeObject.address;
+			
+			Debug.LogError("Error in ConnectToAlembicAuth");
+			return null;
+		}
+		
+		public async Task<string> SignTypedDataWithAlembicAuth(string jwtToken,
+			DomainWithChainIdAndVerifyingContract domain, Dictionary<string, MemberDescription[]> types, SafeTx value)
+		{
+			const string requestUri = "/key-store/signTypedData";
+			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+			request.Headers.Add("Authorization", "Bearer " + jwtToken);
+			
+			var body = new SignTypedDataWithAlembicAuthBody
+			{
+				domain = domain,
+				types = types,
+				value = value
+			};
+			var json = JsonConvert.SerializeObject(body);
+			var content = new StringContent(json, Encoding.UTF8, "application/json");
+			request.Content = content;
+			
+			var response = await api.SendAsync(request);
+			var contentReceived = response.Content.ReadAsStringAsync().Result;
 			return null;
 		}
 
