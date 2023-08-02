@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using AlembicSDK.Scripts.Interfaces;
+using AlembicSDK.Scripts.Adapters.Interfaces;
 using AlembicSDK.Scripts.Tools.Signers;
 using Nethereum.Signer;
-using Nethereum.Signer.EIP712;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
 

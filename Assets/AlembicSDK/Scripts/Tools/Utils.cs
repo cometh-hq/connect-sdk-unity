@@ -2,7 +2,6 @@
 using System.Numerics;
 using System.Threading.Tasks;
 using AlembicSDK.Scripts.Interfaces;
-using AlembicSDK.Scripts.Tools.Signers;
 using AlembicSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
 using Nethereum.Web3;
@@ -96,12 +95,6 @@ namespace AlembicSDK.Scripts.Tools
 			var function = contract.GetFunction("nonce");
 			var result = await function.CallAsync<int>();
 			return result;
-		}
-
-		public static string SignSafeMessage(Signer signer, SafeTx safeTx,
-			TypedData<DomainWithChainIdAndVerifyingContract> typedData)
-		{
-			return signer.SignTypedData(safeTx, typedData);
 		}
 	}
 }

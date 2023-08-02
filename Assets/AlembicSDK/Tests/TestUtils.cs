@@ -4,6 +4,7 @@ using AlembicSDK.Scripts.Core;
 using AlembicSDK.Scripts.Tools;
 using AlembicSDK.Scripts.Types.MessageTypes;
 using CandyCoded.env;
+using AlembicSDK.Scripts.Tools.Signers;
 using Nethereum.ABI.EIP712;
 using NUnit.Framework;
 using UnityEngine;
@@ -287,9 +288,8 @@ namespace AlembicSDK.Tests
 			Assert.AreEqual(expectedSafeTx.gasToken, safeTx.gasToken);
 
 			var signer = walletAdapter.GetSigner();
-			var txSignature = Scripts.Tools.Utils.SignSafeMessage(signer, safeTx, typedData);
-			var expectedTxSignature =
-				"0x28a0f3a9d638cfb4b098278cc90cce4d64e7784d8d8d2e67d5a6c87fe5cbf1125598607d1a1502a7efdb3b2310373f1fc72d46a7eb2eff454c04fdcfc3d0d0f41c";
+			var txSignature = signer.SignTypedData(safeTx, typedData);
+			const string expectedTxSignature = "0x28a0f3a9d638cfb4b098278cc90cce4d64e7784d8d8d2e67d5a6c87fe5cbf1125598607d1a1502a7efdb3b2310373f1fc72d46a7eb2eff454c04fdcfc3d0d0f41c";
 			Assert.AreEqual(expectedTxSignature, txSignature);
 		}
 	}

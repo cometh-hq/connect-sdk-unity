@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using AlembicSDK.Scripts.Adapters.Interfaces;
 using AlembicSDK.Scripts.HTTP;
 using AlembicSDK.Scripts.HTTP.Responses;
 using AlembicSDK.Scripts.Interfaces;
@@ -228,7 +229,9 @@ namespace AlembicSDK.Scripts.Core
 
 			if (!ToSponsoredAddress(safeTx.to)) safeTx = await SetTransactionGas(safeTx);
 
-			var txSignature = Tools.Utils.SignSafeMessage(_authAdaptor.GetSigner(), safeTx, typedData);
+			var signer = _authAdaptor.GetSigner();
+
+			var txSignature = signer.SignTypedData(safeTx, typedData);
 
 			Debug.Log("Sending Transaction");
 			return await _api.RelayTransaction(new RelayTransactionType(
