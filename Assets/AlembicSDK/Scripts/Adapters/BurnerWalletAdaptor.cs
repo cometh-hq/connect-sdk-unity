@@ -12,7 +12,7 @@ namespace AlembicSDK.Scripts.Adapters
 	{
 		[SerializeField] private int chainId;
 
-		private Account _account;
+		private string _account;
 		private EthECKey _ethEcKey;
 		private Signer _signer;
 
@@ -37,7 +37,8 @@ namespace AlembicSDK.Scripts.Adapters
 
 			_ethEcKey = new EthECKey(privateKey);
 			_signer = new Signer(_ethEcKey);
-			_account = new Account(privateKey);
+			var eoa = new Account(privateKey);
+			_account = eoa.Address;
 
 			return Task.CompletedTask;
 		}
@@ -51,12 +52,12 @@ namespace AlembicSDK.Scripts.Adapters
 			return Task.CompletedTask;
 		}
 
-		public Account GetAccount()
+		public string GetAccount()
 		{
 			return _account;
 		}
 
-		public Signer GetSigner()
+		public ISignerBase GetSigner()
 		{
 			return _signer;
 		}

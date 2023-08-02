@@ -1,7 +1,5 @@
-﻿#nullable enable
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AlembicSDK.Scripts.Tools.Signers;
-using Nethereum.Web3.Accounts;
 
 namespace AlembicSDK.Scripts.Adapters.Interfaces
 {
@@ -11,8 +9,8 @@ namespace AlembicSDK.Scripts.Adapters.Interfaces
 
 		public Task Connect();
 		public Task Logout();
-		public Account GetAccount();
-		public Signer GetSigner();
+		public string GetAccount();
+		public ISignerBase GetSigner();
 		public UserInfo GetUserInfos();
 	}
 }

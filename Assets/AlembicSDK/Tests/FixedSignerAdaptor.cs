@@ -9,7 +9,7 @@ namespace AlembicSDK.Tests
 	// This is a test class, it is not used in the project
 	public class FixedSignerAdaptor : IAuthAdaptor
 	{
-		private readonly Account _account;
+		private readonly string _account;
 		private readonly Signer _signer;
 
 		private UserInfo _userInfo;
@@ -20,7 +20,8 @@ namespace AlembicSDK.Tests
 			ChainId = chainId;
 			var ethEcKey = new EthECKey(privateKey);
 			_signer = new Signer(ethEcKey);
-			_account = new Account(privateKey);
+			var eoa = new Account(privateKey);
+			_account = eoa.Address;
 		}
 
 		public string ChainId { get; }
@@ -35,12 +36,12 @@ namespace AlembicSDK.Tests
 			return Task.CompletedTask;
 		}
 
-		public Account GetAccount()
+		public string GetAccount()
 		{
 			return _account;
 		}
 
-		public Signer GetSigner()
+		public ISignerBase GetSigner()
 		{
 			return _signer;
 		}

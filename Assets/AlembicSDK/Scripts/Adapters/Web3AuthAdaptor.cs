@@ -17,7 +17,7 @@ namespace AlembicSDK.Scripts.Adapters
 		[SerializeField] private Web3Auth.Network web3AuthNetwork;
 		[SerializeField] private int chainId;
 
-		private Account _account;
+		private string _account;
 		private EthECKey _ethEcKey;
 
 		private Signer _signer;
@@ -72,12 +72,12 @@ namespace AlembicSDK.Scripts.Adapters
 			Debug.Log("Logout completed!");
 		}
 
-		public Account GetAccount()
+		public string GetAccount()
 		{
 			return _account;
 		}
 
-		public Signer GetSigner()
+		public ISignerBase GetSigner()
 		{
 			return _signer;
 		}
@@ -91,10 +91,11 @@ namespace AlembicSDK.Scripts.Adapters
 		{
 			_userInfo = response.userInfo;
 			_ethEcKey = new EthECKey(response.privKey);
-			_account = new Account(response.privKey);
+			var eoa = new Account(response.privKey);
+			_account = eoa.Address;
 			_signer = new Signer(_ethEcKey);
 
-			Debug.Log("Logged in with account :" + _account.Address);
+			Debug.Log("Logged in with account :" + _account);
 			_waitingTaskCompletionSource.SetResult(true);
 		}
 

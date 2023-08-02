@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AlembicSDK.Scripts.Adapters.Interfaces;
 using AlembicSDK.Scripts.Core;
-using AlembicSDK.Scripts.Interfaces;
+using AlembicSDK.Scripts.HTTP;
 using AlembicSDK.Scripts.Tools.Signers;
-using Nethereum.Signer;
-using Nethereum.Signer.EIP712;
+using AlembicSDK.Scripts.Types;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
 
@@ -13,48 +13,79 @@ namespace AlembicSDK.Scripts.Adapters
 	public class AlembicAuthAdaptor : MonoBehaviour, IAuthAdaptor
 	{
 		[SerializeField] private int chainId;
-
-		private Account _account;
-		private EthECKey _ethEcKey;
-		private Signer _signer; //TODO: replace with AlembicAuthSigner
+		[SerializeField] private string jwtToken;
+		[SerializeField] private string apiKey;
 		
-		private string _jwtToken;
-
+		private string _account;
+		private AlembicAuthSigner _signer;
+		private API _api;
+		
 		private void Awake()
 		{
+			if (string.IsNullOrEmpty(jwtToken) || string.IsNullOrEmpty(apiKey) || chainId == 0)
+			{
+				Debug.LogError("Serialized fields empty");
+			}
+			
 			ChainId = chainId.ToString();
+			_api = new API(apiKey, chainId);
 		}
 
 		public string ChainId { get; private set; }
 
 		public Task Connect()
 		{
-			
+			_signer = new AlembicAuthSigner(jwtToken, _api);
 			return Task.CompletedTask;
 		}
 
 		public Task Logout()
 		{
+			if (_signer == null)
+			{
+				throw new Exception("No signer instance found");
+			}
+			
 			PlayerPrefs.DeleteKey("privateKey");
 			_account = null;
-			_ethEcKey = null;
 			_signer = null;
+			_api = null;
 			return Task.CompletedTask;
 		}
 
-		public Account GetAccount()
+		public string GetAccount()
 		{
+			if (_signer == null)
+			{
+				throw new Exception("No signer instance found");
+			}
+			
 			return _account;
 		}
 
-		public Signer GetSigner()
+		public ISignerBase GetSigner()
 		{
+			if (_signer == null)
+			{
+				throw new Exception("No signer instance found");
+			}
+			
 			return _signer;
 		}
 
 		public UserInfo GetUserInfos()
 		{
-			return null;
+			var walletAddress = GetAccount();
+
+			if (string.IsNullOrEmpty(walletAddress))
+			{
+				return null;
+			}
+
+			return new UserInfos
+			{
+				walletAddress = GetAccount()
+			};
 		}
 	}
 }

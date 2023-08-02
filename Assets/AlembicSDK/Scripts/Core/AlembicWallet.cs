@@ -62,8 +62,7 @@ namespace AlembicSDK.Scripts.Core
 			await _authAdaptor.Connect();
 
 			var account = _authAdaptor.GetAccount();
-			var ownerAddress = account.Address;
-			var predictedWalletAddress = await _api.GetPredictedSafeAddress(ownerAddress);
+			var predictedWalletAddress = await _api.GetPredictedSafeAddress(account);
 			_walletAddress = predictedWalletAddress ?? throw new Exception("Error while getting wallet address");
 
 			var nonce = await _api.GetNonce(predictedWalletAddress);
@@ -121,7 +120,7 @@ namespace AlembicSDK.Scripts.Core
 				idToken = userInfo.idToken,
 				oAuthIdToken = userInfo.oAuthIdToken,
 				oAuthAccessToken = userInfo.oAuthAccessToken,
-				ownerAddress = _authAdaptor.GetAccount().Address,
+				ownerAddress = _authAdaptor.GetAccount(),
 				walletAddress = _walletAddress
 			};
 			return userInfos;
