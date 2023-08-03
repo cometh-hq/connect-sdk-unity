@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlembicSDK.Scripts.HTTP;
-using AlembicSDK.Scripts.Tools.Signers;
+using AlembicSDK.Scripts.Tools.Signers.Interfaces;
 using AlembicSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
 using Nethereum.Signer.EIP712;
 
-namespace AlembicSDK.Scripts.Core
+namespace AlembicSDK.Scripts.Tools.Signers
 {
 	public class AlembicAuthSigner : Eip712TypedDataSigner, ISignerBase
 	{
@@ -27,12 +27,12 @@ namespace AlembicSDK.Scripts.Core
 		}
 
 		public async Task<string> SignTypedData(DomainWithChainIdAndVerifyingContract domain,
-			Dictionary<string, MemberDescription[]> types, SafeTx value)
+			IDictionary<string, MemberDescription[]> types, IDictionary<string, object> value)
 		{
 			return await _api.SignTypedDataWithAlembicAuth(_jwtToken, domain, types, value);
 		}
 
-		public async Task<string> GetAddress()
+		public string GetAddress()
 		{
 			return string.IsNullOrEmpty(_address) ? "" : _address;
 		}

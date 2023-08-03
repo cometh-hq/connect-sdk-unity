@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AlembicSDK.Scripts.Adapters.Interfaces;
-using AlembicSDK.Scripts.Core;
 using AlembicSDK.Scripts.HTTP;
 using AlembicSDK.Scripts.Tools.Signers;
+using AlembicSDK.Scripts.Tools.Signers.Interfaces;
 using AlembicSDK.Scripts.Types;
 using UnityEngine;
 
@@ -30,10 +30,11 @@ namespace AlembicSDK.Scripts.Adapters
 
 		public string ChainId { get; private set; }
 
-		public Task Connect()
+		public async Task Connect()
 		{
 			_signer = new AlembicAuthSigner(jwtToken, _api);
-			return Task.CompletedTask;
+			await _signer.ConnectSigner();
+			Debug.Log("Connected to signer");
 		}
 
 		public Task Logout()
@@ -51,7 +52,7 @@ namespace AlembicSDK.Scripts.Adapters
 		{
 			if (_signer == null) throw new Exception("No signer instance found");
 
-			return _account;
+			return _signer.GetAddress();
 		}
 
 		public ISignerBase GetSigner()
@@ -69,7 +70,7 @@ namespace AlembicSDK.Scripts.Adapters
 
 			return new UserInfos
 			{
-				walletAddress = GetAccount()
+				walletAddress = walletAddress
 			};
 		}
 	}

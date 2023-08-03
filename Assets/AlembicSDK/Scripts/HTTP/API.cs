@@ -147,7 +147,7 @@ namespace AlembicSDK.Scripts.HTTP
 		}
 
 		public async Task<string> SignTypedDataWithAlembicAuth(string jwtToken,
-			DomainWithChainIdAndVerifyingContract domain, Dictionary<string, MemberDescription[]> types, SafeTx value)
+			DomainWithChainIdAndVerifyingContract domain, IDictionary<string, MemberDescription[]> types, IDictionary<string, object> value)
 		{
 			const string requestUri = "/key-store/signTypedData";
 			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);

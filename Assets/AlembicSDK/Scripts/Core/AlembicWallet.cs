@@ -8,6 +8,7 @@ using AlembicSDK.Scripts.HTTP;
 using AlembicSDK.Scripts.HTTP.Responses;
 using AlembicSDK.Scripts.Interfaces;
 using AlembicSDK.Scripts.Tools;
+using AlembicSDK.Scripts.Tools.Signers;
 using AlembicSDK.Scripts.Types;
 using AlembicSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
@@ -280,6 +281,20 @@ namespace AlembicSDK.Scripts.Core
 			message.SetIssuedAtNow();
 
 			return message;
+		}
+		
+		private string SignTypedData<TDomain>(IDictionary<string, object> message, TypedData<TDomain> typedData)
+		{
+			var signer = _authAdaptor.GetSigner();
+			
+			if (signer.GetType() == typeof(AlembicAuthSigner))
+			{
+				signer.SignTypedData(typedData.Domain as DomainWithChainIdAndVerifyingContract, typedData.Types,
+					message);
+			}
+			
+			var signature = signer.SignTypedData(message, typedData);
+			return signature;
 		}
 
 		private bool ToSponsoredAddress(string to)
