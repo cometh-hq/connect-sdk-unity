@@ -43,20 +43,9 @@ namespace AlembicSDK.Scripts.Tools.Signers
 			return string.IsNullOrEmpty(_address) ? "" : _address;
 		}
 
-		public async Task<string> ConnectSigner()
+		public async Task ConnectSigner()
 		{
 			_address = await _api.ConnectToAlembicAuth(_jwtToken);
-			return _address;
-		}
-
-		public async Task<string> SignTransaction()
-		{
-			throw new NotImplementedException();
-		}
-
-		public async Task<string> SignMessage(string message)
-		{
-			throw new NotImplementedException();
 		}
 	}
 }
