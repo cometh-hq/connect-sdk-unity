@@ -184,6 +184,11 @@ namespace AlembicSDK.Scripts.Core
 
 				Types = new Dictionary<string, MemberDescription[]>
 				{
+					["EIP712Domain"] = new[]
+					{
+						new MemberDescription { Name = "chainId", Type = "uint256" },
+						new MemberDescription { Name = "verifyingContract", Type = "address" }
+					},
 					["SafeMessage"] = new[]
 					{
 						new MemberDescription { Name = "message", Type = "bytes" }

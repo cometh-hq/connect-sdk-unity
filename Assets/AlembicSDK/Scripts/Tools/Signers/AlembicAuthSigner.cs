@@ -31,9 +31,10 @@ namespace AlembicSDK.Scripts.Tools.Signers
 		{
 			var lowerCaseDomain = new DomainWithChainIdAndVerifyingContractLowerCase
 			{
-				chainId = domain.ChainId.ToString(),
+				chainId = domain.ChainId,
 				verifyingContract = domain.VerifyingContract
 			};
+			if (types.ContainsKey("EIP712Domain")) types.Remove("EIP712Domain");
 			return await _api.SignTypedDataWithAlembicAuth(_jwtToken, lowerCaseDomain, types, value);
 		}
 
