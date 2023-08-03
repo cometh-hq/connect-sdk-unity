@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using AlembicSDK.Scripts.Tools.Signers;
 using AlembicSDK.Scripts.Tools.Signers.Interfaces;
 
 namespace AlembicSDK.Scripts.Adapters.Interfaces

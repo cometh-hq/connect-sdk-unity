@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using AlembicSDK.Scripts.Types;
-using AlembicSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
 
 namespace AlembicSDK.Scripts.HTTP.RequestBodies

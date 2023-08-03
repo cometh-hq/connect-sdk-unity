@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using AlembicSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
 
 namespace AlembicSDK.Scripts.Tools.Signers.Interfaces

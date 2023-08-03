@@ -6,8 +6,7 @@ namespace AlembicSDK.Scripts.Types
 	[Struct("EIP712Domain")]
 	public class DomainWithChainIdAndVerifyingContractLowerCase : IDomain
 	{
-		[Parameter("uint256", "chainId", 1)]
-		public virtual string chainId { get; set; }
+		[Parameter("uint256", "chainId")] public virtual string chainId { get; set; }
 
 		[Parameter("address", "verifyingContract", 2)]
 		public virtual string verifyingContract { get; set; }

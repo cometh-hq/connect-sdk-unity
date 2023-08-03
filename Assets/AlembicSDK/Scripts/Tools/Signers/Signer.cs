@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlembicSDK.Scripts.Tools.Signers.Interfaces;
-using AlembicSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
 using Nethereum.Signer;
 using Nethereum.Signer.EIP712;
