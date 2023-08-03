@@ -1,55 +1,58 @@
-﻿using AlembicSDK.Scripts.Adapters;
+﻿using System;
+using AlembicSDK.Scripts.Adapters;
 using AlembicSDK.Scripts.Core;
 using AlembicSDK.Scripts.Tools;
 using AlembicSDK.Scripts.Types;
 using CandyCoded.env;
 using Nethereum.Web3;
+using TMPro;
 using UnityEngine;
 
 namespace AlembicSDK.Examples.Scripts
 {
-	public class TestAlembicAuthSigner : MonoBehaviour
+	public class TestWalletAlembicAuth : TestWallet
 	{
 		[SerializeField] public AlembicAuthAdaptor authAdaptor;
-
-		private AlembicWallet _wallet;
+		[SerializeField] private TMP_Text console;
 		private string _apiKey;
 
-		private async void Start()
+		private AlembicWallet _wallet;
+
+		private void Start()
 		{
 			if (env.TryParseEnvironmentVariable("API_KEY", out string apiKey))
-			{
 				_apiKey = apiKey;
-			}
 			else
-			{
 				Debug.LogError("API_KEY environment variable not set");
-			}
 
 			_wallet = new AlembicWallet(authAdaptor, _apiKey);
-			await _wallet.Connect();
 		}
 
-		public async void Connect()
+		public override async void Connect()
 		{
 			PrintInConsole("Connecting...");
 			await _wallet.Connect();
 			PrintInConsole("Connected");
 		}
 
-		public void SignMessage()
+		public override void Disconnect()
+		{
+			throw new NotImplementedException();
+		}
+
+		public override async void SignMessage()
 		{
 			PrintInConsole("Signing message...");
-			var messageSigned = _wallet.SignMessage("Hello World!");
+			var messageSigned = await _wallet.SignMessage("Hello World!");
 			PrintInConsole("Message signed: " + messageSigned);
 		}
 
-		public void CancelWait()
+		public override void CancelWait()
 		{
 			_wallet.CancelWaitingForEvent();
 		}
 
-		public async void SendTestTransaction(string to)
+		public override async void SendTestTransaction(string to)
 		{
 			if (to is "" or Constants.ZERO_ADDRESS)
 			{
@@ -77,13 +80,13 @@ namespace AlembicSDK.Examples.Scripts
 			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authAdaptor.ChainId);
 		}
 
-		public async void GetUserInfo()
+		public override async void GetUserInfo()
 		{
 			var userInfos = _wallet.GetUserInfos();
 			PrintUserInfosInConsole(userInfos);
 		}
 
-		public async void TestCallToCount()
+		public override async void TestCallToCount()
 		{
 			const string
 				COUNTER_TEST_ADDRESS =
@@ -120,7 +123,7 @@ namespace AlembicSDK.Examples.Scripts
 
 		private void PrintInConsole(string str)
 		{
-			Debug.Log(str);
+			console.text += str + "\n";
 		}
 
 		private void PrintUserInfosInConsole(UserInfos userInfos)
@@ -138,44 +141,5 @@ namespace AlembicSDK.Examples.Scripts
 			PrintInConsole("oAuthIdToken: " + userInfos.oAuthIdToken);
 			PrintInConsole("oAuthAccessToken: " + userInfos.oAuthAccessToken);
 		}
-
-		/*private async Task SignTypedData(string _walletAddress)
-		{
-
-			var safeAddress = await _api.GetPredictedSafeAddress(_walletAddress);
-			var domain = new DomainWithChainIdAndVerifyingContract
-			{
-				ChainId = chainID,
-				VerifyingContract = safeAddress
-			};
-
-			var types = new Dictionary<string, MemberDescription[]>
-			{
-				["SafeTx"] = new[]
-				{
-					new MemberDescription { Name = "to", Type = "address" },
-					new MemberDescription { Name = "value", Type = "uint256" },
-					new MemberDescription { Name = "data", Type = "bytes" },
-					new MemberDescription { Name = "operation", Type = "uint8" },
-					new MemberDescription { Name = "safeTxGas", Type = "uint256" },
-					new MemberDescription { Name = "baseGas", Type = "uint256" },
-					new MemberDescription { Name = "gasPrice", Type = "uint256" },
-					new MemberDescription { Name = "gasToken", Type = "address" },
-					new MemberDescription { Name = "refundReceiver", Type = "address" },
-					new MemberDescription { Name = "nonce", Type = "uint256" }
-				}
-			};
-
-			var nonce = "0";//await _api.GetNonce(_walletAddress);
-			const string to = "0x510c522ebCC6Eb376839E0CFf5D57bb2F422EB8b";
-			const string value = "0";
-			const string data = "0x";
-
-			var safeTx = AlembicSDK.Scripts.Tools.Utils.CreateSafeTx(to, value, data, int.Parse(nonce));
-
-			var signature = await _api.SignTypedDataWithAlembicAuth(jwtToken, domain, types, safeTx);
-
-			Debug.Log("Signature :" + signature);
-		}*/
 	}
 }

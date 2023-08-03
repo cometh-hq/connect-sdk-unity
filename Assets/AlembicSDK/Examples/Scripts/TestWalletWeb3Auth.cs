@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace AlembicSDK.Examples.Scripts
 {
-	public class TestWallet : MonoBehaviour
+	public class TestWalletWeb3Auth : TestWallet
 	{
 		[SerializeField] public Web3AuthAdaptor authAdaptor;
 		[SerializeField] private TMP_Text console;
@@ -19,42 +19,38 @@ namespace AlembicSDK.Examples.Scripts
 		private void Start()
 		{
 			if (env.TryParseEnvironmentVariable("API_KEY", out string apiKey))
-			{
 				_wallet = new AlembicWallet(authAdaptor, apiKey);
-			}
 			else
-			{
 				Debug.LogError("API_KEY environment variable not set");
-			}
 		}
 
-		public async void Connect()
+		public override async void Connect()
 		{
 			PrintInConsole("Connecting...");
 			await _wallet.Connect();
 			PrintInConsole("Connected");
 		}
 
-		public async void Disconnect()
+		public override async void Disconnect()
 		{
 			PrintInConsole("Disconnecting...");
 			await _wallet.Logout();
 			PrintInConsole("Disconnected");
 		}
 
-		public void SignMessage()
+		public override void SignMessage()
 		{
 			PrintInConsole("Signing message...");
 			var messageSigned = _wallet.SignMessage("Hello World!");
 			PrintInConsole("Message signed: " + messageSigned);
 		}
 
-		public void CancelWait()
+		public override void CancelWait()
 		{
 			_wallet.CancelWaitingForEvent();
 		}
 
-		public async void SendTestTransaction(string to)
+		public override async void SendTestTransaction(string to)
 		{
 			if (to is "" or Constants.ZERO_ADDRESS)
 			{
@@ -82,13 +78,13 @@ namespace AlembicSDK.Examples.Scripts
 			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authAdaptor.ChainId);
 		}
 
-		public void GetUserInfo()
+		public override void GetUserInfo()
 		{
 			var userInfos = _wallet.GetUserInfos();
 			PrintUserInfosInConsole(userInfos);
 		}
 
-		public async void TestCallToCount()
+		public override async void TestCallToCount()
 		{
 			const string
 				COUNTER_TEST_ADDRESS =

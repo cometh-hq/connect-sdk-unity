@@ -19,13 +19,9 @@ namespace AlembicSDK.Examples.Scripts
 		private void Start()
 		{
 			if (env.TryParseEnvironmentVariable("API_KEY", out string apiKey))
-			{
 				_wallet = new AlembicWallet(authAdaptor, apiKey);
-			}
 			else
-			{
 				Debug.LogError("API_KEY environment variable not set");
-			}
 		}
 
 		public async void Connect()
@@ -64,7 +60,7 @@ namespace AlembicSDK.Examples.Scripts
 
 			var value = "0";
 			var data = "0x";
-			
+
 			PrintInConsole("Sending transaction...");
 			var safeTxHash = await _wallet.SendTransaction(to, value, data);
 
@@ -114,7 +110,7 @@ namespace AlembicSDK.Examples.Scripts
 		{
 			var web3 = new Web3(Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl);
 			var nonce = await AlembicSDK.Scripts.Tools.Utils.GetNonce(web3, _wallet.GetAddress());
-			
+
 			var gas = await _wallet.CalculateMaxFees(to, value, data, nonce);
 			PrintInConsole("Estimated max gas: " + gas);
 		}
