@@ -71,7 +71,7 @@ namespace AlembicSDK.Scripts.Core
 
 			var message = CreateMessage(predictedWalletAddress, nonce);
 			var messageToSign = SiweMessageStringBuilder.BuildMessage(message);
-			var signatureSiwe = SignMessage(messageToSign);
+			var signatureSiwe = await SignMessage(messageToSign);
 
 			//SAFE ADDRESS
 			var walletAddress = await _api.ConnectToAlembicWallet(
@@ -172,7 +172,7 @@ namespace AlembicSDK.Scripts.Core
 		/**
 		   * Signing Message Section
 		   */
-		public string SignMessage(string message)
+		public async Task<string> SignMessage(string message)
 		{
 			var typedData = new TypedData<DomainWithChainIdAndVerifyingContract>
 			{
@@ -184,11 +184,6 @@ namespace AlembicSDK.Scripts.Core
 
 				Types = new Dictionary<string, MemberDescription[]>
 				{
-					["EIP712Domain"] = new[]
-					{
-						new MemberDescription { Name = "chainId", Type = "uint256" },
-						new MemberDescription { Name = "verifyingContract", Type = "address" }
-					},
 					["SafeMessage"] = new[]
 					{
 						new MemberDescription { Name = "message", Type = "bytes" }
@@ -206,8 +201,7 @@ namespace AlembicSDK.Scripts.Core
 				message = hashedMessage.ToHex().EnsureHexPrefix()
 			};
 
-			var signer = _authAdaptor.GetSigner();
-			var signature = signer.SignTypedData(messageTyped, typedData);
+			var signature = await SignTypedData(messageTyped, typedData);
 
 			return signature;
 		}
@@ -229,9 +223,7 @@ namespace AlembicSDK.Scripts.Core
 
 			if (!ToSponsoredAddress(safeTx.to)) safeTx = await SetTransactionGas(safeTx);
 
-			var signer = _authAdaptor.GetSigner();
-
-			var txSignature = signer.SignTypedData(safeTx, typedData);
+			var txSignature = await SignTypedData(safeTx, typedData);
 
 			Debug.Log("Sending Transaction");
 			return await _api.RelayTransaction(new RelayTransactionType(
@@ -282,18 +274,51 @@ namespace AlembicSDK.Scripts.Core
 
 			return message;
 		}
-		
-		private string SignTypedData<TDomain>(IDictionary<string, object> message, TypedData<TDomain> typedData)
+
+		private async Task<string> SignTypedData<T, TDomain>(T message, TypedData<TDomain> typedData)
 		{
 			var signer = _authAdaptor.GetSigner();
-			
+			string signature;
+
 			if (signer.GetType() == typeof(AlembicAuthSigner))
 			{
-				signer.SignTypedData(typedData.Domain as DomainWithChainIdAndVerifyingContract, typedData.Types,
-					message);
+				var value = new Dictionary<string, object>();
+				if (message.GetType() == typeof(SafeTx))
+				{
+					if (message is SafeTx safeTx)
+					{
+						value.Add("to", safeTx.to);
+						value.Add("value", safeTx.value);
+						value.Add("data", safeTx.data);
+						value.Add("operation", safeTx.operation);
+						value.Add("safeTxGas", safeTx.safeTxGas);
+						value.Add("baseGas", safeTx.baseGas);
+						value.Add("gasPrice", safeTx.gasPrice);
+						value.Add("gasToken", safeTx.gasToken);
+						value.Add("refundReceiver", safeTx.refundReceiver);
+						value.Add("nonce", safeTx.nonce);
+					}
+					else
+					{
+						throw new Exception("Invalid SafeTx");
+					}
+				}
+				else if (message.GetType() == typeof(SafeMessage))
+				{
+					if (message is SafeMessage safeMessage) value.Add("message", safeMessage.message);
+				}
+
+				if (typedData.Domain is not DomainWithChainIdAndVerifyingContract domain)
+					throw new Exception("Invalid Domain");
+
+				signature = await signer.SignTypedData(domain,
+					typedData.Types,
+					value);
+
+				return signature;
 			}
-			
-			var signature = signer.SignTypedData(message, typedData);
+
+			signature = signer.SignTypedData(message, typedData);
 			return signature;
 		}
 

@@ -2,6 +2,7 @@
 using AlembicSDK.Scripts.Core;
 using AlembicSDK.Scripts.Tools;
 using AlembicSDK.Scripts.Types;
+using CandyCoded.env;
 using Nethereum.Web3;
 using UnityEngine;
 
@@ -10,13 +11,22 @@ namespace AlembicSDK.Examples.Scripts
 	public class TestAlembicAuthSigner : MonoBehaviour
 	{
 		[SerializeField] public AlembicAuthAdaptor authAdaptor;
-		[SerializeField] public string apikey;
 
 		private AlembicWallet _wallet;
+		private string _apiKey;
 
 		private async void Start()
 		{
-			_wallet = new AlembicWallet(authAdaptor, apikey);
+			if (env.TryParseEnvironmentVariable("API_KEY", out string apiKey))
+			{
+				_apiKey = apiKey;
+			}
+			else
+			{
+				Debug.LogError("API_KEY environment variable not set");
+			}
+
+			_wallet = new AlembicWallet(authAdaptor, _apiKey);
 			await _wallet.Connect();
 		}
 

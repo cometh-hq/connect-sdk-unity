@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AlembicSDK.Scripts.HTTP;
 using AlembicSDK.Scripts.Tools.Signers.Interfaces;
+using AlembicSDK.Scripts.Types;
 using AlembicSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
 using Nethereum.Signer.EIP712;
@@ -29,7 +30,12 @@ namespace AlembicSDK.Scripts.Tools.Signers
 		public async Task<string> SignTypedData(DomainWithChainIdAndVerifyingContract domain,
 			IDictionary<string, MemberDescription[]> types, IDictionary<string, object> value)
 		{
-			return await _api.SignTypedDataWithAlembicAuth(_jwtToken, domain, types, value);
+			var lowerCaseDomain = new DomainWithChainIdAndVerifyingContractLowerCase
+			{
+				chainId = domain.ChainId.ToString(),
+				verifyingContract = domain.VerifyingContract
+			};
+			return await _api.SignTypedDataWithAlembicAuth(_jwtToken, lowerCaseDomain, types, value);
 		}
 
 		public string GetAddress()

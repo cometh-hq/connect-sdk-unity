@@ -2,6 +2,7 @@
   "name": "Signers",
   "references": [
     "GUID:899b09f289b75794fb3f05e12d822ffd",
-    "GUID:9180fc10182395d41bacb05e43007847"
+    "GUID:9180fc10182395d41bacb05e43007847",
+    "GUID:34c16d0e9a6d109409d191c3c79fb3f6"
   ]
 }

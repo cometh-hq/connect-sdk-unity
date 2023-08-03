@@ -134,7 +134,7 @@ namespace AlembicSDK.Scripts.HTTP
 		{
 			const string requestUri = "/key-store/connect";
 			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-			request.Headers.Add("Authorization", "Bearer " + jwtToken);
+			request.Headers.Add("token", jwtToken);
 			var response = await api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 			var contentDeserializeObject =
@@ -147,11 +147,11 @@ namespace AlembicSDK.Scripts.HTTP
 		}
 
 		public async Task<string> SignTypedDataWithAlembicAuth(string jwtToken,
-			DomainWithChainIdAndVerifyingContract domain, IDictionary<string, MemberDescription[]> types, IDictionary<string, object> value)
+			DomainWithChainIdAndVerifyingContractLowerCase domain, IDictionary<string, MemberDescription[]> types, IDictionary<string, object> value)
 		{
 			const string requestUri = "/key-store/signTypedData";
 			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-			request.Headers.Add("Authorization", "Bearer " + jwtToken);
+			request.Headers.Add("token", jwtToken);
 
 			var body = new SignTypedDataWithAlembicAuthBody
 			{
@@ -165,6 +165,11 @@ namespace AlembicSDK.Scripts.HTTP
 
 			var response = await api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
+			var contentDeserializeObject =
+				JsonConvert.DeserializeObject<SignTypedDataWithAlembicAuthResponse>(contentReceived);
+			if (contentDeserializeObject is { success: true }) return contentDeserializeObject.signature;
+
+			Debug.LogError("Error in SignTypedDataWithAlembicAuth");
 			return null;
 		}
 

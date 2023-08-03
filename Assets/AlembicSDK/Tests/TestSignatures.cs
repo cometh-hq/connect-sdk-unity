@@ -56,7 +56,7 @@ namespace AlembicSDK.Tests
 			var walletAddress = wallet.GetAddress();
 			Assert.AreEqual(WALLETADDRESS, walletAddress);
 
-			var signature = wallet.SignMessage(MESSAGETOSIGN);
+			var signature = await wallet.SignMessage(MESSAGETOSIGN);
 			Assert.AreEqual(EXPECTED_SIGNATURE, signature);
 
 			var signatureBytes = signature.HexToByteArray();
@@ -105,7 +105,7 @@ namespace AlembicSDK.Tests
 			var siweMessage = CreateMessage(walletAddress, NONCE);
 			var siweMessageStr = SiweMessageStringBuilder.BuildMessage(siweMessage);
 
-			var signature = wallet.SignMessage(siweMessageStr);
+			var signature = await wallet.SignMessage(siweMessageStr);
 			Assert.AreEqual(EXPECTED_SIGNATURE, signature);
 
 			var ethereumMessageSigner = new EthereumMessageSigner();
