@@ -73,3 +73,11 @@ crashlytics-build.properties
 
 # for .env file
 .env
+
+# TextMesh Pro files
+[Aa]ssets/TextMesh*Pro/
+[Aa]ssets/TextMesh*Pro.meta
+
+
+# for rider
+.idea*
