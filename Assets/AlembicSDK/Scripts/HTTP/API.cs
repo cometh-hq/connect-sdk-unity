@@ -9,6 +9,7 @@ using AlembicSDK.Scripts.Tools;
 using AlembicSDK.Scripts.Types;
 using AlembicSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
+using Nethereum.RPC.Shh.KeyPair;
 using Nethereum.Siwe.Core;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -200,6 +201,27 @@ namespace AlembicSDK.Scripts.HTTP
 
 			Debug.LogError("Error in IsValidSignature");
 			return false;
+		}
+
+		public async Task<string> GetWalletAddressFromUserID(string jwtToken)
+		{
+			const string requestUri = "/user/address";
+			var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+			request.Headers.Add("token", jwtToken);
+			
+			var response = await api.SendAsync(request);
+			var contentReceived = response.Content.ReadAsStringAsync().Result;
+			var deserializedResponse = JsonConvert.DeserializeObject<GetWalletAddressFromUserIDResponse>(contentReceived);
+			
+			if(deserializedResponse.success) return deserializedResponse.walletAddress;
+			
+			Debug.LogError("Error in GetWalletAddressFromUserID");
+			return null;
+		}
+
+		public async Task InitWalletForUserID(string token, string ownerAddress)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

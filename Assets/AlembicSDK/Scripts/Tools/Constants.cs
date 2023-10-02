@@ -12,7 +12,7 @@ namespace AlembicSDK.Scripts.Tools
 			MUMBAI
 		}
 
-		public const string API_URL = "https://account-abstraction.api.alembic.tech/";
+		public const string API_URL = "https://api.connect.cometh.io/user/address/";
 		public const string ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 		public const string SAFE_ABI =
