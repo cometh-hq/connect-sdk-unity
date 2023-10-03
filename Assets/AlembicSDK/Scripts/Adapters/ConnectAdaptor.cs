@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AlembicSDK.Scripts.Adapters.Interfaces;
 using AlembicSDK.Scripts.HTTP;
 using AlembicSDK.Scripts.Services;
+using AlembicSDK.Scripts.Tools;
 using AlembicSDK.Scripts.Tools.Signers;
 using AlembicSDK.Scripts.Tools.Signers.Interfaces;
 using AlembicSDK.Scripts.Types;
@@ -43,7 +44,7 @@ namespace AlembicSDK.Scripts.Adapters
 		{
 			var walletAddress = await _api.GetWalletAddressFromUserID(jwtToken);
 			var userID = TokenService.DecodeTokenAndGetUserID(jwtToken);
-			_signer = await BurnerWalletService.CreateOrGetSigner(jwtToken, userID, walletAddress, _api);
+			_signer = await BurnerWalletService.CreateOrGetSigner(jwtToken, userID, walletAddress, _api, Constants.GetNetworkByChainID(ChainId).RPCUrl);
 			Debug.Log("here");
 		}
 

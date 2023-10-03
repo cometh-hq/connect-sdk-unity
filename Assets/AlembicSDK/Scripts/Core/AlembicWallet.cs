@@ -63,7 +63,7 @@ namespace AlembicSDK.Scripts.Core
 			await _authAdaptor.Connect();
 
 			var account = _authAdaptor.GetAccount();
-			var predictedWalletAddress = await _api.GetPredictedSafeAddress(account);
+			var predictedWalletAddress = await _api.GetWalletAddress(account);
 			_walletAddress = predictedWalletAddress ?? throw new Exception("Error while getting wallet address");
 
 			var nonce = await _api.GetNonce(predictedWalletAddress);

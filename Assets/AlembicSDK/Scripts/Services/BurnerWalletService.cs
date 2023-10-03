@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using AlembicSDK.Scripts.HTTP;
+using AlembicSDK.Scripts.Tools;
 using AlembicSDK.Scripts.Tools.Signers;
 using Nethereum.Signer;
 using UnityEngine;
@@ -8,7 +9,7 @@ namespace AlembicSDK.Scripts.Services
 {
 	public static class BurnerWalletService
 	{
-		public static async Task<Signer> CreateOrGetSigner(string token, string userId, string walletAddress, API api)
+		public static async Task<Signer> CreateOrGetSigner(string token, string userId, string walletAddress, API api, string provider)
 		{
 			if (string.IsNullOrEmpty(userId))
 			{
@@ -34,7 +35,7 @@ namespace AlembicSDK.Scripts.Services
 				
 			var storageSigner = new Signer(new EthECKey(storagePrivateKey));
 
-			var isOwner = false;
+			var isOwner = await SafeService.IsSigner(storageSigner.GetAddress(), walletAddress, provider ,api);
 
 			if (!isOwner)
 			{

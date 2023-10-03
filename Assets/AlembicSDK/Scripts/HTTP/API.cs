@@ -9,7 +9,6 @@ using AlembicSDK.Scripts.Tools;
 using AlembicSDK.Scripts.Types;
 using AlembicSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
-using Nethereum.RPC.Shh.KeyPair;
 using Nethereum.Siwe.Core;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -230,14 +229,28 @@ namespace AlembicSDK.Scripts.HTTP
 				ownerAddress = ownerAddress
 			};
 			var json = JsonConvert.SerializeObject(body);
-			
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
-			var response = await api.PostAsync(requestUri, content);
+			request.Content = content;
+			
+			var response = await api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 			
 			Debug.Log(contentReceived);
 			
 			return;
+		}
+
+		public async Task<string> GetWalletAddress(string ownerAddress)
+		{
+			var response = await api.GetAsync($"/wallets/{ownerAddress}/wallet-address");
+			var result = response.Content.ReadAsStringAsync().Result;
+
+			var predictedSafeAddressResponse = JsonConvert.DeserializeObject<PredictedSafeAddressResponse>(result);
+
+			if (predictedSafeAddressResponse is { success: true }) return predictedSafeAddressResponse.walletAddress;
+
+			Debug.LogError("Error in GetWalletAddress");
+			return null;
 		}
 	}
 }
