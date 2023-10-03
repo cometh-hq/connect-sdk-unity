@@ -219,9 +219,25 @@ namespace AlembicSDK.Scripts.HTTP
 			return null;
 		}
 
-		public async Task InitWalletForUserID(string token, string ownerAddress)
+		public async Task InitWalletForUserID(string jwtToken, string ownerAddress)
 		{
-			throw new NotImplementedException();
+			const string requestUri = "/user/init";
+			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+			request.Headers.Add("token", jwtToken);
+			
+			var body = new InitWalletForUserIDBody
+			{
+				ownerAddress = ownerAddress
+			};
+			var json = JsonConvert.SerializeObject(body);
+			
+			var content = new StringContent(json, Encoding.UTF8, "application/json");
+			var response = await api.PostAsync(requestUri, content);
+			var contentReceived = response.Content.ReadAsStringAsync().Result;
+			
+			Debug.Log(contentReceived);
+			
+			return;
 		}
 	}
 }

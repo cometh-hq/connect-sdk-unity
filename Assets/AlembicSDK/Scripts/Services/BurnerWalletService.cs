@@ -21,7 +21,7 @@ namespace AlembicSDK.Scripts.Services
 			if (string.IsNullOrEmpty(walletAddress))
 			{
 				var newSigner = CreateNewSignerAndSavePrivateKey(userId);
-				await api.InitWalletForUserID(token, "owner address"); //TODO: Get owner address from somewhere
+				await api.InitWalletForUserID(token, newSigner.GetAddress());
 				
 				return newSigner;
 			}

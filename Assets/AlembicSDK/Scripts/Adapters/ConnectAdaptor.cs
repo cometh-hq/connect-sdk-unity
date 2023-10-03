@@ -22,7 +22,7 @@ namespace AlembicSDK.Scripts.Adapters
 
 		private string _account;
 		private API _api;
-		private AlembicAuthSigner _signer;
+		private Signer _signer;
 
 		private void Awake()
 		{
@@ -32,6 +32,9 @@ namespace AlembicSDK.Scripts.Adapters
 
 			ChainId = chainId.ToString();
 			_api = new API(apiKey, chainId);
+			
+			
+			Debug.Log("here");
 		}
 
 		public string ChainId { get; private set; }
@@ -39,9 +42,9 @@ namespace AlembicSDK.Scripts.Adapters
 		public async Task Connect()
 		{
 			var walletAddress = await _api.GetWalletAddressFromUserID(jwtToken);
-			var decodedToken = tokenService.decodeToken(jwtToken);
-			var userId = decodedToken?.payload.sub;
-			_signer = BurnerWalletService.CreateOrGetSigner(jwtToken, userId, walletAddress, _api);
+			var userID = TokenService.DecodeTokenAndGetUserID(jwtToken);
+			_signer = await BurnerWalletService.CreateOrGetSigner(jwtToken, userID, walletAddress, _api);
+			Debug.Log("here");
 		}
 
 		public Task Logout()
