@@ -253,5 +253,28 @@ namespace ComethSDK.Scripts.HTTP
 			Debug.LogError("Error in GetWalletAddress");
 			return null;
 		}
+
+		public async Task Connect(string messageToSign, string signature, string walletAddress)
+		{
+			const string requestUri = "/wallets/connect";
+			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+			
+			var body = new ConnectBody
+			{
+				message = messageToSign,
+				signature = signature,
+				walletAddress = walletAddress
+			};
+			var json = JsonConvert.SerializeObject(body);
+			var content = new StringContent(json, Encoding.UTF8, "application/json");
+			request.Content = content;
+			
+			var response = await api.SendAsync(request);
+			var contentReceived = response.Content.ReadAsStringAsync().Result;
+			
+			Debug.Log(contentReceived);
+			
+			return;
+		}
 	}
 }

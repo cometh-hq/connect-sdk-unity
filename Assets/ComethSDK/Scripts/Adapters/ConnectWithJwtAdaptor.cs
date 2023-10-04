@@ -18,8 +18,8 @@ namespace ComethSDK.Scripts.Adapters
 		[SerializeField] private string apiKey;
 
 		[SerializeField] private string userName;
-		[SerializeField] private string rpcUrl;
-		[SerializeField] private string baseUrl;
+		[SerializeField] private string rpcUrl; //TODO: implement this
+		[SerializeField] private string baseUrl; //TODO: implement this
 
 		private string _account;
 		private API _api;

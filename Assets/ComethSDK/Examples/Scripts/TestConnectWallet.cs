@@ -9,9 +9,9 @@ using UnityEngine;
 
 namespace ComethSDK.Examples.Scripts
 {
-	public class TestBurnerWallet : MonoBehaviour
+	public class TestConnectWallet : MonoBehaviour
 	{
-		[SerializeField] public BurnerWalletAdaptor authAdaptor;
+		[SerializeField] public ConnectAdaptor authAdaptor;
 		[SerializeField] private TMP_Text console;
 
 		private ComethWallet _wallet;
