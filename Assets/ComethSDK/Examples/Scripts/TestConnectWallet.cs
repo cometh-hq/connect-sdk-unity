@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace ComethSDK.Examples.Scripts
 {
-	public class TestConnectWallet : MonoBehaviour
+	public class TestConnectWallet : TestWallet
 	{
 		[SerializeField] public ConnectAdaptor authAdaptor;
 		[SerializeField] private TMP_Text console;
@@ -50,7 +50,13 @@ namespace ComethSDK.Examples.Scripts
 			_wallet.CancelWaitingForEvent();
 		}
 
-		public async void SendTestTransaction(string to)
+		public void ClearBurner()
+		{
+			PlayerPrefs.DeleteKey("burner-wallet-private-key");
+			Debug.Log("Burner wallet cleared");
+		}
+
+		public override async void SendTestTransaction(string to)
 		{
 			if (to is "" or Constants.ZERO_ADDRESS)
 			{
