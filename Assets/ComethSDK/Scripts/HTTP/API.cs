@@ -45,7 +45,7 @@ namespace ComethSDK.Scripts.HTTP
 		{
 			var safeTxDataTypedWithSignature = new SafeTxWithSignature
 			{
-				to = relayTransactionType.safeTxData.to,
+				to = relayTransactionType.safeTxData.to.ToLower(),
 				value = relayTransactionType.safeTxData.value,
 				data = relayTransactionType.safeTxData.data,
 				operation = relayTransactionType.safeTxData.operation,
