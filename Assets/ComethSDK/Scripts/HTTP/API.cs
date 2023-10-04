@@ -254,14 +254,14 @@ namespace ComethSDK.Scripts.HTTP
 			return null;
 		}
 
-		public async Task Connect(string messageToSign, string signature, string walletAddress)
+		public async Task Connect(SiweMessage messageToSign, string signature, string walletAddress)
 		{
 			const string requestUri = "/wallets/connect";
 			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
 			
 			var body = new ConnectBody
 			{
-				message = messageToSign,
+				message = new SiweMessageLowerCase(messageToSign),
 				signature = signature,
 				walletAddress = walletAddress
 			};

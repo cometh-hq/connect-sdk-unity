@@ -35,7 +35,7 @@ namespace ComethSDK.Scripts.Adapters.Interfaces
 			var messageToSign = SiweMessageStringBuilder.BuildMessage(siweMessage);
 			var signature = await SignMessage(walletAddress, messageToSign, signer);
 			
-			await _api.Connect(messageToSign, signature, walletAddress);
+			await _api.Connect(siweMessage, signature, walletAddress);
 		}
 
 		private async Task<string> SignMessage(string walletAddress, string messageToSign, ISignerBase signer)
