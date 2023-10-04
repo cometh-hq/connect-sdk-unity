@@ -73,7 +73,7 @@ namespace ComethSDK.Scripts.Adapters
 			return _signer;
 		}
 
-		public UserInfo GetUserInfos()
+		public UserInfos GetUserInfos()
 		{
 			var walletAddress = GetAccount();
 

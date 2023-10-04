@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using ComethSDK.Scripts.Tools.Signers.Interfaces;
+using ComethSDK.Scripts.Types;
 
 namespace ComethSDK.Scripts.Adapters.Interfaces
 {
@@ -11,6 +12,6 @@ namespace ComethSDK.Scripts.Adapters.Interfaces
 		public Task Logout();
 		public string GetAccount();
 		public ISignerBase GetSigner();
-		public UserInfo GetUserInfos();
+		public UserInfos GetUserInfos();
 	}
 }

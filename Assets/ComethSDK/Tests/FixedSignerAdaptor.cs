@@ -2,6 +2,7 @@
 using ComethSDK.Scripts.Adapters.Interfaces;
 using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Tools.Signers.Interfaces;
+using ComethSDK.Scripts.Types;
 using Nethereum.Signer;
 using Nethereum.Web3.Accounts;
 
@@ -12,9 +13,6 @@ namespace ComethSDK.Tests
 	{
 		private readonly string _account;
 		private readonly Signer _signer;
-
-		private UserInfo _userInfo;
-		private Web3Auth _web3Auth;
 
 		public FixedSignerAdaptor(string chainId, string privateKey)
 		{
@@ -47,7 +45,7 @@ namespace ComethSDK.Tests
 			return _signer;
 		}
 
-		public UserInfo GetUserInfos()
+		public UserInfos GetUserInfos()
 		{
 			return null;
 		}

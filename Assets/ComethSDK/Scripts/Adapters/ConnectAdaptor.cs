@@ -4,6 +4,7 @@ using ComethSDK.Scripts.Adapters.Interfaces;
 using ComethSDK.Scripts.HTTP;
 using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Tools.Signers.Interfaces;
+using ComethSDK.Scripts.Types;
 using Nethereum.Signer;
 using Nethereum.Web3.Accounts;
 using UnityEngine;
@@ -79,7 +80,7 @@ namespace ComethSDK.Scripts.Adapters
 			return _signer;
 		}
 
-		public UserInfo GetUserInfos()
+		public UserInfos GetUserInfos()
 		{
 			return null;
 		}

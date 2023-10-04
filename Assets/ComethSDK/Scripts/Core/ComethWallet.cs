@@ -8,7 +8,6 @@ using ComethSDK.Scripts.HTTP;
 using ComethSDK.Scripts.HTTP.Responses;
 using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Tools;
-using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
@@ -40,8 +39,6 @@ namespace ComethSDK.Scripts.Core
 		private List<SponsoredAddressResponse.SponsoredAddress> _sponsoredAddresses = new();
 		private string _walletAddress;
 		private Web3 _web3;
-
-		private Web3Auth _web3Auth;
 
 		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey)
 		{
@@ -110,17 +107,6 @@ namespace ComethSDK.Scripts.Core
 			var userInfo = _authAdaptor.GetUserInfos();
 			var userInfos = new UserInfos
 			{
-				email = userInfo.email,
-				name = userInfo.name,
-				profileImage = userInfo.profileImage,
-				aggregateVerifier = userInfo.aggregateVerifier,
-				verifier = userInfo.verifier,
-				verifierId = userInfo.verifierId,
-				typeOfLogin = userInfo.typeOfLogin,
-				dappShare = userInfo.dappShare,
-				idToken = userInfo.idToken,
-				oAuthIdToken = userInfo.oAuthIdToken,
-				oAuthAccessToken = userInfo.oAuthAccessToken,
 				ownerAddress = _authAdaptor.GetAccount(),
 				walletAddress = _walletAddress
 			};

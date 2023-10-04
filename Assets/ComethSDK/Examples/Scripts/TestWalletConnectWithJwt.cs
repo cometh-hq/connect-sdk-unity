@@ -130,16 +130,6 @@ namespace ComethSDK.Examples.Scripts
 		{
 			PrintInConsole("walletAddress: " + userInfos.walletAddress);
 			PrintInConsole("ownerAddress: " + userInfos.ownerAddress);
-			PrintInConsole("email: " + userInfos.email);
-			PrintInConsole("name: " + userInfos.name);
-			PrintInConsole("profileImage: " + userInfos.profileImage);
-			PrintInConsole("aggregateVerifier: " + userInfos.aggregateVerifier);
-			PrintInConsole("verifier: " + userInfos.verifier);
-			PrintInConsole("verifierId: " + userInfos.verifierId);
-			PrintInConsole("typeOfLogin: " + userInfos.typeOfLogin);
-			PrintInConsole("idToken: " + userInfos.idToken);
-			PrintInConsole("oAuthIdToken: " + userInfos.oAuthIdToken);
-			PrintInConsole("oAuthAccessToken: " + userInfos.oAuthAccessToken);
 		}
 	}
 }
