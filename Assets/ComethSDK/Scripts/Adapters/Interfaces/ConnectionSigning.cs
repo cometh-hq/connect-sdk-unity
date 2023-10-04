@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.HTTP;
 using ComethSDK.Scripts.Services;
-using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Tools.Signers.Interfaces;
 using ComethSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;

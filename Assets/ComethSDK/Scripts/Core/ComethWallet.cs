@@ -285,44 +285,6 @@ namespace ComethSDK.Scripts.Core
 			var signer = _authAdaptor.GetSigner();
 			string signature;
 
-			if (signer.GetType() == typeof(ComethAuthSigner))
-			{
-				var value = new Dictionary<string, object>();
-				if (message.GetType() == typeof(SafeTx))
-				{
-					if (message is SafeTx safeTx)
-					{
-						value.Add("to", safeTx.to);
-						value.Add("value", safeTx.value);
-						value.Add("data", safeTx.data);
-						value.Add("operation", safeTx.operation);
-						value.Add("safeTxGas", safeTx.safeTxGas);
-						value.Add("baseGas", safeTx.baseGas);
-						value.Add("gasPrice", safeTx.gasPrice);
-						value.Add("gasToken", safeTx.gasToken);
-						value.Add("refundReceiver", safeTx.refundReceiver);
-						value.Add("nonce", safeTx.nonce);
-					}
-					else
-					{
-						throw new Exception("Invalid SafeTx");
-					}
-				}
-				else if (message.GetType() == typeof(SafeMessage))
-				{
-					if (message is SafeMessage safeMessage) value.Add("message", safeMessage.message);
-				}
-
-				if (typedData.Domain is not DomainWithChainIdAndVerifyingContract domain)
-					throw new Exception("Invalid Domain");
-
-				signature = await signer.SignTypedData(domain,
-					typedData.Types,
-					value);
-
-				return signature;
-			}
-
 			signature = signer.SignTypedData(message, typedData);
 			return signature;
 		}
