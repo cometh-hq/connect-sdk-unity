@@ -35,7 +35,6 @@ namespace ComethSDK.Scripts.Tools
 					ChainId = "137",
 					RPCUrl = "https://polygon-rpc.com",
 					NetworkName = "Polygon",
-					P256FactoryContractAddress = "0xB75989998dc2BEADE09Cc5cC385a4D8E18b4466C",
 					BlockExplorerUrl = "https://polygonscan.com/"
 				}
 			},
@@ -46,7 +45,6 @@ namespace ComethSDK.Scripts.Tools
 					ChainId = "80001",
 					RPCUrl = "https://rpc-mumbai.maticvigil.com",
 					NetworkName = "Mumbai",
-					P256FactoryContractAddress = "0x1Ef5853df21DB223776B0e25815d4402156c02eD",
 					BlockExplorerUrl = "https://mumbai.polygonscan.com/"
 				}
 			}

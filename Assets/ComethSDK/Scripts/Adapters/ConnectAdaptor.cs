@@ -33,16 +33,24 @@ namespace ComethSDK.Scripts.Adapters
 
 		public string ChainId { get; private set; }
 
-		public async Task Connect()
+		public async Task Connect(string burnerAddress)
 		{
-			//Get current private key from PlayerPrefs
-			var privateKey = PlayerPrefs.GetString("burner-wallet-private-key", null);
+			var privateKey = "";
+			if (!string.IsNullOrEmpty(burnerAddress))
+			{
+				await VerifyWalletAddress(burnerAddress);
+				privateKey = PlayerPrefs.GetString( $"cometh-connect-{burnerAddress}", null);
+			}
+			
+			var walletAddress = "";
 
 			if (string.IsNullOrEmpty(privateKey))
 			{
 				var ethEcKey = EthECKey.GenerateKey();
 				privateKey = ethEcKey.GetPrivateKey();
-				PlayerPrefs.SetString("burner-wallet-private-key", privateKey);
+				walletAddress = await _api.GetWalletAddress(ethEcKey.GetPublicAddress());
+				Debug.Log("EthEC Address = "+walletAddress);
+				PlayerPrefs.SetString($"cometh-connect-{walletAddress}", privateKey);
 			}
 
 			_ethEcKey = new EthECKey(privateKey);
@@ -50,8 +58,30 @@ namespace ComethSDK.Scripts.Adapters
 			var eoa = new Account(privateKey);
 			_account = eoa.Address;
 
-			var walletAddress = await GetWalletAddress();
+			if (string.IsNullOrEmpty(walletAddress))
+			{
+				walletAddress = await GetWalletAddress();
+			}
+			
 			await _connectionSigning.SignAndConnect(walletAddress, GetSigner());
+		}
+
+		private async Task VerifyWalletAddress(string walletAddress)
+		{
+			WalletInfos connectWallet;
+			try
+			{
+				connectWallet = await _api.GetWalletInfos(walletAddress);
+			}
+			catch
+			{
+				throw new Exception("Invalid address format");
+			}
+
+			if (connectWallet == null)
+			{
+				throw new Exception("Wallet does not exist");
+			}
 		}
 
 		public Task Logout()

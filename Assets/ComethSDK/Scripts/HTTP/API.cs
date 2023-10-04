@@ -273,5 +273,18 @@ namespace ComethSDK.Scripts.HTTP
 
 			Debug.Log(contentReceived);
 		}
+
+		public async Task<WalletInfos> GetWalletInfos(string walletAddress)
+		{
+			var response = await api.GetAsync($"/wallets/{walletAddress}/wallet-infos");
+			var result = response.Content.ReadAsStringAsync().Result;
+
+			var getWalletInfosResponse = JsonConvert.DeserializeObject<GetWalletInfosResponse>(result);
+
+			if (getWalletInfosResponse is { success: true }) return getWalletInfosResponse.walletInfos;
+
+			Debug.LogError("Error in GetWalletInfos");
+			return null;
+		}
 	}
 }

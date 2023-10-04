@@ -48,10 +48,10 @@ namespace ComethSDK.Tests
 				"0x8101c1081dfb8d2b1810183fc781b518963005b896277624264fe7136c8dc07814ee308dd059bc637b7b592d69c908bdda39018871b27f6688e596aaebde08371b";
 
 			var walletAdapter = new FixedSignerAdaptor(CHAINID, PRIVATEKEY);
-			await walletAdapter.Connect();
+			await walletAdapter.Connect("");
 
 			var wallet = new ComethWallet(walletAdapter, APIKEY);
-			await wallet.Connect();
+			await wallet.Connect("");
 
 			var walletAddress = wallet.GetAddress();
 			Assert.AreEqual(WALLETADDRESS, walletAddress);
@@ -94,10 +94,10 @@ namespace ComethSDK.Tests
 				"0x7dadd81326227ca6e768bc5848e35a3f4a709eed8f1ccac5d893ad81942e49795b5c26315e776212f86a3a2e457d5cf1316ac7fc278fd7affc814ae89202f5721b";
 
 			var walletAdapter = new FixedSignerAdaptor(CHAINID, PRIVATEKEY);
-			await walletAdapter.Connect();
+			await walletAdapter.Connect("");
 
 			var wallet = new ComethWallet(walletAdapter, APIKEY);
-			await wallet.Connect();
+			await wallet.Connect("");
 
 			var walletAddress = wallet.GetAddress();
 			Assert.AreEqual(WALLETADDRESS, walletAddress);

@@ -10,6 +10,7 @@ using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
+using JetBrains.Annotations;
 using Nethereum.ABI.EIP712;
 using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
@@ -49,7 +50,7 @@ namespace ComethSDK.Scripts.Core
 			REWARD_PERCENTILE = Constants.DEFAULT_REWARD_PERCENTILE;
 		}
 
-		public async Task Connect()
+		public async Task Connect([CanBeNull] string burnerAddress)
 		{
 			if (_authAdaptor == null) throw new Exception("No EOA adapter found");
 
@@ -57,7 +58,7 @@ namespace ComethSDK.Scripts.Core
 
 			_web3 = new Web3(Constants.GetNetworkByChainID(_chainId).RPCUrl);
 
-			await _authAdaptor.Connect();
+			await _authAdaptor.Connect(burnerAddress);
 
 			var account = _authAdaptor.GetAccount();
 			var predictedWalletAddress = await _api.GetWalletAddress(account);

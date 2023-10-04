@@ -25,7 +25,7 @@ namespace ComethSDK.Tests
 
 		public string ChainId { get; }
 
-		public Task Connect()
+		public Task Connect(string burnerAddress)
 		{
 			return Task.CompletedTask;
 		}

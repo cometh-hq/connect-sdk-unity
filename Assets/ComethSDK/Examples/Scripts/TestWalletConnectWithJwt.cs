@@ -31,7 +31,7 @@ namespace ComethSDK.Examples.Scripts
 		public override async void Connect()
 		{
 			PrintInConsole("Connecting...");
-			await _wallet.Connect();
+			await _wallet.Connect("");
 			PrintInConsole("Connected");
 		}
 

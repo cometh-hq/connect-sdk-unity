@@ -13,6 +13,7 @@ namespace ComethSDK.Examples.Scripts
 	{
 		[SerializeField] public ConnectAdaptor authAdaptor;
 		[SerializeField] private TMP_Text console;
+		[SerializeField] private string walletAddress;
 
 		private ComethWallet _wallet;
 
@@ -27,7 +28,7 @@ namespace ComethSDK.Examples.Scripts
 		public async void Connect()
 		{
 			PrintInConsole("Connecting...");
-			await _wallet.Connect();
+			await _wallet.Connect(walletAddress);
 			PrintInConsole("Connected");
 		}
 

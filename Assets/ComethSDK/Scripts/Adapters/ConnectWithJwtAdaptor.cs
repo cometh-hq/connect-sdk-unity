@@ -40,11 +40,12 @@ namespace ComethSDK.Scripts.Adapters
 
 		public string ChainId { get; private set; }
 
-		public async Task Connect()
+		public async Task Connect(string burnerAddress)
 		{
 			var walletAddress = await _api.GetWalletAddressFromUserID(jwtToken);
 			var userID = TokenService.DecodeTokenAndGetUserID(jwtToken);
-			_signer = await BurnerWalletService.CreateOrGetSigner(jwtToken, userID, walletAddress, _api,
+			_signer = string.IsNullOrEmpty(walletAddress) ? await BurnerWalletService.GetSignerForUserId(userID, walletAddress, _api,
+				Constants.GetNetworkByChainID(ChainId).RPCUrl) : await BurnerWalletService.CreateSignerForUserId(jwtToken, userID, walletAddress, _api,
 				Constants.GetNetworkByChainID(ChainId).RPCUrl);
 			Debug.Log("here");
 		}
