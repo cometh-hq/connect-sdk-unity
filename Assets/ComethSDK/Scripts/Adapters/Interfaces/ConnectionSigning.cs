@@ -15,25 +15,25 @@ namespace ComethSDK.Scripts.Adapters.Interfaces
 {
 	public class ConnectionSigning
 	{
-		private readonly string _chainId;
 		private readonly API _api;
+		private readonly string _chainId;
 		private readonly Uri _uri;
-		
+
 		public ConnectionSigning(int chainId, string apiKey, string baseUrl)
 		{
 			_chainId = chainId.ToString();
 			_api = new API(apiKey, chainId);
 			_uri = new Uri(baseUrl);
 		}
-		
+
 		public async Task SignAndConnect(string walletAddress, ISignerBase signer)
 		{
 			var nonce = await _api.GetNonce(walletAddress);
-			
+
 			var siweMessage = SiweService.CreateMessage(walletAddress, nonce, _chainId, _uri);
 			var messageToSign = SiweMessageStringBuilder.BuildMessage(siweMessage);
 			var signature = await SignMessage(walletAddress, messageToSign, signer);
-			
+
 			await _api.Connect(siweMessage, signature, walletAddress);
 		}
 

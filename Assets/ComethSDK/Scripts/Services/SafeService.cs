@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.HTTP;
 using Nethereum.GnosisSafe;
@@ -14,7 +15,7 @@ namespace ComethSDK.Scripts.Services
 				await IsDeployed(walletAddress, provider);
 
 				var owner = await IsSafeOwner(walletAddress, signerAddress, provider);
-				
+
 				if (!owner) return false;
 			}
 			catch
@@ -23,7 +24,7 @@ namespace ComethSDK.Scripts.Services
 
 				if (predictedWalletAddress != walletAddress) return false;
 			}
-			
+
 			return true;
 		}
 
@@ -36,7 +37,7 @@ namespace ComethSDK.Scripts.Services
 
 		private static async Task IsDeployed(string walletAddress, string provider)
 		{
-			throw new System.NotImplementedException();
+			throw new NotImplementedException();
 		}
 	}
 }

@@ -198,13 +198,14 @@ namespace ComethSDK.Scripts.HTTP
 			const string requestUri = "/user/address";
 			var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 			request.Headers.Add("token", jwtToken);
-			
+
 			var response = await api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
-			var deserializedResponse = JsonConvert.DeserializeObject<GetWalletAddressFromUserIDResponse>(contentReceived);
-			
-			if(deserializedResponse.success) return deserializedResponse.walletAddress;
-			
+			var deserializedResponse =
+				JsonConvert.DeserializeObject<GetWalletAddressFromUserIDResponse>(contentReceived);
+
+			if (deserializedResponse.success) return deserializedResponse.walletAddress;
+
 			Debug.LogError("Error in GetWalletAddressFromUserID");
 			return null;
 		}
@@ -214,7 +215,7 @@ namespace ComethSDK.Scripts.HTTP
 			const string requestUri = "/user/init";
 			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
 			request.Headers.Add("token", jwtToken);
-			
+
 			var body = new InitWalletForUserIDBody
 			{
 				ownerAddress = ownerAddress
@@ -222,20 +223,18 @@ namespace ComethSDK.Scripts.HTTP
 			var json = JsonConvert.SerializeObject(body);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 			request.Content = content;
-			
+
 			var response = await api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
-			
+
 			Debug.Log(contentReceived);
-			
-			return;
 		}
-		
+
 		public async Task<string> GetNonce(string walletAddress)
 		{
 			var response = await api.GetAsync($"/wallets/{walletAddress}/connection-nonce");
 			var result = response.Content.ReadAsStringAsync().Result;
-			
+
 			var nonceResponse = JsonConvert.DeserializeObject<NonceResponse>(result);
 
 			return nonceResponse is { success: true } ? nonceResponse.userNonce.connectionNonce : null;
@@ -258,7 +257,7 @@ namespace ComethSDK.Scripts.HTTP
 		{
 			const string requestUri = "/wallets/connect";
 			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-			
+
 			var body = new ConnectBody
 			{
 				message = new SiweMessageLowerCase(messageToSign),
@@ -268,13 +267,11 @@ namespace ComethSDK.Scripts.HTTP
 			var json = JsonConvert.SerializeObject(body);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 			request.Content = content;
-			
+
 			var response = await api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
-			
+
 			Debug.Log(contentReceived);
-			
-			return;
 		}
 	}
 }

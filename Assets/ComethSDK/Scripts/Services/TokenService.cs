@@ -1,4 +1,5 @@
 using ComethSDK.Scripts.Types;
+using JWT;
 using UnityEngine;
 
 namespace ComethSDK.Scripts.Services
@@ -7,16 +8,14 @@ namespace ComethSDK.Scripts.Services
 	{
 		private static string DecodeToken(string token)
 		{
-			return JWT.JsonWebToken.Decode(token,"",false);
+			return JsonWebToken.Decode(token, "", false);
 		}
-		
+
 		public static string DecodeTokenAndGetUserID(string token)
 		{
 			var decodedToken = DecodeToken(token);
 			var payload = JsonUtility.FromJson<JwtTokenPayload>(decodedToken);
 			return payload.sub;
 		}
-		
-		
 	}
 }

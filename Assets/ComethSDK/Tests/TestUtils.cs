@@ -51,7 +51,7 @@ namespace ComethSDK.Tests
 			var value = "0";
 			var data = "0x";
 
-			var typedData = ComethSDK.Scripts.Tools.Utils.CreateSafeTxTypedData(CHAINID, walletAddress);
+			var typedData = Utils.CreateSafeTxTypedData(CHAINID, walletAddress);
 			var expectedTypedData = new TypedData<DomainWithChainIdAndVerifyingContract>
 			{
 				Domain = new DomainWithChainIdAndVerifyingContract
@@ -142,7 +142,7 @@ namespace ComethSDK.Tests
 			var value = "0";
 			var data = "0x";
 
-			var safeTx = ComethSDK.Scripts.Tools.Utils.CreateSafeTx(to, value, data, nonce);
+			var safeTx = Utils.CreateSafeTx(to, value, data, nonce);
 			var expectedSafeTx = new SafeTx
 			{
 				baseGas = 0,
@@ -199,7 +199,7 @@ namespace ComethSDK.Tests
 			var value = "0";
 			var data = "0x";
 
-			var typedData = ComethSDK.Scripts.Tools.Utils.CreateSafeTxTypedData(CHAINID, walletAddress);
+			var typedData = Utils.CreateSafeTxTypedData(CHAINID, walletAddress);
 			var expectedTypedData = new TypedData<DomainWithChainIdAndVerifyingContract>
 			{
 				Domain = new DomainWithChainIdAndVerifyingContract
@@ -260,7 +260,7 @@ namespace ComethSDK.Tests
 			Assert.AreEqual(expectedTypedData.Types["SafeTx"][9].Type, typedData.Types["SafeTx"][9].Type);
 
 
-			var safeTx = ComethSDK.Scripts.Tools.Utils.CreateSafeTx(to, value, data, nonce);
+			var safeTx = Utils.CreateSafeTx(to, value, data, nonce);
 			var expectedSafeTx = new SafeTx
 			{
 				baseGas = 0,
@@ -288,7 +288,8 @@ namespace ComethSDK.Tests
 
 			var signer = walletAdapter.GetSigner();
 			var txSignature = signer.SignTypedData(safeTx, typedData);
-			const string expectedTxSignature = "0x28a0f3a9d638cfb4b098278cc90cce4d64e7784d8d8d2e67d5a6c87fe5cbf1125598607d1a1502a7efdb3b2310373f1fc72d46a7eb2eff454c04fdcfc3d0d0f41c";
+			const string expectedTxSignature =
+				"0x28a0f3a9d638cfb4b098278cc90cce4d64e7784d8d8d2e67d5a6c87fe5cbf1125598607d1a1502a7efdb3b2310373f1fc72d46a7eb2eff454c04fdcfc3d0d0f41c";
 			Assert.AreEqual(expectedTxSignature, txSignature);
 		}
 	}

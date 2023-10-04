@@ -208,9 +208,9 @@ namespace ComethSDK.Scripts.Core
 				return "";
 			}
 
-			var nonce = await Tools.Utils.GetNonce(_web3, _walletAddress);
-			var typedData = Tools.Utils.CreateSafeTxTypedData(_chainId, _walletAddress);
-			var safeTx = Tools.Utils.CreateSafeTx(to, value, data, nonce);
+			var nonce = await Utils.GetNonce(_web3, _walletAddress);
+			var typedData = Utils.CreateSafeTxTypedData(_chainId, _walletAddress);
+			var safeTx = Utils.CreateSafeTx(to, value, data, nonce);
 
 			if (!ToSponsoredAddress(safeTx.to)) safeTx = await SetTransactionGas(safeTx);
 
@@ -235,7 +235,7 @@ namespace ComethSDK.Scripts.Core
 
 		public async Task<BigInteger> CalculateMaxFees(string to, string value, string data, int nonce)
 		{
-			var safeTx = Tools.Utils.CreateSafeTx(to, value, data, nonce);
+			var safeTx = Utils.CreateSafeTx(to, value, data, nonce);
 			safeTx = await SetTransactionGas(safeTx);
 			var totalGasCost = (safeTx.safeTxGas + safeTx.baseGas) * safeTx.gasPrice;
 			return totalGasCost + BigInteger.Parse(value);
@@ -278,7 +278,8 @@ namespace ComethSDK.Scripts.Core
 		private bool ToSponsoredAddress(string to)
 		{
 			//if index >= 0 then address is sponsored
-			var index = _sponsoredAddresses.FindIndex(sponsoredAddress => sponsoredAddress.targetAddress == to.ToLower());
+			var index = _sponsoredAddresses.FindIndex(
+				sponsoredAddress => sponsoredAddress.targetAddress == to.ToLower());
 			return index >= 0;
 		}
 

@@ -33,8 +33,8 @@ namespace ComethSDK.Scripts.Adapters
 
 			ChainId = chainId.ToString();
 			_api = new API(apiKey, chainId);
-			
-			
+
+
 			Debug.Log("here");
 		}
 
@@ -44,7 +44,8 @@ namespace ComethSDK.Scripts.Adapters
 		{
 			var walletAddress = await _api.GetWalletAddressFromUserID(jwtToken);
 			var userID = TokenService.DecodeTokenAndGetUserID(jwtToken);
-			_signer = await BurnerWalletService.CreateOrGetSigner(jwtToken, userID, walletAddress, _api, Constants.GetNetworkByChainID(ChainId).RPCUrl);
+			_signer = await BurnerWalletService.CreateOrGetSigner(jwtToken, userID, walletAddress, _api,
+				Constants.GetNetworkByChainID(ChainId).RPCUrl);
 			Debug.Log("here");
 		}
 

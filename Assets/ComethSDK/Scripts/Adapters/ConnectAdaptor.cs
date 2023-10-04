@@ -16,13 +16,13 @@ namespace ComethSDK.Scripts.Adapters
 		[SerializeField] private int chainId;
 		[SerializeField] private string apiKey;
 		[SerializeField] private string baseUrl;
-		
-		private ConnectionSigning _connectionSigning;
 
 		private string _account;
+		private API _api;
+
+		private ConnectionSigning _connectionSigning;
 		private EthECKey _ethEcKey;
 		private Signer _signer;
-		private API _api;
 
 		private void Awake()
 		{
@@ -54,13 +54,6 @@ namespace ComethSDK.Scripts.Adapters
 			await _connectionSigning.SignAndConnect(walletAddress, GetSigner());
 		}
 
-		private async Task<string> GetWalletAddress()
-		{
-			var ownerAddress = GetAccount();
-			if(string.IsNullOrEmpty(ownerAddress)) throw new Exception("No owner address found");
-			return await _api.GetWalletAddress(ownerAddress);
-		}
-
 		public Task Logout()
 		{
 			PlayerPrefs.DeleteKey("privateKey");
@@ -83,6 +76,13 @@ namespace ComethSDK.Scripts.Adapters
 		public UserInfos GetUserInfos()
 		{
 			return null;
+		}
+
+		private async Task<string> GetWalletAddress()
+		{
+			var ownerAddress = GetAccount();
+			if (string.IsNullOrEmpty(ownerAddress)) throw new Exception("No owner address found");
+			return await _api.GetWalletAddress(ownerAddress);
 		}
 	}
 }

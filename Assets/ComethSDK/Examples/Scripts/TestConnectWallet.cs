@@ -99,7 +99,7 @@ namespace ComethSDK.Examples.Scripts
 			var countFunction = contract.GetFunction("count");
 			var data = countFunction.GetData();
 			var web3 = new Web3(Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl);
-			var nonce = await ComethSDK.Scripts.Tools.Utils.GetNonce(web3, _wallet.GetAddress());
+			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
 			EstimateGasAndShow(COUNTER_TEST_ADDRESS, "0", data);
 
 			PrintInConsole("Sending transaction...");
@@ -115,7 +115,7 @@ namespace ComethSDK.Examples.Scripts
 		private async void EstimateGasAndShow(string to, string value, string data)
 		{
 			var web3 = new Web3(Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl);
-			var nonce = await ComethSDK.Scripts.Tools.Utils.GetNonce(web3, _wallet.GetAddress());
+			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
 
 			var gas = await _wallet.CalculateMaxFees(to, value, data, nonce);
 			PrintInConsole("Estimated max gas: " + gas);

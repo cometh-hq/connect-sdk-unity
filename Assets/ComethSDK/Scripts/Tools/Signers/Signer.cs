@@ -29,7 +29,7 @@ namespace ComethSDK.Scripts.Tools.Signers
 		{
 			throw new NotImplementedException();
 		}
-		
+
 		public string GetAddress()
 		{
 			return _ethEcKey.GetPublicAddress();

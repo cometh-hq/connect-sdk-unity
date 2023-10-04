@@ -1,20 +1,20 @@
 {
-    "name": "Services",
-    "rootNamespace": "",
-    "references": [
-        "GUID:7dd4f8caf82c243428d2e7006f515400",
-        "GUID:9180fc10182395d41bacb05e43007847",
-        "GUID:fb94875d965e2934a9772cac0c4cac45",
-        "GUID:34c16d0e9a6d109409d191c3c79fb3f6",
-        "GUID:ea2c79e77633b404980a719967bcd567"
-    ],
-    "includePlatforms": [],
-    "excludePlatforms": [],
-    "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
-    "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "Services",
+  "rootNamespace": "",
+  "references": [
+    "GUID:7dd4f8caf82c243428d2e7006f515400",
+    "GUID:9180fc10182395d41bacb05e43007847",
+    "GUID:fb94875d965e2934a9772cac0c4cac45",
+    "GUID:34c16d0e9a6d109409d191c3c79fb3f6",
+    "GUID:ea2c79e77633b404980a719967bcd567"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
 }
