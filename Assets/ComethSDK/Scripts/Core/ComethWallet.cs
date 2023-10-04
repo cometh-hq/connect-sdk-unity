@@ -330,7 +330,7 @@ namespace ComethSDK.Scripts.Core
 		private bool ToSponsoredAddress(string to)
 		{
 			//if index >= 0 then address is sponsored
-			var index = _sponsoredAddresses.FindIndex(sponsoredAddress => sponsoredAddress.TargetAddress == to);
+			var index = _sponsoredAddresses.FindIndex(sponsoredAddress => sponsoredAddress.targetAddress == to.ToLower());
 			return index >= 0;
 		}
 

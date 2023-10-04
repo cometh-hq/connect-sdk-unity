@@ -7,9 +7,8 @@
 
 		public struct SponsoredAddress
 		{
-			public string CustomerId;
-			public string TargetAddress;
-			public string ChainId;
+			public string targetAddress;
+			public string chainId;
 		}
 	}
 }
