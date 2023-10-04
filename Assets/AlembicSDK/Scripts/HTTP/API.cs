@@ -174,15 +174,6 @@ namespace AlembicSDK.Scripts.HTTP
 			return null;
 		}
 
-		public async Task<string> GetNonce(string account)
-		{
-			var response = await api.GetAsync($"/wallets/connection-nonce/{account}");
-			var result = response.Content.ReadAsStringAsync().Result;
-			var nonceResponse = JsonConvert.DeserializeObject<NonceResponse>(result);
-
-			return nonceResponse is { success: true } ? nonceResponse.userNonce.connectionNonce : null;
-		}
-
 		public async Task<bool> IsValidSignature(string walletAddress, string message, string signature)
 		{
 			var requestUri = "/wallets/" + walletAddress + "/isValidSignature";
@@ -238,6 +229,16 @@ namespace AlembicSDK.Scripts.HTTP
 			Debug.Log(contentReceived);
 			
 			return;
+		}
+		
+		public async Task<string> GetNonce(string walletAddress)
+		{
+			var response = await api.GetAsync($"/wallets/{walletAddress}/connection-nonce");
+			var result = response.Content.ReadAsStringAsync().Result;
+			
+			var nonceResponse = JsonConvert.DeserializeObject<NonceResponse>(result);
+
+			return nonceResponse is { success: true } ? nonceResponse.userNonce.connectionNonce : null;
 		}
 
 		public async Task<string> GetWalletAddress(string ownerAddress)
