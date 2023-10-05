@@ -1,22 +1,21 @@
-# Account Abstraction Unity SDK
+# Comeht Conect Unity SDK
 
-Alembic Unity Account Abstraction SDK allows developers to onboard their users with a seedless, gasless experience familiar to Web2.
+Cometh Connect SDK allows developers to onboard their users with a seedless, gasless experience familiar to Web2.
 
 Account Abstraction (AA) improves transaction user experience by using smart contract wallets as primary accounts.
-Our solution is compatible with EIP-4337.
 
 ## Instantiate Wallet
 
-To get an API key please [Contact us](https://alembic.tech/)
+To get an API key please [Contact us](https://cometh.io/)
 
 ```C#
-[SerializeField] private BurnerWalletAdapter authAdapter; //Set ChainId in inspector
-private const string API_KEY = "my_api_key"; 
-private AlembicWallet _wallet;
+[SerializeField] private ConnectAdaptor authAdapter; //Set ChainId in inspector
+private const string API_KEY = "my_api_key";
+private ComethWallet _wallet;
 
 private void Start()
 {
-    _wallet = new AlembicWallet(authAdapter, API_KEY );
+    _wallet = new ComethWallet(authAdapter, API_KEY );
 }
 ```
 
@@ -27,8 +26,6 @@ private void Start()
 ```C#
 await _wallet.Connect()
 ```
-
-This function pops up the social login modal on UI.
 
 ### Logout
 
@@ -46,14 +43,6 @@ await _wallet.GetAddress()
 
 This function returns the address of the wallet.
 
-### Get user infos
-
-```C#
-await wallet.GetUserInfos()
-```
-
-If the user is logged in with social media accounts, this function can be used to fetch user related data such as email, etc.
-
 ### Send transaction
 
 ```C#
@@ -67,18 +56,9 @@ Once you have received the SafeTxHash you can wait for the transaction to be min
 var transactionReceipt = await _wallet.Wait(safeTxHash);
 ```
 
-### Get Relay Status
-
-```javascript
-const transactionStatus = await wallet.getRelayTxStatus(relayId)
-// TransactionStatus:{hash: string,  status: string}
-```
-
-Returns the current transaction hash and the status of the relay (sent, mined, confirmed)
-
 ### Sign Message
 
-```javascript
+```C#
 var messageSigned = _wallet.SignMessage("Hello World!");
 ```
 
