@@ -1,7 +1,6 @@
-# Comeht Conect Unity SDK
+# Cometh Conect Unity SDK
 
 Cometh Connect SDK allows developers to onboard their users with a seedless, gasless experience familiar to Web2.
-
 Account Abstraction (AA) improves transaction user experience by using smart contract wallets as primary accounts.
 
 ## Instantiate Wallet
@@ -23,8 +22,16 @@ private void Start()
 
 ### Connect
 
+When your user doesn't already have a wallet, create a new one by calling the connect method without parameter.
+
 ```C#
 await _wallet.Connect()
+```
+
+When you already have created your user's wallet, just pass the wallet address to the connect method in order to instanciate it.
+
+```C#
+await _wallet.Connect(WALLET_ADDRESS)
 ```
 
 ### Logout
