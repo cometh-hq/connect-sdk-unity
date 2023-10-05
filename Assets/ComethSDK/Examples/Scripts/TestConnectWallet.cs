@@ -51,12 +51,6 @@ namespace ComethSDK.Examples.Scripts
 			_wallet.CancelWaitingForEvent();
 		}
 
-		public void ClearBurner()
-		{
-			PlayerPrefs.DeleteKey("burner-wallet-private-key");
-			Debug.Log("Burner wallet cleared");
-		}
-
 		public override async void SendTestTransaction(string to)
 		{
 			if (to is "" or Constants.ZERO_ADDRESS)
@@ -108,9 +102,30 @@ namespace ComethSDK.Examples.Scripts
 			PrintInConsole("Safe transaction hash: " + safeTxHash);
 			PrintInConsole("Transaction sent, waiting for confirmation...");
 			var transactionReceipt = await _wallet.Wait(safeTxHash);
-			PrintInConsole("Transaction confirmed, see it on the block explorer: " +
-			               transactionReceipt.TransactionHash);
-			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authAdaptor.ChainId);
+
+			if (transactionReceipt != null)
+			{
+				PrintInConsole("Transaction confirmed, see it on the block explorer: " +
+				               transactionReceipt.TransactionHash);
+				SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authAdaptor.ChainId);
+			}
+			else
+			{
+				PrintInConsole("Issue with event, redirecting to wallet to see the transaction");
+				SeeWalletOnBlockExplorer(_wallet.GetAddress(), authAdaptor.ChainId);
+			}
+		}
+
+		public async void TestCallToCounter()
+		{
+			const string
+				COUNTER_TEST_ADDRESS =
+					"0x3633A1bE570fBD902D10aC6ADd65BB11FC914624"; //On polygon : 0x84ADD3fa2c2463C8cF2C95aD70e4b5F602332160";
+			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNTER_TEST_ADDRESS);
+			var counterFunction = contract.GetFunction("counters");
+			PrintInConsole("Sending query to get Counter...");
+			var counterAmount = await counterFunction.CallAsync<int>(_wallet.GetAddress());
+			PrintInConsole("Query successful, Counter = " + counterAmount);
 		}
 
 		private async void EstimateGasAndShow(string to, string value, string data)
@@ -125,6 +140,12 @@ namespace ComethSDK.Examples.Scripts
 		private void SeeTransactionReceiptOnBlockExplorer(string txHash, string chainId)
 		{
 			var url = Constants.GetNetworkByChainID(chainId).BlockExplorerUrl + "/tx/" + txHash;
+			Application.OpenURL(url);
+		}
+
+		private void SeeWalletOnBlockExplorer(string walletAddressToSee, string chainId)
+		{
+			var url = Constants.GetNetworkByChainID(chainId).BlockExplorerUrl + "/address/" + walletAddressToSee;
 			Application.OpenURL(url);
 		}
 

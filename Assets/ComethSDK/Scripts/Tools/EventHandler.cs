@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Nethereum.Contracts;
 using Nethereum.GnosisSafe.ContractDefinition;
@@ -48,38 +49,46 @@ namespace ComethSDK.Scripts.Tools
 			EventLog<ExecutionFailureEventDTO> txFailureEvent = null;
 
 			Debug.Log("Waiting for event");
-			while (!txFailureEventFound && !txSuccessEventFound && !_cancelled)
+			try
 			{
-				var currentBlockNumber = await _web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
-				var oldBlockNumber = (currentBlockNumber.Value + Constants.BLOCK_EVENT_GAP).ToHexBigInteger();
+				while (!txFailureEventFound && !txSuccessEventFound && !_cancelled)
+				{
+					var currentBlockNumber = await _web3.Eth.Blocks.GetBlockNumber.SendRequestAsync();
+					var oldBlockNumber = (currentBlockNumber.Value + Constants.BLOCK_EVENT_GAP).ToHexBigInteger();
 
-				var filterExecSuccess = _execSuccessEventHandler.CreateFilterInput(
-					new BlockParameter(oldBlockNumber),
-					new BlockParameter(currentBlockNumber));
-				var allSuccessfulEventsFound = await _execSuccessEventHandler.GetAllChangesAsync(filterExecSuccess);
+					var filterExecSuccess = _execSuccessEventHandler.CreateFilterInput(
+						new BlockParameter(oldBlockNumber),
+						new BlockParameter(currentBlockNumber));
+					var allSuccessfulEventsFound = await _execSuccessEventHandler.GetAllChangesAsync(filterExecSuccess);
 
-				foreach (var events in allSuccessfulEventsFound)
-					if (safeTxHashBytes.SequenceEqual(events.Event.TxHash))
-					{
-						Debug.Log("Success");
-						txSuccessEvent = events;
-						txSuccessEventFound = true;
-						break;
-					}
+					foreach (var events in allSuccessfulEventsFound)
+						if (safeTxHashBytes.SequenceEqual(events.Event.TxHash))
+						{
+							Debug.Log("Success");
+							txSuccessEvent = events;
+							txSuccessEventFound = true;
+							break;
+						}
 
-				var filterExecFailure = _execFailureEventHandler.CreateFilterInput(
-					new BlockParameter(oldBlockNumber),
-					new BlockParameter(currentBlockNumber));
-				var allFailureEventsFound = await _execFailureEventHandler.GetAllChangesAsync(filterExecFailure);
+					var filterExecFailure = _execFailureEventHandler.CreateFilterInput(
+						new BlockParameter(oldBlockNumber),
+						new BlockParameter(currentBlockNumber));
+					var allFailureEventsFound = await _execFailureEventHandler.GetAllChangesAsync(filterExecFailure);
 
-				foreach (var events in allFailureEventsFound)
-					if (safeTxHashBytes.SequenceEqual(events.Event.TxHash))
-					{
-						Debug.Log("Failure");
-						txFailureEvent = events;
-						txFailureEventFound = true;
-						break;
-					}
+					foreach (var events in allFailureEventsFound)
+						if (safeTxHashBytes.SequenceEqual(events.Event.TxHash))
+						{
+							Debug.Log("Failure");
+							txFailureEvent = events;
+							txFailureEventFound = true;
+							break;
+						}
+				}
+			}
+			catch (Exception e)
+			{
+				Debug.LogWarning(e);
+				return null;
 			}
 
 			if (_cancelled)
