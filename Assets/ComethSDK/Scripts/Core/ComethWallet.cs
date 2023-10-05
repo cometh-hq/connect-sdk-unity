@@ -30,7 +30,7 @@ namespace ComethSDK.Scripts.Core
 		private readonly API _api;
 		private readonly IAuthAdaptor _authAdaptor;
 		private readonly string _chainId;
-		private readonly Uri _uri = new("https://api.cometh.finance");
+		private readonly Uri _uri = new("https://api.connect.cometh.io");
 		private readonly BigInteger BASE_GAS;
 		private readonly double REWARD_PERCENTILE;
 		private bool _connected;
@@ -52,7 +52,7 @@ namespace ComethSDK.Scripts.Core
 
 		public async Task Connect([CanBeNull] string burnerAddress)
 		{
-			if (_authAdaptor == null) throw new Exception("No EOA adapter found");
+			if (_authAdaptor == null) throw new Exception("No auth adaptor found");
 
 			if (!Constants.IsNetworkSupported(_chainId)) throw new Exception("This network is not supported");
 
