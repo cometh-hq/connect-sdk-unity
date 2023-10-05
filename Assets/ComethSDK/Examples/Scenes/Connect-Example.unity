@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028326, g: 0.22571333, b: 0.30692202, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028334, g: 0.22571328, b: 0.3069217, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -490,7 +490,7 @@ GameObject:
   - component: {fileID: 216291510}
   - component: {fileID: 216291509}
   m_Layer: 5
-  m_Name: CallCount
+  m_Name: 'Sponsored: Count'
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -514,7 +514,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -598.25, y: -189.9502}
+  m_AnchoredPosition: {x: -598.25, y: 23.299805}
   m_SizeDelta: {x: 258.7886, y: 59.6312}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &216291509
@@ -648,7 +648,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -270.7737, y: -297.15814}
+  m_AnchoredPosition: {x: -270.7737, y: -243.40814}
   m_SizeDelta: {x: 238.8818, y: 59.6312}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &270538141
@@ -695,9 +695,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: AlembicSDK.Examples.Scripts.TestWalletConnect,
-          ExampleScripts
+      - m_Target: {fileID: 1442284380}
+        m_TargetAssemblyTypeName: ComethSDK.Examples.Scripts.TestConnectWallet, ExampleScripts
         m_MethodName: SignMessage
         m_Mode: 1
         m_Arguments:
@@ -1073,7 +1072,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Login
+  m_text: Connect
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1525,7 +1524,7 @@ GameObject:
   - component: {fileID: 491760305}
   - component: {fileID: 491760304}
   m_Layer: 5
-  m_Name: GetUserInfo
+  m_Name: Get Address
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1549,7 +1548,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -605.4474, y: -296.54013}
+  m_AnchoredPosition: {x: -605.4474, y: -246.79013}
   m_SizeDelta: {x: 238.8818, y: 59.6312}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &491760304
@@ -1598,7 +1597,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1442284380}
         m_TargetAssemblyTypeName: ComethSDK.Examples.Scripts.TestConnectWallet, ExampleScripts
-        m_MethodName: GetUserInfo
+        m_MethodName: GetAddress
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1793,7 +1792,7 @@ GameObject:
   - component: {fileID: 677876641}
   - component: {fileID: 677876640}
   m_Layer: 5
-  m_Name: Login
+  m_Name: Connect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2107,7 +2106,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Get User Info
+  m_text: Get Address
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2546,7 +2545,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 141378945}
   m_HandleRect: {fileID: 141378944}
   m_Direction: 0
-  m_Value: 0.49999988
+  m_Value: 0.49999994
   m_Size: 0.4630167
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -2685,7 +2684,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Web3Auth Unity Sample App
+  m_text: Cometh Connect Unity Sample
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3166,7 +3165,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: CallCount
+  m_text: 'Send Sponsored Tx: Count'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3280,7 +3279,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -423.75, y: 14.25}
+  m_AnchoredPosition: {x: -599.75, y: -60.25}
   m_SizeDelta: {x: 238.8818, y: 59.6312}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1305436149
@@ -3805,6 +3804,7 @@ MonoBehaviour:
   authAdaptor: {fileID: 1442284379}
   console: {fileID: 693827447}
   walletAddress: 
+  apiKey: 
 --- !u!1 &1444845274
 GameObject:
   m_ObjectHideFlags: 0
@@ -4959,7 +4959,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1935419022
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5263,7 +5263,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: CallCounter
+  m_text: Display Count
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5488,7 +5488,7 @@ GameObject:
   - component: {fileID: 2098011958}
   - component: {fileID: 2098011957}
   m_Layer: 5
-  m_Name: CallCounter
+  m_Name: Display Count
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5512,7 +5512,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -267.63318, y: -189.9502}
+  m_AnchoredPosition: {x: -267.63318, y: 23.299805}
   m_SizeDelta: {x: 258.7886, y: 59.6312}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2098011957

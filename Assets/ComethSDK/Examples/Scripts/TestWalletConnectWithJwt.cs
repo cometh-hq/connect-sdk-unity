@@ -1,5 +1,4 @@
 ﻿using System;
-using CandyCoded.env;
 using ComethSDK.Scripts.Adapters;
 using ComethSDK.Scripts.Core;
 using ComethSDK.Scripts.Tools;
@@ -12,20 +11,18 @@ namespace ComethSDK.Examples.Scripts
 {
 	public class TestWalletConnectWithJwt : TestWallet
 	{
-		[SerializeField] public ConnectWithJwtAdaptor AuthWithJwtAdaptor;
+		[SerializeField] private ConnectWithJwtAdaptor authWithJwtAdaptor;
 		[SerializeField] private TMP_Text console;
-		private string _apiKey;
+		[SerializeField] private string apiKey;
 
 		private ComethWallet _wallet;
 
 		private void Start()
 		{
-			if (env.TryParseEnvironmentVariable("API_KEY", out string apiKey))
-				_apiKey = apiKey;
+			if (authWithJwtAdaptor && !string.IsNullOrEmpty(apiKey))
+				_wallet = new ComethWallet(authWithJwtAdaptor, apiKey);
 			else
-				Debug.LogError("API_KEY environment variable not set");
-
-			_wallet = new ComethWallet(AuthWithJwtAdaptor, _apiKey);
+				Debug.LogError("Please set the apiKey & authAdaptor serialised variables");
 		}
 
 		public override async void Connect()
@@ -77,7 +74,7 @@ namespace ComethSDK.Examples.Scripts
 			var transactionReceipt = await _wallet.Wait(safeTxHash);
 			PrintInConsole("Transaction confirmed, see it on the block explorer: " +
 			               transactionReceipt.TransactionHash);
-			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, AuthWithJwtAdaptor.ChainId);
+			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authWithJwtAdaptor.ChainId);
 		}
 
 		public override async void GetUserInfo()
@@ -104,12 +101,12 @@ namespace ComethSDK.Examples.Scripts
 			var transactionReceipt = await _wallet.Wait(safeTxHash);
 			PrintInConsole("Transaction confirmed, see it on the block explorer: " +
 			               transactionReceipt.TransactionHash);
-			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, AuthWithJwtAdaptor.ChainId);
+			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authWithJwtAdaptor.ChainId);
 		}
 
 		private async void EstimateGasAndShow(string to, string value, string data)
 		{
-			var web3 = new Web3(Constants.GetNetworkByChainID(AuthWithJwtAdaptor.ChainId).RPCUrl);
+			var web3 = new Web3(Constants.GetNetworkByChainID(authWithJwtAdaptor.ChainId).RPCUrl);
 			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
 			var gas = await _wallet.CalculateMaxFees(to, value, data, nonce);
 			PrintInConsole("Estimated max gas: " + gas);

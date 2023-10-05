@@ -1,5 +1,4 @@
-﻿using CandyCoded.env;
-using ComethSDK.Scripts.Adapters;
+﻿using ComethSDK.Scripts.Adapters;
 using ComethSDK.Scripts.Core;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Types;
@@ -14,15 +13,16 @@ namespace ComethSDK.Examples.Scripts
 		[SerializeField] public ConnectAdaptor authAdaptor;
 		[SerializeField] private TMP_Text console;
 		[SerializeField] private string walletAddress;
+		[SerializeField] private string apiKey;
 
 		private ComethWallet _wallet;
 
 		private void Start()
 		{
-			if (env.TryParseEnvironmentVariable("API_KEY", out string apiKey))
+			if (authAdaptor && !string.IsNullOrEmpty(apiKey))
 				_wallet = new ComethWallet(authAdaptor, apiKey);
 			else
-				Debug.LogError("API_KEY environment variable not set");
+				Debug.LogError("Please set the apiKey & authAdaptor serialised variables");
 		}
 
 		public async void Connect()
@@ -39,10 +39,10 @@ namespace ComethSDK.Examples.Scripts
 			PrintInConsole("Disconnected");
 		}
 
-		public void SignMessage()
+		public async void SignMessage()
 		{
 			PrintInConsole("Signing message...");
-			var messageSigned = _wallet.SignMessage("Hello World!");
+			var messageSigned = await _wallet.SignMessage("Hello World!");
 			PrintInConsole("Message signed: " + messageSigned);
 		}
 
@@ -79,10 +79,10 @@ namespace ComethSDK.Examples.Scripts
 			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authAdaptor.ChainId);
 		}
 
-		public void GetUserInfo()
+		public void GetAddress()
 		{
-			var userInfos = _wallet.GetUserInfos();
-			PrintUserInfosInConsole(userInfos);
+			var address = _wallet.GetAddress();
+			PrintInConsole(address);
 		}
 
 		public async void TestCallToCount()

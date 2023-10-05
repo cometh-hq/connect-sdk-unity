@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028334, g: 0.22571328, b: 0.3069217, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2688,7 +2688,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Web3Auth Unity Sample App
+  m_text: Cometh Connect with JWT Unity Sample
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3807,8 +3807,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22d8b95eb5aa456792aedf591ea79c51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AuthWithJwtAdaptor: {fileID: 1442284380}
+  authWithJwtAdaptor: {fileID: 0}
   console: {fileID: 693827447}
+  apiKey: 
 --- !u!1 &1444845274
 GameObject:
   m_ObjectHideFlags: 0
