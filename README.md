@@ -3,9 +3,26 @@
 Cometh Connect SDK allows developers to onboard their users with a seedless, gasless experience familiar to Web2.
 Account Abstraction (AA) improves transaction user experience by using smart contract wallets as primary accounts.
 
-## Instantiate Wallet
-
 To get an API key please [Contact us](https://cometh.io/)
+
+## Test Cometh Connect SDK
+
+Open the scene: **Examples/Scenes/Connect-Example.unity**
+
+Click on the TestWallet GameObject:
+
+  * Fill your API-KEY
+  * To use a specific wallet fill its address. If you don't specify an address a new wallet will be created. The address wille be printed in the console log.
+
+Launch the Scene.
+
+  * First click on "Connect" button. If you did not specified a wallet address, you will get a new one. Before you made a first transaction your wallet is not deployed.
+  * Click on "Send Sponsored Tx: Count" to call a sponsored transaction on a "Count" contract.
+  * To see the number of time you clicked on "Count" , use "Display Count"
+
+To see usage of the SDK open the script: **Examples/Scripts/TestConnectWallet.cs**
+
+## Instantiate Wallet
 
 ```C#
 [SerializeField] private ConnectAdaptor authAdapter; //Set ChainId in inspector
