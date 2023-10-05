@@ -1,22 +1,37 @@
-# Account Abstraction Unity SDK
+# Cometh Connect Unity SDK
 
-Alembic Unity Account Abstraction SDK allows developers to onboard their users with a seedless, gasless experience familiar to Web2.
-
+Cometh Connect SDK allows developers to onboard their users with a seedless, gasless experience familiar to Web2.
 Account Abstraction (AA) improves transaction user experience by using smart contract wallets as primary accounts.
-Our solution is compatible with EIP-4337.
+
+To get an API key please [Contact us](https://cometh.io/)
+
+## Test Cometh Connect SDK
+
+Open the scene: **Examples/Scenes/Connect-Example.unity**
+
+Click on the TestWallet GameObject:
+
+  * Fill your API-KEY
+  * To use a specific wallet fill its address. If you don't specify an address a new wallet will be created. The address wille be printed in the console log.
+
+Launch the Scene.
+
+  * First click on "Connect" button. If you did not specified a wallet address, you will get a new one. Before you made a first transaction your wallet is not deployed.
+  * Click on "Send Sponsored Tx: Count" to call a sponsored transaction on a "Count" contract.
+  * To see the number of time you clicked on "Count" , use "Display Count"
+
+To see usage of the SDK open the script: **Examples/Scripts/TestConnectWallet.cs**
 
 ## Instantiate Wallet
 
-To get an API key please [Contact us](https://alembic.tech/)
-
 ```C#
-[SerializeField] private BurnerWalletAdapter authAdapter; //Set ChainId in inspector
-private const string API_KEY = "my_api_key"; 
-private AlembicWallet _wallet;
+[SerializeField] private ConnectAdaptor authAdapter; //Set ChainId in inspector
+private const string API_KEY = "my_api_key";
+private ComethWallet _wallet;
 
 private void Start()
 {
-    _wallet = new AlembicWallet(authAdapter, API_KEY );
+    _wallet = new ComethWallet(authAdapter, API_KEY );
 }
 ```
 
@@ -24,11 +39,17 @@ private void Start()
 
 ### Connect
 
+When your user doesn't already have a wallet, create a new one by calling the connect method without parameter.
+
 ```C#
 await _wallet.Connect()
 ```
 
-This function pops up the social login modal on UI.
+When you already have created your user's wallet, just pass the wallet address to the connect method in order to instanciate it.
+
+```C#
+await _wallet.Connect(WALLET_ADDRESS)
+```
 
 ### Logout
 
@@ -46,14 +67,6 @@ await _wallet.GetAddress()
 
 This function returns the address of the wallet.
 
-### Get user infos
-
-```C#
-await wallet.GetUserInfos()
-```
-
-If the user is logged in with social media accounts, this function can be used to fetch user related data such as email, etc.
-
 ### Send transaction
 
 ```C#
@@ -67,18 +80,9 @@ Once you have received the SafeTxHash you can wait for the transaction to be min
 var transactionReceipt = await _wallet.Wait(safeTxHash);
 ```
 
-### Get Relay Status
-
-```javascript
-const transactionStatus = await wallet.getRelayTxStatus(relayId)
-// TransactionStatus:{hash: string,  status: string}
-```
-
-Returns the current transaction hash and the status of the relay (sent, mined, confirmed)
-
 ### Sign Message
 
-```javascript
+```C#
 var messageSigned = _wallet.SignMessage("Hello World!");
 ```
 

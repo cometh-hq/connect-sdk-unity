@@ -1,0 +1,43 @@
+{
+  "name": "Tests",
+  "rootNamespace": "",
+  "references": [
+    "GUID:3efd68cd7411d6c48b93e20d299a7971",
+    "GUID:c837fd7a762e6004a8bbebf6e960c38a",
+    "GUID:0f10bb1ed19dbc149b242394e50d9774",
+    "GUID:ea2c79e77633b404980a719967bcd567",
+    "GUID:27619889b8ba8c24980f49ee34dbb44a",
+    "GUID:0acc523941302664db1f4e527237feb3",
+    "GUID:20ff5bdc0066ab04a80b5c6707f10371",
+    "GUID:9180fc10182395d41bacb05e43007847",
+    "GUID:0022c094e0c7f481288196a6d3e9ce33",
+    "GUID:7dd4f8caf82c243428d2e7006f515400",
+    "GUID:34c16d0e9a6d109409d191c3c79fb3f6",
+    "GUID:899b09f289b75794fb3f05e12d822ffd"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll",
+    "Nethereum.Hex.dll",
+    "Nethereum.Web3.dll",
+    "Nethereum.Signer.dll",
+    "Nethereum.Contracts.dll",
+    "Nethereum.RPC.dll",
+    "Nethereum.JsonRpc.Client.dll",
+    "Microsoft.Extensions.Logging.Abstractions.dll",
+    "Nethereum.Accounts.dll",
+    "Nethereum.Siwe.Core.dll",
+    "Nethereum.Util.dll",
+    "Nethereum.ABI.dll",
+    "Nethereum.Signer.EIP712.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
