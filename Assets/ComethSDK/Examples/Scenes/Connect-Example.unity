@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028326, g: 0.22571333, b: 0.30692202, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2546,7 +2546,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 141378945}
   m_HandleRect: {fileID: 141378944}
   m_Direction: 0
-  m_Value: 0.49999994
+  m_Value: 0.49999988
   m_Size: 0.4630167
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3789,7 +3789,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chainId: 80001
   apiKey: 
-  baseUrl: https://api.cometh.finance
+  baseUrl: https://api.connect.cometh.io
 --- !u!114 &1442284380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3804,7 +3804,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   authAdaptor: {fileID: 1442284379}
   console: {fileID: 693827447}
-  walletAddress: 0xFaaB99567815B2E3B842BA9188Bca6EAc84f8363
+  walletAddress: 
 --- !u!1 &1444845274
 GameObject:
   m_ObjectHideFlags: 0

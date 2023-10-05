@@ -34,7 +34,7 @@ namespace ComethSDK.Scripts.Tools
 			Debug.Log("Event Handler Created");
 		}
 
-		//this function can be optimized / can remove boilerplate 
+		//this function can be optimized / can remove boilerplate
 		public async Task<TransactionReceipt> Wait(string safeTxHash)
 		{
 			//set it to false in case it was cancelled before
@@ -57,8 +57,7 @@ namespace ComethSDK.Scripts.Tools
 					var oldBlockNumber = (currentBlockNumber.Value + Constants.BLOCK_EVENT_GAP).ToHexBigInteger();
 
 					var filterExecSuccess = _execSuccessEventHandler.CreateFilterInput(
-						new BlockParameter(oldBlockNumber),
-						new BlockParameter(currentBlockNumber));
+						new BlockParameter(oldBlockNumber), null);
 					var allSuccessfulEventsFound = await _execSuccessEventHandler.GetAllChangesAsync(filterExecSuccess);
 
 					foreach (var events in allSuccessfulEventsFound)
@@ -69,12 +68,10 @@ namespace ComethSDK.Scripts.Tools
 							txSuccessEventFound = true;
 							break;
 						}
-
+					if (txSuccessEventFound == false) {
 					var filterExecFailure = _execFailureEventHandler.CreateFilterInput(
-						new BlockParameter(oldBlockNumber),
-						new BlockParameter(currentBlockNumber));
+						new BlockParameter(oldBlockNumber), null);
 					var allFailureEventsFound = await _execFailureEventHandler.GetAllChangesAsync(filterExecFailure);
-
 					foreach (var events in allFailureEventsFound)
 						if (safeTxHashBytes.SequenceEqual(events.Event.TxHash))
 						{
@@ -83,6 +80,7 @@ namespace ComethSDK.Scripts.Tools
 							txFailureEventFound = true;
 							break;
 						}
+					}
 				}
 			}
 			catch (Exception e)
