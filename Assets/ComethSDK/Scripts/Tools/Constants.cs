@@ -60,15 +60,6 @@ namespace ComethSDK.Scripts.Tools
 			return null;
 		}
 
-		public static bool IsNetworkSupported(string chainId)
-		{
-			foreach (var network in Networks.Values)
-				if (network.ChainId == chainId)
-					return true;
-
-			return false;
-		}
-
 		public class NetworkData
 		{
 			public string BlockExplorerUrl;

@@ -39,16 +39,15 @@ namespace ComethSDK.Scripts.Core
 
 		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey)
 		{
-			_authAdaptor = authAdaptor;
+			if (!Utils.IsNetworkSupported(authAdaptor.ChainId)) throw new Exception("This network is not supported");
 			_chainId = authAdaptor.ChainId;
 			_api = new API(apiKey, int.Parse(_chainId));
+			_authAdaptor = authAdaptor;
 		}
 
 		public async Task Connect([CanBeNull] string burnerAddress)
 		{
 			if (_authAdaptor == null) throw new Exception("No auth adaptor found");
-
-			if (!Constants.IsNetworkSupported(_chainId)) throw new Exception("This network is not supported");
 
 			_web3 = new Web3(Constants.GetNetworkByChainID(_chainId).RPCUrl);
 

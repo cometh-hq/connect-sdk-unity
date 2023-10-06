@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using ComethSDK.Scripts.Adapters.Interfaces;
 using ComethSDK.Scripts.HTTP;
+using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Tools.Signers.Interfaces;
 using ComethSDK.Scripts.Types;
@@ -26,7 +27,16 @@ namespace ComethSDK.Scripts.Adapters
 
 		private void Awake()
 		{
+			if(chainId == 0)
+				throw new Exception("ChainId is not set");
+			if(string.IsNullOrEmpty(apiKey))
+				throw new Exception("ApiKey is not set");
+			if(string.IsNullOrEmpty(baseUrl))
+				throw new Exception("BaseUrl is not set");
+			
+			if (!Utils.IsNetworkSupported(chainId.ToString())) throw new Exception("This network is not supported");
 			ChainId = chainId.ToString();
+			
 			_api = new API(apiKey, chainId);
 			_connectionSigning = new ConnectionSigning(chainId, apiKey, baseUrl);
 		}

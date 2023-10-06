@@ -2,7 +2,6 @@
 using ComethSDK.Scripts.Core;
 using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
-using ComethSDK.Scripts.Types;
 using Nethereum.Web3;
 using TMPro;
 using UnityEngine;
