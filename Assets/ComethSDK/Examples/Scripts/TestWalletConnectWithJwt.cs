@@ -1,6 +1,7 @@
 ﻿using System;
 using ComethSDK.Scripts.Adapters;
 using ComethSDK.Scripts.Core;
+using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Types;
 using Nethereum.Web3;
@@ -108,7 +109,7 @@ namespace ComethSDK.Examples.Scripts
 		{
 			var web3 = new Web3(Constants.GetNetworkByChainID(authWithJwtAdaptor.ChainId).RPCUrl);
 			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
-			var gas = await _wallet.CalculateMaxFees(to, value, data, nonce);
+			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, web3);
 			PrintInConsole("Estimated max gas: " + gas);
 		}
 
