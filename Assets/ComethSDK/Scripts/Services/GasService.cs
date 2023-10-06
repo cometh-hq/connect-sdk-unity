@@ -14,7 +14,7 @@ namespace ComethSDK.Scripts.Services
 {
 	public static class GasService
 	{
-		private static readonly double REWARD_PERCENTILE = Constants.DEFAULT_REWARD_PERCENTILE;
+		private static readonly decimal REWARD_PERCENTILE = Constants.DEFAULT_REWARD_PERCENTILE;
 		private static readonly BigInteger BASE_GAS = Constants.DEFAULT_BASE_GAS;
 
 		public static async Task<BigInteger> GetGasPrice(IWeb3 web3)
