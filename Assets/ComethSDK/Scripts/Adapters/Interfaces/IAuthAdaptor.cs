@@ -13,6 +13,7 @@ namespace ComethSDK.Scripts.Adapters.Interfaces
 		public Task Logout();
 		public string GetAccount();
 		public ISignerBase GetSigner();
+		public Task<string> GetWalletAddress();
 		public UserInfos GetUserInfos();
 	}
 }

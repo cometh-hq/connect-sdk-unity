@@ -74,6 +74,11 @@ namespace ComethSDK.Scripts.Adapters
 			return _signer;
 		}
 
+		public Task<string> GetWalletAddress()
+		{
+			throw new NotImplementedException();
+		}
+
 		public UserInfos GetUserInfos()
 		{
 			var walletAddress = GetAccount();

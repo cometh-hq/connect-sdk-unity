@@ -9,7 +9,6 @@ using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Tools.Signers.Interfaces;
 using ComethSDK.Scripts.Types;
 using Nethereum.Signer;
-using Nethereum.Web3.Accounts;
 using UnityEngine;
 
 namespace ComethSDK.Scripts.Adapters
@@ -20,104 +19,76 @@ namespace ComethSDK.Scripts.Adapters
 		[SerializeField] private string apiKey;
 		[SerializeField] private string baseUrl;
 
-		private string _account;
 		private API _api;
-
-		private ConnectionSigning _connectionSigning;
-		private EthECKey _ethEcKey;
 		private Signer _signer;
+		private string _walletAddress;
 
 		private void Awake()
 		{
-			if(chainId == 0)
+			if (chainId == 0)
 				throw new Exception("ChainId is not set");
-			if(string.IsNullOrEmpty(apiKey))
+			if (string.IsNullOrEmpty(apiKey))
 				throw new Exception("ApiKey is not set");
-			if(string.IsNullOrEmpty(baseUrl))
+			if (string.IsNullOrEmpty(baseUrl))
 				throw new Exception("BaseUrl is not set");
-			
+
 			if (!Utils.IsNetworkSupported(chainId.ToString())) throw new Exception("This network is not supported");
 			ChainId = chainId.ToString();
-			
+
 			_api = new API(apiKey, chainId);
-			_connectionSigning = new ConnectionSigning(chainId, apiKey, baseUrl);
 		}
 
 		public string ChainId { get; private set; }
 
 		public async Task Connect(string burnerAddress)
 		{
-			var privateKey = "";
 			if (!string.IsNullOrEmpty(burnerAddress))
 			{
 				await VerifyWalletAddress(burnerAddress);
-				privateKey = PlayerPrefs.GetString( $"cometh-connect-{burnerAddress}", null);
+				_signer = await BurnerWalletService.GetSigner(burnerAddress, _api,
+					Constants.GetNetworkByChainID(ChainId).RPCUrl);
 			}
-			
-			var walletAddress = "";
-
-			if (string.IsNullOrEmpty(privateKey))
+			else
 			{
-				var ethEcKey = EthECKey.GenerateKey();
-				privateKey = ethEcKey.GetPrivateKey();
-				walletAddress = await _api.GetWalletAddress(ethEcKey.GetPublicAddress());
-				Debug.Log("EthEC Address = "+walletAddress);
-				PlayerPrefs.SetString($"cometh-connect-{walletAddress}", privateKey);
+				_signer = await BurnerWalletService.CreateSigner(_api);
 			}
 
-			_ethEcKey = new EthECKey(privateKey);
-			_signer = new Signer(_ethEcKey);
-			var eoa = new Account(privateKey);
-			_account = eoa.Address;
-
-			if (string.IsNullOrEmpty(walletAddress))
-			{
-				walletAddress = await GetWalletAddress();
-			}
-			
-			await _connectionSigning.SignAndConnect(walletAddress, GetSigner());
-		}
-
-		private async Task VerifyWalletAddress(string walletAddress)
-		{
-			WalletInfos connectWallet;
-			try
-			{
-				connectWallet = await _api.GetWalletInfos(walletAddress);
-			}
-			catch
-			{
-				throw new Exception("Invalid address format");
-			}
-
-			if (connectWallet == null)
-			{
-				throw new Exception("Wallet does not exist");
-			}
+			_walletAddress = await InitAdaptorWalletAddress(burnerAddress);
 		}
 
 		public Task Logout()
 		{
-			PlayerPrefs.DeleteKey("privateKey");
-			_account = null;
-			_ethEcKey = null;
+			CheckIfSignerIsSet();
 			_signer = null;
+			_walletAddress = null;
 			return Task.CompletedTask;
 		}
 
 		public string GetAccount()
 		{
-			return _account;
+			CheckIfSignerIsSet();
+			return _signer.GetAddress();
 		}
 
 		public ISignerBase GetSigner()
 		{
+			CheckIfSignerIsSet();
 			return _signer;
 		}
 
 		public UserInfos GetUserInfos()
 		{
-			return null;
+			CheckIfSignerIsSet();
+			return new UserInfos
+			{
+				walletAddress = GetAccount()
+			};
+		}
+
+		public async Task<string> GetWalletAddress()
+		{
+			if (string.IsNullOrEmpty(_walletAddress)) throw new Exception("No wallet Instance found");
+			return _walletAddress;
 		}
 
 		public async Task<NewSignerRequestBody> InitNewSignerRequest(string walletAddress)
@@ -134,21 +105,43 @@ namespace ComethSDK.Scripts.Adapters
 				deviceData = DeviceService.GetDeviceData(),
 				type = NewSignerRequestType.BURNER_WALLET
 			};
-			
+
 			return addNewSignerRequest;
 		}
-		
+
 		public async Task<NewSignerRequestBody[]> GetNewSignerRequest()
 		{
 			var walletAddress = await GetWalletAddress();
 			return await _api.GetNewSignerRequests(walletAddress);
 		}
-		
-		private async Task<string> GetWalletAddress()
+
+		private async Task<string> InitAdaptorWalletAddress(string address)
 		{
-			var ownerAddress = GetAccount();
-			if (string.IsNullOrEmpty(ownerAddress)) throw new Exception("No owner address found");
-			return await _api.GetWalletAddress(ownerAddress);
+			if (_signer == null) throw new Exception("No signer instance found");
+
+			return string.IsNullOrEmpty(address)
+				? address
+				: await _api.GetWalletAddress(_signer.GetAddress());
+		}
+
+		private async Task VerifyWalletAddress(string walletAddress)
+		{
+			WalletInfos connectWallet;
+			try
+			{
+				connectWallet = await _api.GetWalletInfos(walletAddress);
+			}
+			catch
+			{
+				throw new Exception("Invalid address format");
+			}
+
+			if (connectWallet == null) throw new Exception("Wallet does not exist");
+		}
+
+		private void CheckIfSignerIsSet()
+		{
+			if (_signer == null) throw new Exception("No signer instance found");
 		}
 	}
 }
