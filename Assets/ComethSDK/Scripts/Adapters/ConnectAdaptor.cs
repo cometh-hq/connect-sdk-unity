@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using ComethSDK.Scripts.Adapters.Interfaces;
 using ComethSDK.Scripts.HTTP;
+using ComethSDK.Scripts.HTTP.RequestBodies;
+using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Tools.Signers.Interfaces;
@@ -118,6 +120,30 @@ namespace ComethSDK.Scripts.Adapters
 			return null;
 		}
 
+		public async Task<NewSignerRequestBody> InitNewSignerRequest(string walletAddress)
+		{
+			var ethEcKey = EthECKey.GenerateKey();
+			var privateKey = ethEcKey.GetPrivateKey();
+			_signer = new Signer(ethEcKey);
+			PlayerPrefs.SetString($"cometh-connect-{walletAddress}", privateKey);
+
+			var addNewSignerRequest = new NewSignerRequestBody
+			{
+				walletAddress = walletAddress,
+				signerAddress = _signer.GetAddress(),
+				deviceData = DeviceService.GetDeviceData(),
+				type = NewSignerRequestType.BURNER_WALLET
+			};
+			
+			return addNewSignerRequest;
+		}
+		
+		public async Task<NewSignerRequestBody[]> GetNewSignerRequest()
+		{
+			var walletAddress = await GetWalletAddress();
+			return await _api.GetNewSignerRequests(walletAddress);
+		}
+		
 		private async Task<string> GetWalletAddress()
 		{
 			var ownerAddress = GetAccount();
