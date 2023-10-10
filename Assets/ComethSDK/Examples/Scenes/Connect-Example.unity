@@ -3787,7 +3787,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chainId: 80001
-  apiKey: 
+  apiKey: 389806c6-d75c-4117-91f7-2c81d5d1e5dd
   baseUrl: https://api.connect.cometh.io
 --- !u!114 &1442284380
 MonoBehaviour:
@@ -3804,7 +3804,7 @@ MonoBehaviour:
   authAdaptor: {fileID: 1442284379}
   console: {fileID: 693827447}
   walletAddress: 
-  apiKey: 
+  apiKey: 389806c6-d75c-4117-91f7-2c81d5d1e5dd
 --- !u!1 &1444845274
 GameObject:
   m_ObjectHideFlags: 0
