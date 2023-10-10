@@ -90,10 +90,7 @@ namespace ComethSDK.Scripts.Services
 			var isOwner = await SafeService.IsSigner(storageSigner.GetAddress(), walletAddress, provider, api);
 
 			if (!isOwner)
-			{
-				Debug.LogError("New Domain detected. You need to add that domain as signer.");
-				return null;
-			}
+				throw new Exception("New Domain detected. You need to add that domain as signer.");
 
 			return storageSigner;
 		}
