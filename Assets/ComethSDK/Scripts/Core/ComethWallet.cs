@@ -45,7 +45,7 @@ namespace ComethSDK.Scripts.Core
 			_authAdaptor = authAdaptor;
 		}
 
-		public async Task Connect([CanBeNull] string burnerAddress)
+		public async Task Connect([CanBeNull] string burnerAddress = "")
 		{
 			if (_authAdaptor == null) throw new Exception("No auth adaptor found");
 

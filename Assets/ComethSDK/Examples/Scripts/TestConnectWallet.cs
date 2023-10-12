@@ -28,7 +28,10 @@ namespace ComethSDK.Examples.Scripts
 		public async void Connect()
 		{
 			PrintInConsole("Connecting...");
-			await _wallet.Connect(walletAddress);
+			if(string.IsNullOrEmpty(walletAddress))
+				await _wallet.Connect();
+			else
+				await _wallet.Connect(walletAddress);
 			PrintInConsole("Connected");
 		}
 

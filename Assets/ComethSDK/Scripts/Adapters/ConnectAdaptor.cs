@@ -8,6 +8,7 @@ using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Tools.Signers.Interfaces;
 using ComethSDK.Scripts.Types;
+using JetBrains.Annotations;
 using Nethereum.Signer;
 using UnityEngine;
 
@@ -40,7 +41,7 @@ namespace ComethSDK.Scripts.Adapters
 
 		public string ChainId { get; private set; }
 
-		public async Task Connect(string burnerAddress)
+		public async Task Connect([CanBeNull] string burnerAddress = "")
 		{
 			if (!string.IsNullOrEmpty(burnerAddress))
 			{
