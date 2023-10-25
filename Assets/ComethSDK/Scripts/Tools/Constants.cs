@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 using UnityEngine;
 
@@ -23,7 +24,7 @@ namespace ComethSDK.Scripts.Tools
 
 		public static readonly BigInteger BLOCK_EVENT_GAP = -500;
 		public static readonly BigInteger DEFAULT_BASE_GAS = 80000;
-		public static readonly double DEFAULT_REWARD_PERCENTILE = 80;
+		public static readonly decimal DEFAULT_REWARD_PERCENTILE = 80;
 
 
 		public static readonly Dictionary<Network, NetworkData> Networks = new()
@@ -58,15 +59,6 @@ namespace ComethSDK.Scripts.Tools
 
 			Debug.LogError("No network found for chainId: " + chainId);
 			return null;
-		}
-
-		public static bool IsNetworkSupported(string chainId)
-		{
-			foreach (var network in Networks.Values)
-				if (network.ChainId == chainId)
-					return true;
-
-			return false;
 		}
 
 		public class NetworkData

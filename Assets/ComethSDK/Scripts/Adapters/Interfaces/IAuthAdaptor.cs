@@ -9,10 +9,11 @@ namespace ComethSDK.Scripts.Adapters.Interfaces
 	{
 		public string ChainId { get; }
 
-		public Task Connect([CanBeNull] string walletAddress);
+		public Task Connect([CanBeNull] string walletAddress = "");
 		public Task Logout();
 		public string GetAccount();
 		public ISignerBase GetSigner();
+		public Task<string> GetWalletAddress();
 		public UserInfos GetUserInfos();
 	}
 }

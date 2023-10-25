@@ -1,7 +1,7 @@
 ﻿using ComethSDK.Scripts.Adapters;
 using ComethSDK.Scripts.Core;
+using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
-using ComethSDK.Scripts.Types;
 using Nethereum.Web3;
 using TMPro;
 using UnityEngine;
@@ -28,7 +28,10 @@ namespace ComethSDK.Examples.Scripts
 		public async void Connect()
 		{
 			PrintInConsole("Connecting...");
-			await _wallet.Connect(walletAddress);
+			if(string.IsNullOrEmpty(walletAddress))
+				await _wallet.Connect();
+			else
+				await _wallet.Connect(walletAddress);
 			PrintInConsole("Connected");
 		}
 
@@ -133,7 +136,7 @@ namespace ComethSDK.Examples.Scripts
 			var web3 = new Web3(Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl);
 			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
 
-			var gas = await _wallet.CalculateMaxFees(to, value, data, nonce);
+			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, web3);
 			PrintInConsole("Estimated max gas: " + gas);
 		}
 
@@ -152,12 +155,6 @@ namespace ComethSDK.Examples.Scripts
 		private void PrintInConsole(string str)
 		{
 			console.text += str + "\n";
-		}
-
-		private void PrintUserInfosInConsole(UserInfos userInfos)
-		{
-			PrintInConsole("walletAddress: " + userInfos.walletAddress);
-			PrintInConsole("ownerAddress: " + userInfos.ownerAddress);
 		}
 	}
 }

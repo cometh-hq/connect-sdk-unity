@@ -30,12 +30,11 @@ namespace ComethSDK.Scripts.Adapters
 			if (string.IsNullOrEmpty(jwtToken) || string.IsNullOrEmpty(apiKey) || chainId == 0 ||
 			    string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(rpcUrl) || string.IsNullOrEmpty(baseUrl))
 				Debug.LogError("Serialized fields empty");
-
+			
+			if (!Utils.IsNetworkSupported(chainId.ToString())) throw new Exception("This network is not supported");
 			ChainId = chainId.ToString();
+			
 			_api = new API(apiKey, chainId);
-
-
-			Debug.Log("here");
 		}
 
 		public string ChainId { get; private set; }
@@ -73,6 +72,11 @@ namespace ComethSDK.Scripts.Adapters
 			if (_signer == null) throw new Exception("No signer instance found");
 
 			return _signer;
+		}
+
+		public Task<string> GetWalletAddress()
+		{
+			throw new NotImplementedException();
 		}
 
 		public UserInfos GetUserInfos()

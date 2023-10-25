@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ComethSDK.Scripts.Adapters.Interfaces;
 using ComethSDK.Scripts.HTTP;
 using ComethSDK.Scripts.HTTP.Responses;
-using ComethSDK.Scripts.Interfaces;
+using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
@@ -14,9 +14,7 @@ using JetBrains.Annotations;
 using Nethereum.ABI.EIP712;
 using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
-using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
-using Nethereum.RPC.Eth.Transactions;
 using Nethereum.Signer;
 using Nethereum.Siwe.Core;
 using Nethereum.Web3;
@@ -31,8 +29,6 @@ namespace ComethSDK.Scripts.Core
 		private readonly IAuthAdaptor _authAdaptor;
 		private readonly string _chainId;
 		private readonly Uri _uri = new("https://api.connect.cometh.io");
-		private readonly BigInteger BASE_GAS;
-		private readonly double REWARD_PERCENTILE;
 		private bool _connected;
 		private EventHandler _eventHandler;
 		private Constants.Network _network;
@@ -43,18 +39,15 @@ namespace ComethSDK.Scripts.Core
 
 		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey)
 		{
-			_authAdaptor = authAdaptor;
+			if (!Utils.IsNetworkSupported(authAdaptor.ChainId)) throw new Exception("This network is not supported");
 			_chainId = authAdaptor.ChainId;
 			_api = new API(apiKey, int.Parse(_chainId));
-			BASE_GAS = Constants.DEFAULT_BASE_GAS;
-			REWARD_PERCENTILE = Constants.DEFAULT_REWARD_PERCENTILE;
+			_authAdaptor = authAdaptor;
 		}
 
-		public async Task Connect([CanBeNull] string burnerAddress)
+		public async Task Connect([CanBeNull] string burnerAddress = "")
 		{
 			if (_authAdaptor == null) throw new Exception("No auth adaptor found");
-
-			if (!Constants.IsNetworkSupported(_chainId)) throw new Exception("This network is not supported");
 
 			_web3 = new Web3(Constants.GetNetworkByChainID(_chainId).RPCUrl);
 
@@ -213,7 +206,11 @@ namespace ComethSDK.Scripts.Core
 			var typedData = Utils.CreateSafeTxTypedData(_chainId, _walletAddress);
 			var safeTx = Utils.CreateSafeTx(to, value, data, nonce);
 
-			if (!ToSponsoredAddress(safeTx.to)) safeTx = await SetTransactionGas(safeTx);
+			if (!ToSponsoredAddress(safeTx.to))
+			{
+				safeTx = await GasService.SetTransactionGas(safeTx, _walletAddress, _web3);
+				await GasService.VerifyHasEnoughBalance(_walletAddress, to, value, data, nonce, _web3);
+			}
 
 			var txSignature = await SignTypedData(safeTx, typedData);
 
@@ -221,25 +218,6 @@ namespace ComethSDK.Scripts.Core
 			return await _api.RelayTransaction(new RelayTransactionType(
 				safeTx, txSignature, _walletAddress)
 			);
-		}
-
-		public async Task<GasEstimates> EstimateTransactionGas(ISafeTransactionDataPartial safeTxData)
-		{
-			var safeTxGas = safeTxData.safeTxGas;
-			safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to);
-
-			var gasPrice = safeTxData.gasPrice;
-			gasPrice += await CalculateGasPrice();
-
-			return new GasEstimates { safeTxGas = safeTxGas, baseGas = BASE_GAS, gasPrice = gasPrice };
-		}
-
-		public async Task<BigInteger> CalculateMaxFees(string to, string value, string data, int nonce)
-		{
-			var safeTx = Utils.CreateSafeTx(to, value, data, nonce);
-			safeTx = await SetTransactionGas(safeTx);
-			var totalGasCost = (safeTx.safeTxGas + safeTx.baseGas) * safeTx.gasPrice;
-			return totalGasCost + BigInteger.Parse(value);
 		}
 
 		/**
@@ -282,42 +260,6 @@ namespace ComethSDK.Scripts.Core
 			var index = _sponsoredAddresses.FindIndex(
 				sponsoredAddress => sponsoredAddress.targetAddress == to.ToLower());
 			return index >= 0;
-		}
-
-		private async Task<BigInteger> CalculateSafeTxGas(string data, string to)
-		{
-			var ethEstimateGas = new EthEstimateGas(_web3.Client);
-
-			var transactionInput = new CallInput
-			{
-				Data = data,
-				To = to,
-				From = _walletAddress
-			};
-			return await ethEstimateGas.SendRequestAsync(transactionInput);
-		}
-
-		private async Task<BigInteger> CalculateGasPrice()
-		{
-			var ethFeeHistory = await _web3.Eth.FeeHistory.SendRequestAsync(
-				new HexBigInteger(1),
-				new BlockParameter(),
-				new[] { REWARD_PERCENTILE });
-
-			var reward = ethFeeHistory.Reward[0][0].Value;
-			var baseFee = ethFeeHistory.BaseFeePerGas[0].Value;
-
-			return reward + baseFee + (reward + baseFee) / 10;
-		}
-
-		private async Task<SafeTx> SetTransactionGas(SafeTx safeTxDataTyped)
-		{
-			var gasEstimates = await EstimateTransactionGas(safeTxDataTyped);
-			safeTxDataTyped.safeTxGas = gasEstimates.safeTxGas;
-			safeTxDataTyped.baseGas = gasEstimates.baseGas;
-			safeTxDataTyped.gasPrice = gasEstimates.gasPrice;
-
-			return safeTxDataTyped;
 		}
 	}
 }

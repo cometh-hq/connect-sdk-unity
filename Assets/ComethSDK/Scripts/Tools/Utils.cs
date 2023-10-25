@@ -96,5 +96,14 @@ namespace ComethSDK.Scripts.Tools
 			var result = await function.CallAsync<int>();
 			return result;
 		}
+		
+		public static bool IsNetworkSupported(string chainId)
+		{
+			foreach (var network in Constants.Networks.Values)
+				if (network.ChainId == chainId)
+					return true;
+
+			return false;
+		}
 	}
 }

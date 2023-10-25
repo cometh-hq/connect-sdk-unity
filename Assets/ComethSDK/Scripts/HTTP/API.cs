@@ -8,6 +8,7 @@ using ComethSDK.Scripts.HTTP.Responses;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
+using Microsoft.Extensions.Logging.Abstractions;
 using Nethereum.ABI.EIP712;
 using Nethereum.Siwe.Core;
 using Newtonsoft.Json;
@@ -230,6 +231,30 @@ namespace ComethSDK.Scripts.HTTP
 			Debug.Log(contentReceived);
 		}
 
+		public async Task<string> InitWallet(string ownerAddress)
+		{
+			const string requestUri = "/wallets/init";
+			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+
+			var body = new InitWalletForUserIDBody
+			{
+				ownerAddress = ownerAddress
+			};
+			var json = JsonConvert.SerializeObject(body);
+			var content = new StringContent(json, Encoding.UTF8, "application/json");
+			request.Content = content;
+
+			var response = await api.SendAsync(request);
+			var contentReceived = response.Content.ReadAsStringAsync().Result;
+			
+			var initWalletResponse = JsonConvert.DeserializeObject<InitWalletResponse>(contentReceived);
+
+			if(initWalletResponse is { success: true }) return initWalletResponse.walletAddress;
+
+			Debug.LogError("Error in InitWallet");
+			return null;
+		}
+
 		public async Task<string> GetNonce(string walletAddress)
 		{
 			var response = await api.GetAsync($"/wallets/{walletAddress}/connection-nonce");
@@ -284,6 +309,19 @@ namespace ComethSDK.Scripts.HTTP
 			if (getWalletInfosResponse is { success: true }) return getWalletInfosResponse.walletInfos;
 
 			Debug.LogError("Error in GetWalletInfos");
+			return null;
+		}
+
+		public async Task<NewSignerRequestBody[]> GetNewSignerRequests(string walletAddress)
+		{
+			var response = await api.GetAsync($"/new-signer-request/{walletAddress}");
+			var result = response.Content.ReadAsStringAsync().Result;
+
+			var getNewSignerRequestsResponse = JsonConvert.DeserializeObject<GetNewSignerRequestsResponse>(result);
+
+			if (getNewSignerRequestsResponse is { success: true }) return getNewSignerRequestsResponse.signerRequests;
+
+			Debug.LogError("Error in GetNewSignerRequests");
 			return null;
 		}
 	}
