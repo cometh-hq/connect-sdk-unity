@@ -26,7 +26,7 @@ To see usage of the SDK open the script: **Examples/Scripts/TestConnectWallet.cs
 
 ```C#
 [SerializeField] private ConnectAdaptor authAdapter; //Set ChainId in inspector
-private const string API_KEY = "my_api_key";
+[SerializeField] private const string API_KEY = "my_api_key"; //Set API_KEY in inspector
 private ComethWallet _wallet;
 
 private void Start()
@@ -83,7 +83,7 @@ var transactionReceipt = await _wallet.Wait(safeTxHash);
 ### Sign Message
 
 ```C#
-var messageSigned = _wallet.SignMessage("Hello World!");
+var messageSigned = await _wallet.SignMessage("Hello World!");
 ```
 
 Sign the given message using the EOA, owner of the smart wallet.
