@@ -133,10 +133,11 @@ namespace ComethSDK.Examples.Scripts
 
 		private async void EstimateGasAndShow(string to, string value, string data)
 		{
-			var web3 = new Web3(Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl);
+			var provider = Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl;
+			var web3 = new Web3(provider);
 			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
 
-			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, web3);
+			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, provider);
 			PrintInConsole("Estimated max gas: " + gas);
 		}
 

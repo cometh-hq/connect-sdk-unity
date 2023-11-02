@@ -36,6 +36,7 @@ namespace ComethSDK.Scripts.Core
 		private List<SponsoredAddressResponse.SponsoredAddress> _sponsoredAddresses = new();
 		private string _walletAddress;
 		private Web3 _web3;
+		private string _provider;
 
 		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey)
 		{
@@ -48,8 +49,9 @@ namespace ComethSDK.Scripts.Core
 		public async Task Connect([CanBeNull] string burnerAddress = "")
 		{
 			if (_authAdaptor == null) throw new Exception("No auth adaptor found");
-
-			_web3 = new Web3(Constants.GetNetworkByChainID(_chainId).RPCUrl);
+			
+			_provider = Constants.GetNetworkByChainID(_chainId).RPCUrl;
+			_web3 = new Web3(_provider);
 
 			await _authAdaptor.Connect(burnerAddress);
 
@@ -208,8 +210,8 @@ namespace ComethSDK.Scripts.Core
 
 			if (!ToSponsoredAddress(safeTx.to))
 			{
-				safeTx = await GasService.SetTransactionGas(safeTx, _walletAddress, _web3);
-				await GasService.VerifyHasEnoughBalance(_walletAddress, to, value, data, nonce, _web3);
+				safeTx = await GasService.SetTransactionGas(safeTx, _walletAddress, _provider);
+				await GasService.VerifyHasEnoughBalance(_walletAddress, to, value, data, nonce, _provider);
 			}
 
 			var txSignature = await SignTypedData(safeTx, typedData);

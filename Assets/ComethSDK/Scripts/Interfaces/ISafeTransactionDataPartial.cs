@@ -5,7 +5,6 @@ namespace ComethSDK.Scripts.Interfaces
 {
 	public interface ISafeTransactionDataPartial : IMetaTransactionData
 	{
-		OperationType? operation { get; }
 		BigInteger safeTxGas { get; }
 		BigInteger baseGas { get; }
 		BigInteger gasPrice { get; }
