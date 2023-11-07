@@ -38,7 +38,7 @@ namespace ComethSDK.Scripts.Core
 		private List<SponsoredAddressResponse.SponsoredAddress> _sponsoredAddresses = new();
 		private string _walletAddress;
 		private Web3 _web3;
-		
+		private BigInteger BASE_GAS = Constants.DEFAULT_BASE_GAS;
 		private ProjectParams _projectParams;
 
 		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey)
@@ -213,8 +213,8 @@ namespace ComethSDK.Scripts.Core
 
 			if (!ToSponsoredAddress(safeTx.to))
 			{
-				safeTx = await GasService.SetTransactionGas(safeTx, _walletAddress, _web3);
-				await GasService.VerifyHasEnoughBalance(_walletAddress, to, value, data, nonce, _web3);
+				safeTx = await GasService.SetTransactionGas(safeTx, _walletAddress, BASE_GAS, _web3);
+				await GasService.VerifyHasEnoughBalance(_walletAddress, safeTx.safeTxGas, safeTx.gasPrice, safeTx.baseGas, safeTx.value, _web3);
 			}
 
 			var txSignature = await SignTypedData(safeTx, typedData);
@@ -240,7 +240,7 @@ namespace ComethSDK.Scripts.Core
 			if(_projectParams == null) throw new Exception("Project params not found");
 			
 			var nonce = await Utils.GetNonce(_web3, _walletAddress);
-			var data = EncodeMulti();
+			var data = "";//EncodeMulti();
 			var safeTx = Utils.CreateSafeTx(_projectParams.MultiSendContractAddress, "0", data, nonce, OperationType.DELEGATE_CALL);
 			var dataType = Utils.CreateSafeTxTypedData(_chainId, _walletAddress);
 
@@ -248,9 +248,13 @@ namespace ComethSDK.Scripts.Core
 			{
 				var safeTxGas = await GasService.EstimateTransactionGas(
 					safeTxData, _walletAddress, _web3);
-				var txValue = SafeService.GetTransactionsTotalValue(safeTxData);
 				var gasPrice = await GasService.GetGasPrice(_web3);
-				await GasService.VerifyHasEnoughBalance(_walletAddress, _projectParams.MultiSendContractAddress, txValue, data, nonce, _web3);
+				var txValue = SafeService.GetTransactionsTotalValue(safeTxData);
+				await GasService.VerifyHasEnoughBalance(_walletAddress, safeTxGas, gasPrice, BASE_GAS, txValue, _web3);
+				
+				safeTx.safeTxGas += safeTxGas;
+				safeTx.baseGas = BASE_GAS;
+				safeTx.gasPrice += gasPrice;
 			}
 			
 			return await SignAndSendTransaction(safeTx, dataType);
