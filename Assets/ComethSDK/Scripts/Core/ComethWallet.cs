@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ComethSDK.Scripts.Adapters.Interfaces;
 using ComethSDK.Scripts.HTTP;
 using ComethSDK.Scripts.HTTP.Responses;
+using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Types;
@@ -13,6 +14,7 @@ using ComethSDK.Scripts.Types.MessageTypes;
 using JetBrains.Annotations;
 using Nethereum.ABI.EIP712;
 using Nethereum.Contracts;
+using Nethereum.GnosisSafe;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Signer;
@@ -36,6 +38,8 @@ namespace ComethSDK.Scripts.Core
 		private List<SponsoredAddressResponse.SponsoredAddress> _sponsoredAddresses = new();
 		private string _walletAddress;
 		private Web3 _web3;
+		
+		private ProjectParams _projectParams;
 
 		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey)
 		{
@@ -52,7 +56,8 @@ namespace ComethSDK.Scripts.Core
 			_web3 = new Web3(Constants.GetNetworkByChainID(_chainId).RPCUrl);
 
 			await _authAdaptor.Connect(burnerAddress);
-
+			
+			_projectParams = await _api.GetProjectParams();
 			var account = _authAdaptor.GetAccount();
 			var predictedWalletAddress = await _api.GetWalletAddress(account);
 			_walletAddress = predictedWalletAddress ?? throw new Exception("Error while getting wallet address");
@@ -219,6 +224,46 @@ namespace ComethSDK.Scripts.Core
 				safeTx, txSignature, _walletAddress)
 			);
 		}
+		
+		//TODO: should be able to combine safeTx and DataType together
+		//TODO: change return tpe to SendTransactionResponse
+		public async Task<string> SendBatchTransactions(ISafeTransactionDataPartial[] safeTxData)
+		{
+			if(safeTxData.Length == 0) throw new Exception("Empty array provided, no transaction to send");
+			
+			if (!_connected)
+			{
+				Debug.Log("Please Login First");
+				return "";
+			}
+			
+			if(_projectParams == null) throw new Exception("Project params not found");
+			
+			var nonce = await Utils.GetNonce(_web3, _walletAddress);
+			var data = EncodeMulti();
+			var safeTx = Utils.CreateSafeTx(_projectParams.MultiSendContractAddress, "0", data, nonce, OperationType.DELEGATE_CALL);
+			var dataType = Utils.CreateSafeTxTypedData(_chainId, _walletAddress);
+
+			if (!await IsSponsoredTransaction(safeTxData))
+			{
+				var safeTxGas = await GasService.EstimateTransactionGas(
+					safeTxData, _walletAddress, _web3);
+				var txValue = SafeService.GetTransactionsTotalValue(safeTxData);
+				var gasPrice = await GasService.GetGasPrice(_web3);
+				await GasService.VerifyHasEnoughBalance(_walletAddress, _projectParams.MultiSendContractAddress, txValue, data, nonce, _web3);
+			}
+			
+			return await SignAndSendTransaction(safeTx, dataType);
+		}
+
+		public async Task<string> SignAndSendTransaction(SafeTx safeTx, TypedData<DomainWithChainIdAndVerifyingContract> typedData)
+		{
+			var txSignature = await SignTypedData(safeTx, typedData);
+			
+			return await _api.RelayTransaction(new RelayTransactionType(
+					safeTx, txSignature, _walletAddress)
+			);
+		}
 
 		/**
 		 * Private Methods
@@ -252,6 +297,22 @@ namespace ComethSDK.Scripts.Core
 
 			signature = signer.SignTypedData(message, typedData);
 			return signature;
+		}
+		
+		private async Task<bool> IsSponsoredTransaction(ISafeTransactionDataPartial[] safeTxDataArray)
+		{
+			foreach (var safeTxData in safeTxDataArray)
+			{
+				var functionSelector = SafeService.GetFunctionSelector(safeTxData);
+				var sponsoredAddress = ToSponsoredAddress(safeTxData.to);
+
+				if (!sponsoredAddress && functionSelector != Constants.ADD_OWNER_FUNCTION_SELECTOR)
+				{
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		private bool ToSponsoredAddress(string to)

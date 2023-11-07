@@ -38,22 +38,33 @@ namespace ComethSDK.Scripts.Services
 			if (walletBalance.Value < totalGasCost)
 				throw new Exception("Not enough balance to send this value and pay for gas");
 		}
+		
+		public static async Task VerifyHasEnoughBalance2(string walletAddres, BigInteger safeTxGas, BigInteger gasPrice, string data, int nonce,
+			IWeb3 web3)
+		{
+			var walletBalance = await web3.Eth.GetBalance.SendRequestAsync(from);
+			var totalGasCost = await CalculateMaxFees(from, to, value, data, nonce, web3);
+			if (walletBalance.Value < totalGasCost)
+				throw new Exception("Not enough balance to send this value and pay for gas");
+		}
 
-		public static async Task<GasEstimates> EstimateTransactionGas(ISafeTransactionDataPartial safeTxData,
+		public static async Task<GasEstimates> EstimateTransactionGas(ISafeTransactionDataPartial[] safeTxDataArray,
 			string from, IWeb3 web3)
 		{
-			var safeTxGas = safeTxData.safeTxGas;
-			safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to, from, web3);
-
-			var gasPrice = safeTxData.gasPrice;
-			gasPrice += await GetGasPrice(web3);
-
-			return new GasEstimates { safeTxGas = safeTxGas, baseGas = BASE_GAS, gasPrice = gasPrice };
+			var safeTxGas = BigInteger.Zero;
+			
+			foreach (var safeTxData in safeTxDataArray)
+			{
+				safeTxGas = safeTxData.safeTxGas;
+				safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to, from, web3);
+			}
+			
+			return new GasEstimates { safeTxGas = safeTxGas, baseGas = BASE_GAS };
 		}
 
 		public static async Task<SafeTx> SetTransactionGas(SafeTx safeTxDataTyped, string from, IWeb3 web3)
 		{
-			var gasEstimates = await EstimateTransactionGas(safeTxDataTyped, from, web3);
+			var gasEstimates = await EstimateTransactionGas(new ISafeTransactionDataPartial[]{safeTxDataTyped}, from, web3);
 			safeTxDataTyped.safeTxGas = gasEstimates.safeTxGas;
 			safeTxDataTyped.baseGas = gasEstimates.baseGas;
 			safeTxDataTyped.gasPrice = gasEstimates.gasPrice;

@@ -2,7 +2,9 @@
 using System.Numerics;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.Interfaces;
+using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
+using JetBrains.Annotations;
 using Nethereum.ABI.EIP712;
 using Nethereum.Web3;
 
@@ -10,14 +12,14 @@ namespace ComethSDK.Scripts.Tools
 {
 	public static class Utils
 	{
-		public static SafeTx CreateSafeTx(string to, string value, string data, int nonce)
+		public static SafeTx CreateSafeTx(string to, string value, string data, int nonce, OperationType operationType = 0)
 		{
 			var safeTx = new SafeTx
 			{
 				to = to,
 				value = value,
 				data = data,
-				operation = 0,
+				operation = operationType,
 				safeTxGas = new BigInteger(0),
 				baseGas = new BigInteger(0),
 				gasPrice = new BigInteger(0),

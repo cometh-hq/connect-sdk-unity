@@ -24,7 +24,8 @@ namespace ComethSDK.Scripts.Tools
 
 		public static readonly BigInteger BLOCK_EVENT_GAP = -500;
 		public static readonly BigInteger DEFAULT_BASE_GAS = 80000;
-		public static readonly decimal DEFAULT_REWARD_PERCENTILE = 80;
+		public const decimal DEFAULT_REWARD_PERCENTILE = 80;
+		public const string ADD_OWNER_FUNCTION_SELECTOR = "0x0d582f13";
 
 
 		public static readonly Dictionary<Network, NetworkData> Networks = new()

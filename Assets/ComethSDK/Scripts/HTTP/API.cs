@@ -324,5 +324,18 @@ namespace ComethSDK.Scripts.HTTP
 			Debug.LogError("Error in GetNewSignerRequests");
 			return null;
 		}
+
+		public async Task<ProjectParams> GetProjectParams()
+		{
+			var response = await api.GetAsync($"/project/params");
+			var result = response.Content.ReadAsStringAsync().Result;
+
+			var getNewSignerRequestsResponse = JsonConvert.DeserializeObject<GetProjectParamsResponse>(result);
+
+			if (getNewSignerRequestsResponse is { success: true }) return getNewSignerRequestsResponse.projectParams;
+
+			Debug.LogError("Error in GetProjectParams");
+			return null;
+		}
 	}
 }
