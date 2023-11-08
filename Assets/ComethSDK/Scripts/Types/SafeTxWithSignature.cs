@@ -1,4 +1,6 @@
-﻿namespace ComethSDK.Scripts.Types
+﻿using ComethSDK.Scripts.Enums;
+
+namespace ComethSDK.Scripts.Types
 {
 	public class SafeTxWithSignature
 	{

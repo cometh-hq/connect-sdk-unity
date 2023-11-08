@@ -3,7 +3,6 @@ using System.Numerics;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Tools;
-using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
 using Nethereum.Hex.HexTypes;
 using Nethereum.RPC.Eth.DTOs;
@@ -46,14 +45,13 @@ namespace ComethSDK.Scripts.Services
 			return BigInteger.Multiply(totalGasCost, gasPrice);
 		}
 
-		public static async Task<BigInteger> EstimateTransactionGas(ISafeTransactionDataPartial[] safeTxDataArray,
+		public static async Task<BigInteger> EstimateTransactionGas(IMetaTransactionData[] safeTxDataArray,
 			string from, IWeb3 web3)
 		{
 			var safeTxGas = BigInteger.Zero;
 			
 			foreach (var safeTxData in safeTxDataArray)
 			{
-				safeTxGas = safeTxData.safeTxGas;
 				safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to, from, web3);
 			}
 			
@@ -62,7 +60,7 @@ namespace ComethSDK.Scripts.Services
 
 		public static async Task<SafeTx> SetTransactionGas(SafeTx safeTxDataTyped, string from, BigInteger baseGas, IWeb3 web3)
 		{
-			safeTxDataTyped.safeTxGas = await EstimateTransactionGas(new ISafeTransactionDataPartial[]{safeTxDataTyped}, from, web3);
+			safeTxDataTyped.safeTxGas = await EstimateTransactionGas(new IMetaTransactionData[]{safeTxDataTyped}, from, web3);
 			safeTxDataTyped.baseGas = baseGas;
 			safeTxDataTyped.gasPrice = await GetGasPrice(web3);
 

@@ -78,7 +78,7 @@ namespace ComethSDK.Examples.Scripts
 			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authWithJwtAdaptor.ChainId);
 		}
 
-		public override async void GetUserInfo()
+		public override void GetUserInfo()
 		{
 			var userInfos = _wallet.GetUserInfos();
 			PrintUserInfosInConsole(userInfos);

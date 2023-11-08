@@ -8,7 +8,6 @@ using ComethSDK.Scripts.HTTP.Responses;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
-using Microsoft.Extensions.Logging.Abstractions;
 using Nethereum.ABI.EIP712;
 using Nethereum.Siwe.Core;
 using Newtonsoft.Json;
@@ -46,7 +45,7 @@ namespace ComethSDK.Scripts.HTTP
 		{
 			var safeTxDataTypedWithSignature = new SafeTxWithSignature
 			{
-				to = relayTransactionType.safeTxData.to.ToLower(),
+				to = relayTransactionType.safeTxData.to,
 				value = relayTransactionType.safeTxData.value,
 				data = relayTransactionType.safeTxData.data,
 				operation = relayTransactionType.safeTxData.operation,
@@ -246,10 +245,10 @@ namespace ComethSDK.Scripts.HTTP
 
 			var response = await api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
-			
+
 			var initWalletResponse = JsonConvert.DeserializeObject<InitWalletResponse>(contentReceived);
 
-			if(initWalletResponse is { success: true }) return initWalletResponse.walletAddress;
+			if (initWalletResponse is { success: true }) return initWalletResponse.walletAddress;
 
 			Debug.LogError("Error in InitWallet");
 			return null;
@@ -327,7 +326,7 @@ namespace ComethSDK.Scripts.HTTP
 
 		public async Task<ProjectParams> GetProjectParams()
 		{
-			var response = await api.GetAsync($"/project/params");
+			var response = await api.GetAsync("/project/params");
 			var result = response.Content.ReadAsStringAsync().Result;
 
 			var getNewSignerRequestsResponse = JsonConvert.DeserializeObject<GetProjectParamsResponse>(result);

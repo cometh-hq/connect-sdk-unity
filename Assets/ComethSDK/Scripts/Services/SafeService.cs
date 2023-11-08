@@ -43,7 +43,7 @@ namespace ComethSDK.Scripts.Services
 
 		public static string GetFunctionSelector(IMetaTransactionData metaTransactionData)
 		{
-			return metaTransactionData.data.Substring(0, 10);
+			return metaTransactionData.data[..10];
 		}
 
 		public static string GetTransactionsTotalValue(IMetaTransactionData[] safeTxData)
