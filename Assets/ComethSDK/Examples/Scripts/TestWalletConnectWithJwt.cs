@@ -78,7 +78,7 @@ namespace ComethSDK.Examples.Scripts
 			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authWithJwtAdaptor.ChainId);
 		}
 
-		public override async void GetUserInfo()
+		public override void GetUserInfo()
 		{
 			var userInfos = _wallet.GetUserInfos();
 			PrintUserInfosInConsole(userInfos);
@@ -110,7 +110,8 @@ namespace ComethSDK.Examples.Scripts
 			var provider = Constants.GetNetworkByChainID(authWithJwtAdaptor.ChainId).RPCUrl;
 			var web3 = new Web3(provider);
 			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
-			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, provider);
+			var baseGas = Constants.DEFAULT_BASE_GAS;
+			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, baseGas, web3);
 			PrintInConsole("Estimated max gas: " + gas);
 		}
 

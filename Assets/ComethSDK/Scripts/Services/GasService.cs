@@ -3,7 +3,6 @@ using System.Numerics;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Tools;
-using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.Decoders;
 using Nethereum.Contracts;
@@ -37,7 +36,7 @@ namespace ComethSDK.Scripts.Services
 
 			return reward + baseFee + (reward + baseFee) / 10;
 		}
-
+		
 		public static async Task VerifyHasEnoughBalance(string from, string to, string value, string data, int nonce,
 			string provider)
 		{
@@ -47,35 +46,52 @@ namespace ComethSDK.Scripts.Services
 			if (walletBalance.Value < totalGasCost)
 				throw new Exception("Not enough balance to send this value and pay for gas");
 		}
-
-		public static async Task<GasEstimates> EstimateTransactionGas(ISafeTransactionDataPartial safeTxData,
-			string from, string provider)
+		
+		public static async Task VerifyHasEnoughBalance(string walletAddress, BigInteger safeTxGas, BigInteger gasPrice, BigInteger baseGas, string txValue,
+			IWeb3 web3)
 		{
-			var safeTxGas = safeTxData.safeTxGas;
-			safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to, from, provider);
+			var walletBalance = await web3.Eth.GetBalance.SendRequestAsync(walletAddress);
+			var totalGasCost = GetTotalGasCost(safeTxGas, baseGas, gasPrice);
+			var totalValue = BigInteger.Parse(txValue);
+			if (walletBalance.Value < BigInteger.Add(totalGasCost, totalValue))
+				throw new Exception("Not enough balance to send this value and pay for gas");
+		}
 
-			var gasPrice = safeTxData.gasPrice;
-			gasPrice += await GetGasPrice(provider);
-
-			return new GasEstimates { safeTxGas = safeTxGas, baseGas = BASE_GAS, gasPrice = gasPrice };
+		private static BigInteger GetTotalGasCost(BigInteger safeTxGas, BigInteger baseGas, BigInteger gasPrice)
+		{
+			var totalGasCost = BigInteger.Add(safeTxGas, baseGas);
+			return BigInteger.Multiply(totalGasCost, gasPrice);
 		}
 		
-
-		public static async Task<SafeTx> SetTransactionGas(SafeTx safeTxDataTyped, string from, string provider)
+		
+		public static async Task<BigInteger> EstimateTransactionGas(IMetaTransactionData[] safeTxDataArray,
+			string from, IWeb3 web3)
 		{
-			var gasEstimates = await EstimateTransactionGas(safeTxDataTyped, from, provider);
-			safeTxDataTyped.safeTxGas = gasEstimates.safeTxGas;
-			safeTxDataTyped.baseGas = gasEstimates.baseGas;
-			safeTxDataTyped.gasPrice = gasEstimates.gasPrice;
+			var safeTxGas = BigInteger.Zero;
+			
+			foreach (var safeTxData in safeTxDataArray)
+			{
+				safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to, from, web3);
+			}
+			
+			return safeTxGas;
+		}
+
+		public static async Task<SafeTx> SetTransactionGas(SafeTx safeTxDataTyped, string from, BigInteger baseGas, IWeb3 web3)
+		{
+			safeTxDataTyped.safeTxGas = await EstimateTransactionGas(new IMetaTransactionData[]{safeTxDataTyped}, from, web3);
+			safeTxDataTyped.baseGas = baseGas;
+			safeTxDataTyped.gasPrice = await GetGasPrice(web3);
 
 			return safeTxDataTyped;
 		}
 
 		public static async Task<BigInteger> CalculateMaxFees(string from, string to, string value, string data,
-			int nonce, string provider)
+			int nonce, BigInteger baseGas, IWeb3 web3)
 		{
 			var safeTx = Utils.CreateSafeTx(to, value, data, nonce);
-			safeTx = await SetTransactionGas(safeTx, from, provider);
+			safeTx = await SetTransactionGas(safeTx, from, baseGas, web3);
+
 			var totalGasCost = (safeTx.safeTxGas + safeTx.baseGas) * safeTx.gasPrice;
 			return totalGasCost + BigInteger.Parse(value);
 		}
