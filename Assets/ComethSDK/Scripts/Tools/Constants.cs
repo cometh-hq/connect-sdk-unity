@@ -26,6 +26,9 @@ namespace ComethSDK.Scripts.Tools
 		public static readonly BigInteger DEFAULT_BASE_GAS = 80000;
 		public static readonly decimal DEFAULT_REWARD_PERCENTILE = 80;
 
+		public static readonly string MUMBAI_SAFE_SINGLETON_ADDRESS = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E";
+		public static readonly string MUMBAI_SAFE_TX_ACCESSOR_ADDRESS = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da";
+
 
 		public static readonly Dictionary<Network, NetworkData> Networks = new()
 		{

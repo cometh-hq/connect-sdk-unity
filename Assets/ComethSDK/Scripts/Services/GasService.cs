@@ -5,10 +5,17 @@ using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
+using Nethereum.ABI.Decoders;
+using Nethereum.Contracts;
+using Nethereum.GnosisSafe;
+using Nethereum.GnosisSafe.ContractDefinition;
+using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Hex.HexTypes;
+using Nethereum.JsonRpc.Client;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.RPC.Eth.Transactions;
 using Nethereum.Web3;
+using UnityEngine;
 
 namespace ComethSDK.Scripts.Services
 {
@@ -73,37 +80,69 @@ namespace ComethSDK.Scripts.Services
 			return totalGasCost + BigInteger.Parse(value);
 		}
 
-		public static async Task<string> EstimateSafeTxGasWithSimulate( string walletAddress, IMetaTransactionData safeTxData,
+		public static async Task<string> EstimateSafeTxGasWithSimulate(string walletAddress, IMetaTransactionData safeTxData,
 		string multisendAddress, string singletonAddress, string simulateTxAcessorAddress, string provider) //TODO: transaction data into a n array to handle multisend
 		{
 			IMetaTransactionData transaction;
 			
 			//add multisend later
-
+			
 			transaction = safeTxData;
 			transaction.operation = 0;
 			
-			var isSafeDeployed = await SafeService.IsDeployed(walletAddress, provider); //TODO: this is not implemented
+			//var isSafeDeployed = await SafeService.IsDeployed(walletAddress, provider); //TODO: this is not implemented
 			
 			var simulateTxContract = SimulateTxAcessorService.GetContract(simulateTxAcessorAddress, provider);
 			var simulateFunction = simulateTxContract.GetFunction("simulate");
-			var transactionDataToEstimate = simulateFunction.GetData(transaction);
+			
+			object[] simulateFunctionInputs = {transaction.to, transaction.value, transaction.data.HexToByteArray(), transaction.operation};
+			var transactionDataToEstimate = simulateFunction.GetData(simulateFunctionInputs);
 			
 			// if the Safe is not deployed we can use the singleton address to simulate
-			var to = isSafeDeployed ? walletAddress : singletonAddress;
+			var to = singletonAddress;//isSafeDeployed ? walletAddress : singletonAddress;
 			
-			var safeFunctionToEstimate =  SafeService.EncodeFunctionData("simulateAndRevert", walletAddress, provider, transactionDataToEstimate);
+			var web3 = new Web3(provider);
+			var safeContract = web3.Eth.GetContract(Constants.SAFE_ABI, to);
+			var safeFunction = safeContract.GetFunction("simulateAndRevert");
+			object[] simulateAndRevertFunctionInputs = {simulateTxAcessorAddress, transactionDataToEstimate.HexToByteArray()};
+			var safeFunctionToEstimate = safeFunction.GetData(simulateAndRevertFunctionInputs);
 
+			var transactionToEstimateGas  = new CallInput
+			{
+				Data = safeFunctionToEstimate,
+				To = to,
+				Value = new HexBigInteger(0)
+			};
+			
 			try
 			{
-				var safeTxGas = await CalculateSafeTxGas(safeFunctionToEstimate, to, provider);
-				return AddExtraGasForSafety(safeTxGas);
+				var encodedResponse  = await safeFunction.CallRawAsync(transactionToEstimateGas );
+				Debug.Log("encodedResponse :"+ encodedResponse );
+
 			}
-			catch (Exception e)
+			catch (SmartContractCustomErrorRevertException smartContractCustomErrorRevertException)
 			{
-				Console.WriteLine(e);
-				throw;
+				Debug.Log("Revert Reason:"+ smartContractCustomErrorRevertException);
+				var safeTxGas  = DecodeSafeTxGas(smartContractCustomErrorRevertException.ExceptionEncodedData);
+				return AddExtraGasForSafety(BigInteger.Parse(safeTxGas));
 			}
+			catch (RpcResponseException revertResponseException)
+			{
+				Debug.Log("Revert Reason:"+ revertResponseException.RpcError.Message);
+			}
+			catch (RpcClientUnknownException e)
+			{
+				Debug.Log(e);
+			}
+			
+			return "";
+		}
+		
+		private static string DecodeSafeTxGas(string encodedSafeTxGas) {
+			Debug.Log("encodedSafeTxGasLenght:"+ encodedSafeTxGas.Length);
+			var gasHex = encodedSafeTxGas.Substring(184, 10);
+			var gasNum = Convert.ToUInt64(gasHex, 16);
+			return gasNum.ToString(); 
 		}
 
 		private static async Task<BigInteger> CalculateSafeTxGas(string data, string to, string from, string provider)

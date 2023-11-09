@@ -2,6 +2,7 @@
 using ComethSDK.Scripts.Core;
 using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
+using ComethSDK.Scripts.Types.MessageTypes;
 using Nethereum.Web3;
 using TMPro;
 using UnityEngine;
@@ -130,14 +131,35 @@ namespace ComethSDK.Examples.Scripts
 			var counterAmount = await counterFunction.CallAsync<int>(_wallet.GetAddress());
 			PrintInConsole("Query successful, Counter = " + counterAmount);
 		}
+		
+		public async void TestEstimateSafeTxGasWithSimulate()
+		{
+			var value = "0";
+			var data = "0x00";
+			var to = "0x6e13dA17777a7325DcCF7FAa2358Ef3Db6E452cE";
+
+			EstimateGasAndShowWithSimulate(to, value, data);
+		}
 
 		private async void EstimateGasAndShow(string to, string value, string data)
 		{
 			var provider = Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl;
 			var web3 = new Web3(provider);
 			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
-
 			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, provider);
+			PrintInConsole("Estimated max gas: " + gas);
+		}
+		
+		private async void EstimateGasAndShowWithSimulate(string to, string value, string data)
+		{
+			var provider = Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl;
+			var txData = new SafeTx
+			{
+				to = to,
+				value = value,
+				data = data
+			};
+			var gas = await GasService.EstimateSafeTxGasWithSimulate(walletAddress, txData, "", Constants.MUMBAI_SAFE_SINGLETON_ADDRESS, Constants.MUMBAI_SAFE_TX_ACCESSOR_ADDRESS, provider);
 			PrintInConsole("Estimated max gas: " + gas);
 		}
 
@@ -156,6 +178,7 @@ namespace ComethSDK.Examples.Scripts
 		private void PrintInConsole(string str)
 		{
 			console.text += str + "\n";
+			Debug.Log(str);
 		}
 	}
 }
