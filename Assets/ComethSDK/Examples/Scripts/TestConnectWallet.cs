@@ -1,7 +1,10 @@
-﻿using ComethSDK.Scripts.Adapters;
+﻿using ComethSDK.Examples.ContractDefinition;
+using ComethSDK.Scripts.Adapters;
 using ComethSDK.Scripts.Core;
 using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
+using ComethSDK.Scripts.Types;
+using Nethereum.Contracts.TransactionHandlers.MultiSend;
 using Nethereum.Web3;
 using TMPro;
 using UnityEngine;
@@ -25,31 +28,31 @@ namespace ComethSDK.Examples.Scripts
 				Debug.LogError("Please set the apiKey & authAdaptor serialised variables");
 		}
 
-		public async void Connect()
+		public override async void Connect()
 		{
 			PrintInConsole("Connecting...");
-			if(string.IsNullOrEmpty(walletAddress))
+			if (string.IsNullOrEmpty(walletAddress))
 				await _wallet.Connect();
 			else
 				await _wallet.Connect(walletAddress);
 			PrintInConsole("Connected");
 		}
 
-		public async void Disconnect()
+		public override async void Disconnect()
 		{
 			PrintInConsole("Disconnecting...");
 			await _wallet.Logout();
 			PrintInConsole("Disconnected");
 		}
 
-		public async void SignMessage()
+		public override async void SignMessage()
 		{
 			PrintInConsole("Signing message...");
 			var messageSigned = await _wallet.SignMessage("Hello World!");
 			PrintInConsole("Message signed: " + messageSigned);
 		}
 
-		public void CancelWait()
+		public override void CancelWait()
 		{
 			_wallet.CancelWaitingForEvent();
 		}
@@ -88,7 +91,7 @@ namespace ComethSDK.Examples.Scripts
 			PrintInConsole(address);
 		}
 
-		public async void TestCallToCount()
+		public override async void TestCallToCount()
 		{
 			const string
 				COUNTER_TEST_ADDRESS =
@@ -103,6 +106,58 @@ namespace ComethSDK.Examples.Scripts
 			PrintInConsole("Sending transaction...");
 			var safeTxHash = await _wallet.SendTransaction(COUNTER_TEST_ADDRESS, "0", data);
 			PrintInConsole("Safe transaction hash: " + safeTxHash);
+			PrintInConsole("Transaction sent, waiting for confirmation...");
+			var transactionReceipt = await _wallet.Wait(safeTxHash);
+
+			if (transactionReceipt != null)
+			{
+				PrintInConsole("Transaction confirmed, see it on the block explorer: " +
+				               transactionReceipt.TransactionHash);
+				SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authAdaptor.ChainId);
+			}
+			else
+			{
+				PrintInConsole("Issue with event, redirecting to wallet to see the transaction");
+				SeeWalletOnBlockExplorer(_wallet.GetAddress(), authAdaptor.ChainId);
+			}
+		}
+
+		public async void TestCallToCountBatch()
+		{
+			const string
+				COUNTER_TEST_ADDRESS =
+					"0x3633A1bE570fBD902D10aC6ADd65BB11FC914624"; //On polygon : 0x84ADD3fa2c2463C8cF2C95aD70e4b5F602332160";
+			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNTER_TEST_ADDRESS);
+			var countFunction = contract.GetFunction("count");
+			var data = countFunction.GetData();
+			var web3 = new Web3(Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl);
+			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
+			EstimateGasAndShow(COUNTER_TEST_ADDRESS, "0", data);
+
+			var dataArr = new[]
+			{
+				new MetaTransactionData
+				{
+					to = COUNTER_TEST_ADDRESS,
+					value = "0x00",
+					data = data
+				},
+				new MetaTransactionData
+				{
+					to = COUNTER_TEST_ADDRESS,
+					value = "0x00",
+					data = data
+				}
+			};
+
+			var dataArr2 = new MultiSendFunctionInput<CountFunction>[2];
+			var countFunction2 = new CountFunction();
+			dataArr2[0] = new MultiSendFunctionInput<CountFunction>(countFunction2, COUNTER_TEST_ADDRESS);
+			dataArr2[1] = new MultiSendFunctionInput<CountFunction>(countFunction2, COUNTER_TEST_ADDRESS);
+
+			PrintInConsole("Sending Batch transaction...");
+			var safeTxHash = await _wallet.SendBatchTransactions(dataArr);
+			PrintInConsole("Safe Transaction hash: " + safeTxHash);
 			PrintInConsole("Transaction sent, waiting for confirmation...");
 			var transactionReceipt = await _wallet.Wait(safeTxHash);
 
@@ -135,8 +190,8 @@ namespace ComethSDK.Examples.Scripts
 		{
 			var web3 = new Web3(Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl);
 			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
-
-			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, web3);
+			var baseGas = Constants.DEFAULT_BASE_GAS;
+			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, baseGas, web3);
 			PrintInConsole("Estimated max gas: " + gas);
 		}
 

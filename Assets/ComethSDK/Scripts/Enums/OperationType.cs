@@ -1,4 +1,4 @@
-﻿namespace ComethSDK.Scripts.Types
+﻿namespace ComethSDK.Scripts.Enums
 {
 	public enum OperationType
 	{

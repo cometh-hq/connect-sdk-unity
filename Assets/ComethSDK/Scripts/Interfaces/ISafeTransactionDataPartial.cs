@@ -1,5 +1,5 @@
 ﻿using System.Numerics;
-using ComethSDK.Scripts.Types;
+using ComethSDK.Scripts.Enums;
 
 namespace ComethSDK.Scripts.Interfaces
 {
