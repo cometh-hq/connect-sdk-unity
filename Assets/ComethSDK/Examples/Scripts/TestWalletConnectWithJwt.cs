@@ -29,7 +29,7 @@ namespace ComethSDK.Examples.Scripts
 		public override async void Connect()
 		{
 			PrintInConsole("Connecting...");
-			await _wallet.Connect("");
+			await _wallet.Connect();
 			PrintInConsole("Connected");
 		}
 
@@ -111,7 +111,8 @@ namespace ComethSDK.Examples.Scripts
 			var web3 = new Web3(provider);
 			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
 			var baseGas = Constants.DEFAULT_BASE_GAS;
-			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, baseGas, web3);
+			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, baseGas,
+				provider);
 			PrintInConsole("Estimated max gas: " + gas);
 		}
 

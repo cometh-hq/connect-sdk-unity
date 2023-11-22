@@ -1,11 +1,10 @@
-﻿using ComethSDK.Examples.ContractDefinition;
-using ComethSDK.Scripts.Adapters;
+﻿using ComethSDK.Scripts.Adapters;
 using ComethSDK.Scripts.Core;
+using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
-using ComethSDK.Scripts.Types.MessageTypes;
 using ComethSDK.Scripts.Types;
-using Nethereum.Contracts.TransactionHandlers.MultiSend;
+using ComethSDK.Scripts.Types.MessageTypes;
 using Nethereum.Web3;
 using TMPro;
 using UnityEngine;
@@ -86,6 +85,40 @@ namespace ComethSDK.Examples.Scripts
 			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authAdaptor.ChainId);
 		}
 
+		public async void SendBatchTestTransaction(string to)
+		{
+			if (to is "" or Constants.ZERO_ADDRESS)
+			{
+				Debug.LogError("Please enter a valid address");
+				return;
+			}
+
+			var dataArr = new[]
+			{
+				new MetaTransactionData
+				{
+					to = to,
+					value = "0",
+					data = "0x00000000"
+				},
+				new MetaTransactionData
+				{
+					to = to,
+					value = "0",
+					data = "0x00000000"
+				}
+			};
+
+			PrintInConsole("Sending Batch transaction...");
+			var safeTxHash = await _wallet.SendBatchTransactions(dataArr);
+			PrintInConsole("Safe transaction hash: " + safeTxHash);
+			PrintInConsole("Transaction sent, waiting for confirmation...");
+			var transactionReceipt = await _wallet.Wait(safeTxHash);
+			PrintInConsole("Transaction confirmed, see it on the block explorer: " +
+			               transactionReceipt.TransactionHash);
+			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authAdaptor.ChainId);
+		}
+
 		public void GetAddress()
 		{
 			var address = _wallet.GetAddress();
@@ -131,8 +164,6 @@ namespace ComethSDK.Examples.Scripts
 			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNTER_TEST_ADDRESS);
 			var countFunction = contract.GetFunction("count");
 			var data = countFunction.GetData();
-			var web3 = new Web3(Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl);
-			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
 			EstimateGasAndShow(COUNTER_TEST_ADDRESS, "0", data);
 
 			var dataArr = new[]
@@ -150,11 +181,6 @@ namespace ComethSDK.Examples.Scripts
 					data = data
 				}
 			};
-
-			var dataArr2 = new MultiSendFunctionInput<CountFunction>[2];
-			var countFunction2 = new CountFunction();
-			dataArr2[0] = new MultiSendFunctionInput<CountFunction>(countFunction2, COUNTER_TEST_ADDRESS);
-			dataArr2[1] = new MultiSendFunctionInput<CountFunction>(countFunction2, COUNTER_TEST_ADDRESS);
 
 			PrintInConsole("Sending Batch transaction...");
 			var safeTxHash = await _wallet.SendBatchTransactions(dataArr);
@@ -186,7 +212,7 @@ namespace ComethSDK.Examples.Scripts
 			var counterAmount = await counterFunction.CallAsync<int>(_wallet.GetAddress());
 			PrintInConsole("Query successful, Counter = " + counterAmount);
 		}
-		
+
 		public async void TestEstimateSafeTxGasWithSimulate()
 		{
 			var value = "0";
@@ -194,18 +220,25 @@ namespace ComethSDK.Examples.Scripts
 			var to = "0x6e13dA17777a7325DcCF7FAa2358Ef3Db6E452cE";
 
 			EstimateGasAndShowWithSimulate(to, value, data);
+			EstimateGasAndShow(to, value, data);
 		}
 
 		private async void EstimateGasAndShow(string to, string value, string data)
 		{
 			var provider = Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl;
-			var web3 = new Web3(provider);
-			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
+			var txData = new SafeTx
+			{
+				to = to,
+				value = value,
+				data = data
+			};
 
-			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, provider);
-			PrintInConsole("Estimated max gas: " + gas);
+			IMetaTransactionData[] safeTxDataArray = { txData };
+
+			var estimates = await GasService.EstimateTransactionGas(safeTxDataArray, walletAddress, provider);
+			PrintInConsole("Estimated safeTxGas Normal: " + estimates);
 		}
-		
+
 		private async void EstimateGasAndShowWithSimulate(string to, string value, string data)
 		{
 			var provider = Constants.GetNetworkByChainID(authAdaptor.ChainId).RPCUrl;
@@ -215,9 +248,12 @@ namespace ComethSDK.Examples.Scripts
 				value = value,
 				data = data
 			};
-			var gas = await GasService.EstimateSafeTxGasWithSimulate(walletAddress, txData, "", Constants.MUMBAI_SAFE_SINGLETON_ADDRESS, Constants.MUMBAI_SAFE_TX_ACCESSOR_ADDRESS, provider);
 
-			PrintInConsole("Estimated max gas: " + gas);
+			var txDataArray = new IMetaTransactionData[] { txData };
+			var gas = await GasService.EstimateSafeTxGasWithSimulate(walletAddress, txDataArray, "",
+				Constants.MUMBAI_SAFE_SINGLETON_ADDRESS, Constants.MUMBAI_SAFE_TX_ACCESSOR_ADDRESS, provider);
+
+			PrintInConsole("Estimated safeTxGas gas Simulated: " + gas);
 		}
 
 		private void SeeTransactionReceiptOnBlockExplorer(string txHash, string chainId)

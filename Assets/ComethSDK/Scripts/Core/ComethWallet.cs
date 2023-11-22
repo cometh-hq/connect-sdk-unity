@@ -31,16 +31,16 @@ namespace ComethSDK.Scripts.Core
 		private readonly IAuthAdaptor _authAdaptor;
 		private readonly string _chainId;
 		private readonly Uri _uri = new("https://api.connect.cometh.io");
+		private readonly BigInteger BASE_GAS = Constants.DEFAULT_BASE_GAS;
 		private bool _connected;
 		private EventHandler _eventHandler;
 		private Constants.Network _network;
 		private ProjectParams _projectParams;
+		private string _provider;
 
 		private List<SponsoredAddressResponse.SponsoredAddress> _sponsoredAddresses = new();
 		private string _walletAddress;
 		private Web3 _web3;
-		private string _provider;
-		private readonly BigInteger BASE_GAS = Constants.DEFAULT_BASE_GAS;
 
 		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey)
 		{
@@ -53,7 +53,7 @@ namespace ComethSDK.Scripts.Core
 		public async Task Connect([CanBeNull] string burnerAddress = "")
 		{
 			if (_authAdaptor == null) throw new Exception("No auth adaptor found");
-			
+
 			_provider = Constants.GetNetworkByChainID(_chainId).RPCUrl;
 			_web3 = new Web3(_provider);
 
@@ -201,6 +201,7 @@ namespace ComethSDK.Scripts.Core
 		/**
 		 * Transaction Section
 		 */
+		//TODO: change return type to SendTransactionResponse
 		public async Task<string> SendTransaction(string to, string value, string data)
 		{
 			if (!_connected)
@@ -215,9 +216,9 @@ namespace ComethSDK.Scripts.Core
 
 			if (!ToSponsoredAddress(safeTx.to))
 			{
-				safeTx = await GasService.SetTransactionGas(safeTx, _walletAddress, BASE_GAS, _web3);
-				await GasService.VerifyHasEnoughBalance(_walletAddress, safeTx.safeTxGas, safeTx.gasPrice,
-					safeTx.baseGas, safeTx.value, _web3);
+				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress, "",
+					Constants.MUMBAI_SAFE_SINGLETON_ADDRESS, Constants.MUMBAI_SAFE_TX_ACCESSOR_ADDRESS, _provider);
+				await GasService.VerifyHasEnoughBalance(_walletAddress, to, value, data, nonce, _provider);
 			}
 
 			var txSignature = await SignTypedData(safeTx, typedData);
@@ -228,8 +229,7 @@ namespace ComethSDK.Scripts.Core
 			);
 		}
 
-		//TODO: should be able to combine safeTx and DataType together
-		//TODO: change return tpe to SendTransactionResponse
+		//TODO: change return type to SendTransactionResponse
 		public async Task<string> SendBatchTransactions(IMetaTransactionData[] safeTxData)
 		{
 			if (safeTxData.Length == 0) throw new Exception("Empty array provided, no transaction to send");
@@ -243,23 +243,32 @@ namespace ComethSDK.Scripts.Core
 			if (_projectParams == null) throw new Exception("Project params not found");
 
 			var nonce = await Utils.GetNonce(_web3, _walletAddress);
-			var data = MultiSend.EncodeMultiSendArray(safeTxData, _provider, _projectParams.MultiSendContractAddress)
+			var multiSendData = MultiSend
+				.EncodeMultiSendArray(safeTxData, _provider, _projectParams.MultiSendContractAddress)
 				.data;
-			var safeTx = Utils.CreateSafeTx(_projectParams.MultiSendContractAddress, "0x00", data, nonce,
+			var safeTx = Utils.CreateSafeTx(_projectParams.MultiSendContractAddress, "0x00", multiSendData, nonce,
 				OperationType.DELEGATE_CALL);
 			var dataType = Utils.CreateSafeTxTypedData(_chainId, _walletAddress);
 
 			if (!await IsSponsoredTransaction(safeTxData))
 			{
-				var safeTxGas = await GasService.EstimateTransactionGas(
-					safeTxData, _walletAddress, _web3);
-				var gasPrice = await GasService.GetGasPrice(_web3);
-				var txValue = SafeService.GetTransactionsTotalValue(safeTxData);
-				await GasService.VerifyHasEnoughBalance(_walletAddress, safeTxGas, gasPrice, BASE_GAS, txValue, _web3);
+				var safeTxGasString = await GasService.EstimateSafeTxGasWithSimulate(_walletAddress, safeTxData,
+					_projectParams.MultiSendContractAddress,
+					Constants.MUMBAI_SAFE_SINGLETON_ADDRESS, Constants.MUMBAI_SAFE_TX_ACCESSOR_ADDRESS, _provider);
 
-				safeTx.safeTxGas += safeTxGas;
-				safeTx.baseGas = BASE_GAS;
-				safeTx.gasPrice += gasPrice;
+				var gasEstimates = new GasEstimates
+				{
+					baseGas = BASE_GAS,
+					gasPrice = await GasService.GetGasPrice(_provider),
+					safeTxGas = BigInteger.Parse(safeTxGasString)
+				};
+
+				var txValue = SafeService.GetTransactionsTotalValue(safeTxData);
+				await GasService.VerifyHasEnoughBalance(_walletAddress, gasEstimates, txValue, _provider);
+
+				safeTx.safeTxGas += gasEstimates.safeTxGas;
+				safeTx.baseGas = gasEstimates.baseGas;
+				safeTx.gasPrice += gasEstimates.gasPrice;
 			}
 
 			return await SignAndSendTransaction(safeTx, dataType);

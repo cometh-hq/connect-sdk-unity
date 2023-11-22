@@ -1,4 +1,4 @@
-﻿using ComethSDK.Scripts.Types;
+﻿using ComethSDK.Scripts.Enums;
 
 namespace ComethSDK.Scripts.Interfaces
 {
@@ -7,6 +7,6 @@ namespace ComethSDK.Scripts.Interfaces
 		string to { get; set; }
 		string value { get; set; }
 		string data { get; set; }
-		OperationType? operation { get; set;}
+		OperationType? operation { get; set; }
 	}
 }
