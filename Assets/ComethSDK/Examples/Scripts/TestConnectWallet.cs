@@ -17,15 +17,19 @@ namespace ComethSDK.Examples.Scripts
 		[SerializeField] private TMP_Text console;
 		[SerializeField] private string walletAddress;
 		[SerializeField] private string apiKey;
+		[SerializeField] private string baseUrl;
 
 		private ComethWallet _wallet;
 
 		private void Start()
 		{
-			if (authAdaptor && !string.IsNullOrEmpty(apiKey))
-				_wallet = new ComethWallet(authAdaptor, apiKey);
-			else
+			if (!authAdaptor && string.IsNullOrEmpty(apiKey))
+			{
 				Debug.LogError("Please set the apiKey & authAdaptor serialised variables");
+				return;
+			}
+
+			_wallet = string.IsNullOrEmpty(baseUrl) ? new ComethWallet(authAdaptor, apiKey) : new ComethWallet(authAdaptor, apiKey, baseUrl);
 		}
 
 		public override async void Connect()

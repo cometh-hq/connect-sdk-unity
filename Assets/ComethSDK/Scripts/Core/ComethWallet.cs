@@ -42,11 +42,11 @@ namespace ComethSDK.Scripts.Core
 		private string _walletAddress;
 		private Web3 _web3;
 
-		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey)
+		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey, string baseUrl = "")
 		{
 			if (!Utils.IsNetworkSupported(authAdaptor.ChainId)) throw new Exception("This network is not supported");
 			_chainId = authAdaptor.ChainId;
-			_api = new API(apiKey, int.Parse(_chainId));
+			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, int.Parse(_chainId)) : new API(apiKey, int.Parse(_chainId), baseUrl);
 			_authAdaptor = authAdaptor;
 		}
 
