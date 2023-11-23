@@ -107,7 +107,7 @@ namespace ComethSDK.Scripts.Adapters
 			return addNewSignerRequest;
 		}
 
-		public async Task<NewSignerRequestBody[]> GetNewSignerRequest()
+		public async Task<NewSignerRequestBody[]> GetNewSignerRequests()
 		{
 			var walletAddress = await GetWalletAddress();
 			return await _api.GetNewSignerRequests(walletAddress);
