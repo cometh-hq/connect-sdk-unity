@@ -3,7 +3,8 @@
 Cometh Connect SDK allows developers to onboard their users with a seedless, gasless experience familiar to Web2.
 Account Abstraction (AA) improves transaction user experience by using smart contract wallets as primary accounts.
 
-To get an API key please [Contact us](https://cometh.io/)
+To get an API key please [Contact us](https://cometh.io/) \
+You can view the documentation [here](https://docs.cometh.io/connect/quickstart/what-is-connect)
 
 ## Test Cometh Connect SDK
 
@@ -87,3 +88,21 @@ var messageSigned = await _wallet.SignMessage("Hello World!");
 ```
 
 Sign the given message using the EOA, owner of the smart wallet.
+
+### Init a new Signer Request
+
+```C#
+var addSignerRequest = await connectAuthAdaptor.InitNewSignerRequest(walletAddress);
+```
+
+Initialize a new SignerRequest to be used by your backend.
+
+### Get all Signer Requests
+
+```C#
+var newSignerRequests = await connectAuthAdaptor.GetNewSignerRequests();
+```
+
+Get all signerRequests for the connected address.
+
+For more information about adding new devices please refer to this [documentation](https://docs.cometh.io/connect/features/add-a-new-device)
