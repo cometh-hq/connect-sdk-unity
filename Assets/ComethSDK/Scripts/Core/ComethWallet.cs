@@ -4,8 +4,10 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.Adapters.Interfaces;
+using ComethSDK.Scripts.Enums;
 using ComethSDK.Scripts.HTTP;
 using ComethSDK.Scripts.HTTP.Responses;
+using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Types;
@@ -29,19 +31,22 @@ namespace ComethSDK.Scripts.Core
 		private readonly IAuthAdaptor _authAdaptor;
 		private readonly string _chainId;
 		private readonly Uri _uri = new("https://api.connect.cometh.io");
+		private readonly BigInteger BASE_GAS = Constants.DEFAULT_BASE_GAS;
 		private bool _connected;
 		private EventHandler _eventHandler;
 		private Constants.Network _network;
+		private ProjectParams _projectParams;
+		private string _provider;
 
 		private List<SponsoredAddressResponse.SponsoredAddress> _sponsoredAddresses = new();
 		private string _walletAddress;
 		private Web3 _web3;
 
-		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey)
+		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey, string baseUrl = "")
 		{
 			if (!Utils.IsNetworkSupported(authAdaptor.ChainId)) throw new Exception("This network is not supported");
 			_chainId = authAdaptor.ChainId;
-			_api = new API(apiKey, int.Parse(_chainId));
+			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, int.Parse(_chainId)) : new API(apiKey, int.Parse(_chainId), baseUrl);
 			_authAdaptor = authAdaptor;
 		}
 
@@ -49,10 +54,12 @@ namespace ComethSDK.Scripts.Core
 		{
 			if (_authAdaptor == null) throw new Exception("No auth adaptor found");
 
-			_web3 = new Web3(Constants.GetNetworkByChainID(_chainId).RPCUrl);
+			_provider = Constants.GetNetworkByChainID(_chainId).RPCUrl;
+			_web3 = new Web3(_provider);
 
 			await _authAdaptor.Connect(burnerAddress);
 
+			_projectParams = await _api.GetProjectParams();
 			var account = _authAdaptor.GetAccount();
 			var predictedWalletAddress = await _api.GetWalletAddress(account);
 			_walletAddress = predictedWalletAddress ?? throw new Exception("Error while getting wallet address");
@@ -194,6 +201,7 @@ namespace ComethSDK.Scripts.Core
 		/**
 		 * Transaction Section
 		 */
+		//TODO: change return type to SendTransactionResponse
 		public async Task<string> SendTransaction(string to, string value, string data)
 		{
 			if (!_connected)
@@ -208,13 +216,69 @@ namespace ComethSDK.Scripts.Core
 
 			if (!ToSponsoredAddress(safeTx.to))
 			{
-				safeTx = await GasService.SetTransactionGas(safeTx, _walletAddress, _web3);
-				await GasService.VerifyHasEnoughBalance(_walletAddress, to, value, data, nonce, _web3);
+				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress, "",
+					Constants.MUMBAI_SAFE_SINGLETON_ADDRESS, Constants.MUMBAI_SAFE_TX_ACCESSOR_ADDRESS, _provider);
+				await GasService.VerifyHasEnoughBalance(_walletAddress, to, value, data, nonce, _provider);
 			}
 
 			var txSignature = await SignTypedData(safeTx, typedData);
 
 			Debug.Log("Sending Transaction");
+			return await _api.RelayTransaction(new RelayTransactionType(
+				safeTx, txSignature, _walletAddress)
+			);
+		}
+
+		//TODO: change return type to SendTransactionResponse
+		public async Task<string> SendBatchTransactions(IMetaTransactionData[] safeTxData)
+		{
+			if (safeTxData.Length == 0) throw new Exception("Empty array provided, no transaction to send");
+
+			if (!_connected)
+			{
+				Debug.Log("Please Login First");
+				return "";
+			}
+
+			if (_projectParams == null) throw new Exception("Project params not found");
+
+			var nonce = await Utils.GetNonce(_web3, _walletAddress);
+			var multiSendData = MultiSend
+				.EncodeMultiSendArray(safeTxData, _provider, _projectParams.MultiSendContractAddress)
+				.data;
+			var safeTx = Utils.CreateSafeTx(_projectParams.MultiSendContractAddress, "0x00", multiSendData, nonce,
+				OperationType.DELEGATE_CALL);
+			var dataType = Utils.CreateSafeTxTypedData(_chainId, _walletAddress);
+
+			if (!await IsSponsoredTransaction(safeTxData))
+			{
+				var safeTxGasString = await GasService.EstimateSafeTxGasWithSimulate(_walletAddress, safeTxData,
+					_projectParams.MultiSendContractAddress,
+					Constants.MUMBAI_SAFE_SINGLETON_ADDRESS, Constants.MUMBAI_SAFE_TX_ACCESSOR_ADDRESS, _provider);
+
+				var gasEstimates = new GasEstimates
+				{
+					baseGas = BASE_GAS,
+					gasPrice = await GasService.GetGasPrice(_provider),
+					safeTxGas = BigInteger.Parse(safeTxGasString)
+				};
+
+				var txValue = SafeService.GetTransactionsTotalValue(safeTxData);
+				await GasService.VerifyHasEnoughBalance(_walletAddress, gasEstimates, txValue, _provider);
+
+				safeTx.safeTxGas += gasEstimates.safeTxGas;
+				safeTx.baseGas = gasEstimates.baseGas;
+				safeTx.gasPrice += gasEstimates.gasPrice;
+			}
+
+			return await SignAndSendTransaction(safeTx, dataType);
+		}
+
+		public async Task<string> SignAndSendTransaction(SafeTx safeTx,
+			TypedData<DomainWithChainIdAndVerifyingContract> typedData)
+		{
+			var txSignature = await SignTypedData(safeTx, typedData);
+
 			return await _api.RelayTransaction(new RelayTransactionType(
 				safeTx, txSignature, _walletAddress)
 			);
@@ -252,6 +316,19 @@ namespace ComethSDK.Scripts.Core
 
 			signature = signer.SignTypedData(message, typedData);
 			return signature;
+		}
+
+		private async Task<bool> IsSponsoredTransaction(IMetaTransactionData[] safeTxDataArray)
+		{
+			foreach (var safeTxData in safeTxDataArray)
+			{
+				var functionSelector = SafeService.GetFunctionSelector(safeTxData);
+				var sponsoredAddress = ToSponsoredAddress(safeTxData.to);
+
+				if (!sponsoredAddress && functionSelector != Constants.ADD_OWNER_FUNCTION_SELECTOR) return false;
+			}
+
+			return true;
 		}
 
 		private bool ToSponsoredAddress(string to)

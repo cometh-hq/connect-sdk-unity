@@ -29,7 +29,7 @@ namespace ComethSDK.Examples.Scripts
 		public override async void Connect()
 		{
 			PrintInConsole("Connecting...");
-			await _wallet.Connect("");
+			await _wallet.Connect();
 			PrintInConsole("Connected");
 		}
 
@@ -78,7 +78,7 @@ namespace ComethSDK.Examples.Scripts
 			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, authWithJwtAdaptor.ChainId);
 		}
 
-		public override async void GetUserInfo()
+		public override void GetUserInfo()
 		{
 			var userInfos = _wallet.GetUserInfos();
 			PrintUserInfosInConsole(userInfos);
@@ -107,9 +107,12 @@ namespace ComethSDK.Examples.Scripts
 
 		private async void EstimateGasAndShow(string to, string value, string data)
 		{
-			var web3 = new Web3(Constants.GetNetworkByChainID(authWithJwtAdaptor.ChainId).RPCUrl);
+			var provider = Constants.GetNetworkByChainID(authWithJwtAdaptor.ChainId).RPCUrl;
+			var web3 = new Web3(provider);
 			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
-			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, web3);
+			var baseGas = Constants.DEFAULT_BASE_GAS;
+			var gas = await GasService.CalculateMaxFees(_wallet.GetAddress(), to, value, data, nonce, baseGas,
+				provider);
 			PrintInConsole("Estimated max gas: " + gas);
 		}
 

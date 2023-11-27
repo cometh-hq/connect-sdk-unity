@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using ComethSDK.Scripts.Enums;
 using ComethSDK.Scripts.Interfaces;
 using Nethereum.ABI.FunctionEncoding.Attributes;
 

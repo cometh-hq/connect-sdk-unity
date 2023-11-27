@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
+using ComethSDK.Scripts.Enums;
 using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Types.MessageTypes;
 using Nethereum.ABI.EIP712;
@@ -10,14 +11,15 @@ namespace ComethSDK.Scripts.Tools
 {
 	public static class Utils
 	{
-		public static SafeTx CreateSafeTx(string to, string value, string data, int nonce)
+		public static SafeTx CreateSafeTx(string to, string value, string data, int nonce,
+			OperationType operationType = 0)
 		{
 			var safeTx = new SafeTx
 			{
 				to = to,
 				value = value,
 				data = data,
-				operation = 0,
+				operation = operationType,
 				safeTxGas = new BigInteger(0),
 				baseGas = new BigInteger(0),
 				gasPrice = new BigInteger(0),
@@ -96,7 +98,7 @@ namespace ComethSDK.Scripts.Tools
 			var result = await function.CallAsync<int>();
 			return result;
 		}
-		
+
 		public static bool IsNetworkSupported(string chainId)
 		{
 			foreach (var network in Constants.Networks.Values)

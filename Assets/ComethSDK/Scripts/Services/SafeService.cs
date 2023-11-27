@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.HTTP;
+using ComethSDK.Scripts.Tools;
+using ComethSDK.Scripts.Interfaces;
 using Nethereum.GnosisSafe;
 using Nethereum.Web3;
 
@@ -28,6 +30,15 @@ namespace ComethSDK.Scripts.Services
 			return true;
 		}
 
+		public static string EncodeFunctionData(string functionName, string safeAddress, string provider, params object[] functionInput)
+		{
+			var web3 = new Web3(provider);
+			var contract = web3.Eth.GetContract(Constants.SAFE_ABI, safeAddress);
+			var function = contract.GetFunction(functionName);
+			var data = function.GetData(functionInput);
+			return data;
+		}
+
 		private static async Task<bool> IsSafeOwner(string walletAddress, string signerAddress, string provider)
 		{
 			var web3 = new Web3(provider);
@@ -35,9 +46,27 @@ namespace ComethSDK.Scripts.Services
 			return await service.IsOwnerQueryAsync(signerAddress);
 		}
 
-		private static async Task IsDeployed(string walletAddress, string provider)
+		//TODO: Implement this
+		public static async Task<bool> IsDeployed(string walletAddress, string provider)
 		{
 			throw new NotImplementedException();
+		}
+
+		public static string GetFunctionSelector(IMetaTransactionData metaTransactionData)
+		{
+			return metaTransactionData.data[..10];
+		}
+
+		public static string GetTransactionsTotalValue(IMetaTransactionData[] safeTxData)
+		{
+			var txValue = 0;
+			
+			foreach (var safeTx in safeTxData)
+			{
+				txValue += int.Parse(safeTx.value);
+			}
+			
+			return txValue.ToString();
 		}
 	}
 }

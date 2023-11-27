@@ -8,7 +8,6 @@ using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Tools.Signers.Interfaces;
 using ComethSDK.Scripts.Types;
-using JetBrains.Annotations;
 using Nethereum.Signer;
 using UnityEngine;
 
@@ -30,18 +29,16 @@ namespace ComethSDK.Scripts.Adapters
 				throw new Exception("ChainId is not set");
 			if (string.IsNullOrEmpty(apiKey))
 				throw new Exception("ApiKey is not set");
-			if (string.IsNullOrEmpty(baseUrl))
-				throw new Exception("BaseUrl is not set");
 
 			if (!Utils.IsNetworkSupported(chainId.ToString())) throw new Exception("This network is not supported");
 			ChainId = chainId.ToString();
 
-			_api = new API(apiKey, chainId);
+			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, chainId) : new API(apiKey, chainId, baseUrl);
 		}
 
 		public string ChainId { get; private set; }
 
-		public async Task Connect([CanBeNull] string burnerAddress = "")
+		public async Task Connect(string burnerAddress = "")
 		{
 			if (!string.IsNullOrEmpty(burnerAddress))
 			{
@@ -110,7 +107,7 @@ namespace ComethSDK.Scripts.Adapters
 			return addNewSignerRequest;
 		}
 
-		public async Task<NewSignerRequestBody[]> GetNewSignerRequest()
+		public async Task<NewSignerRequestBody[]> GetNewSignerRequests()
 		{
 			var walletAddress = await GetWalletAddress();
 			return await _api.GetNewSignerRequests(walletAddress);

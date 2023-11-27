@@ -8,7 +8,6 @@ using ComethSDK.Scripts.HTTP.Responses;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
-using Microsoft.Extensions.Logging.Abstractions;
 using Nethereum.ABI.EIP712;
 using Nethereum.Siwe.Core;
 using Newtonsoft.Json;
@@ -32,21 +31,21 @@ namespace ComethSDK.Scripts.HTTP
 
 	public class API
 	{
-		private readonly HttpClient api;
-
-		public API(string apiKey, int chainId)
+		private readonly HttpClient _api;
+		
+		public API(string apiKey, int chainId, string baseUrl = Constants.API_URL)
 		{
-			api = new HttpClient();
-			api.DefaultRequestHeaders.Add("apikey", apiKey);
-			api.DefaultRequestHeaders.Add("chainId", chainId.ToString());
-			api.BaseAddress = new Uri(Constants.API_URL);
+			_api = new HttpClient();
+			_api.DefaultRequestHeaders.Add("apikey", apiKey);
+			_api.DefaultRequestHeaders.Add("chainId", chainId.ToString());
+			_api.BaseAddress = new Uri(baseUrl);
 		}
 
 		public async Task<string> RelayTransaction(RelayTransactionType relayTransactionType)
 		{
 			var safeTxDataTypedWithSignature = new SafeTxWithSignature
 			{
-				to = relayTransactionType.safeTxData.to.ToLower(),
+				to = relayTransactionType.safeTxData.to,
 				value = relayTransactionType.safeTxData.value,
 				data = relayTransactionType.safeTxData.data,
 				operation = relayTransactionType.safeTxData.operation,
@@ -62,7 +61,7 @@ namespace ComethSDK.Scripts.HTTP
 			var json = JsonConvert.SerializeObject(safeTxDataTypedWithSignature);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 			var requestUri = "/wallets/" + relayTransactionType.walletAddress + "/relay";
-			var response = await api.PostAsync(requestUri, content);
+			var response = await _api.PostAsync(requestUri, content);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 
 			var contentDeserializeObject = JsonConvert.DeserializeObject<RelayTransactionResponse>(contentReceived);
@@ -75,7 +74,7 @@ namespace ComethSDK.Scripts.HTTP
 
 		public async Task<List<SponsoredAddressResponse.SponsoredAddress>> GetSponsoredAddresses()
 		{
-			var response = await api.GetAsync("/sponsored-address");
+			var response = await _api.GetAsync("/sponsored-address");
 			var content = response.Content.ReadAsStringAsync().Result;
 
 			var sponsoredAddressesResponse = JsonConvert.DeserializeObject<SponsoredAddressResponse>(content);
@@ -97,7 +96,7 @@ namespace ComethSDK.Scripts.HTTP
 		//OwnerAddress is the address of the OEA
 		public async Task<string> GetPredictedSafeAddress(string ownerAddress)
 		{
-			var response = await api.GetAsync($"/wallets/{ownerAddress}/getWalletAddress");
+			var response = await _api.GetAsync($"/wallets/{ownerAddress}/getWalletAddress");
 			var result = response.Content.ReadAsStringAsync().Result;
 
 			var predictedSafeAddressResponse = JsonConvert.DeserializeObject<PredictedSafeAddressResponse>(result);
@@ -120,7 +119,7 @@ namespace ComethSDK.Scripts.HTTP
 			};
 			var json = JsonConvert.SerializeObject(body);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
-			var response = await api.PostAsync(requestUri, content);
+			var response = await _api.PostAsync(requestUri, content);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 			var contentDeserializeObject =
 				JsonConvert.DeserializeObject<ConnectToComethWalletResponse>(contentReceived);
@@ -136,7 +135,7 @@ namespace ComethSDK.Scripts.HTTP
 			const string requestUri = "/key-store/connect";
 			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
 			request.Headers.Add("token", jwtToken);
-			var response = await api.SendAsync(request);
+			var response = await _api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 			var contentDeserializeObject =
 				JsonConvert.DeserializeObject<ConnectToComethAuthResponse>(contentReceived);
@@ -165,7 +164,7 @@ namespace ComethSDK.Scripts.HTTP
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 			request.Content = content;
 
-			var response = await api.SendAsync(request);
+			var response = await _api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 			var contentDeserializeObject =
 				JsonConvert.DeserializeObject<SignTypedDataWithComethAuthResponse>(contentReceived);
@@ -185,7 +184,7 @@ namespace ComethSDK.Scripts.HTTP
 			};
 			var json = JsonConvert.SerializeObject(isValidSignatureBody);
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
-			var response = await api.PostAsync(requestUri, content);
+			var response = await _api.PostAsync(requestUri, content);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 
 			if (contentReceived == "{\"success\":true,\"result\":true}") return true;
@@ -200,7 +199,7 @@ namespace ComethSDK.Scripts.HTTP
 			var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 			request.Headers.Add("token", jwtToken);
 
-			var response = await api.SendAsync(request);
+			var response = await _api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 			var deserializedResponse =
 				JsonConvert.DeserializeObject<GetWalletAddressFromUserIDResponse>(contentReceived);
@@ -225,7 +224,7 @@ namespace ComethSDK.Scripts.HTTP
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 			request.Content = content;
 
-			var response = await api.SendAsync(request);
+			var response = await _api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 
 			Debug.Log(contentReceived);
@@ -244,12 +243,12 @@ namespace ComethSDK.Scripts.HTTP
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 			request.Content = content;
 
-			var response = await api.SendAsync(request);
+			var response = await _api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
-			
+
 			var initWalletResponse = JsonConvert.DeserializeObject<InitWalletResponse>(contentReceived);
 
-			if(initWalletResponse is { success: true }) return initWalletResponse.walletAddress;
+			if (initWalletResponse is { success: true }) return initWalletResponse.walletAddress;
 
 			Debug.LogError("Error in InitWallet");
 			return null;
@@ -257,7 +256,7 @@ namespace ComethSDK.Scripts.HTTP
 
 		public async Task<string> GetNonce(string walletAddress)
 		{
-			var response = await api.GetAsync($"/wallets/{walletAddress}/connection-nonce");
+			var response = await _api.GetAsync($"/wallets/{walletAddress}/connection-nonce");
 			var result = response.Content.ReadAsStringAsync().Result;
 
 			var nonceResponse = JsonConvert.DeserializeObject<NonceResponse>(result);
@@ -267,7 +266,7 @@ namespace ComethSDK.Scripts.HTTP
 
 		public async Task<string> GetWalletAddress(string ownerAddress)
 		{
-			var response = await api.GetAsync($"/wallets/{ownerAddress}/wallet-address");
+			var response = await _api.GetAsync($"/wallets/{ownerAddress}/wallet-address");
 			var result = response.Content.ReadAsStringAsync().Result;
 
 			var predictedSafeAddressResponse = JsonConvert.DeserializeObject<PredictedSafeAddressResponse>(result);
@@ -293,7 +292,7 @@ namespace ComethSDK.Scripts.HTTP
 			var content = new StringContent(json, Encoding.UTF8, "application/json");
 			request.Content = content;
 
-			var response = await api.SendAsync(request);
+			var response = await _api.SendAsync(request);
 			var contentReceived = response.Content.ReadAsStringAsync().Result;
 
 			Debug.Log(contentReceived);
@@ -301,7 +300,7 @@ namespace ComethSDK.Scripts.HTTP
 
 		public async Task<WalletInfos> GetWalletInfos(string walletAddress)
 		{
-			var response = await api.GetAsync($"/wallets/{walletAddress}/wallet-infos");
+			var response = await _api.GetAsync($"/wallets/{walletAddress}/wallet-infos");
 			var result = response.Content.ReadAsStringAsync().Result;
 
 			var getWalletInfosResponse = JsonConvert.DeserializeObject<GetWalletInfosResponse>(result);
@@ -314,7 +313,7 @@ namespace ComethSDK.Scripts.HTTP
 
 		public async Task<NewSignerRequestBody[]> GetNewSignerRequests(string walletAddress)
 		{
-			var response = await api.GetAsync($"/new-signer-request/{walletAddress}");
+			var response = await _api.GetAsync($"/new-signer-request/{walletAddress}");
 			var result = response.Content.ReadAsStringAsync().Result;
 
 			var getNewSignerRequestsResponse = JsonConvert.DeserializeObject<GetNewSignerRequestsResponse>(result);
@@ -322,6 +321,19 @@ namespace ComethSDK.Scripts.HTTP
 			if (getNewSignerRequestsResponse is { success: true }) return getNewSignerRequestsResponse.signerRequests;
 
 			Debug.LogError("Error in GetNewSignerRequests");
+			return null;
+		}
+
+		public async Task<ProjectParams> GetProjectParams()
+		{
+			var response = await _api.GetAsync("/project/params");
+			var result = response.Content.ReadAsStringAsync().Result;
+
+			var getNewSignerRequestsResponse = JsonConvert.DeserializeObject<GetProjectParamsResponse>(result);
+
+			if (getNewSignerRequestsResponse is { success: true }) return getNewSignerRequestsResponse.projectParams;
+
+			Debug.LogError("Error in GetProjectParams");
 			return null;
 		}
 	}
