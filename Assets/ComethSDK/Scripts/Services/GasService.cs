@@ -168,7 +168,6 @@ namespace ComethSDK.Scripts.Services
 			}
 			catch (SmartContractCustomErrorRevertException smartContractCustomErrorRevertException)
 			{
-				Debug.Log("Revert Reason:" + smartContractCustomErrorRevertException);
 				var safeTxGas = DecodeSafeTxGas(smartContractCustomErrorRevertException.ExceptionEncodedData);
 				return AddExtraGasForSafety(BigInteger.Parse(safeTxGas));
 			}
@@ -197,7 +196,7 @@ namespace ComethSDK.Scripts.Services
 			var web3 = new Web3(provider);
 			var ethEstimateGas = new EthEstimateGas(web3.Client);
 
-			var transactionInput = new CallInput
+			var transactionInput = new CallInput    
 			{
 				Data = data,
 				To = to,

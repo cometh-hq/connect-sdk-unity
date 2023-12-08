@@ -147,7 +147,6 @@ namespace ComethSDK.Examples.Scripts
 			var countFunction = contract.GetFunction("count");
 			var data = countFunction.GetData();
 			var web3 = new Web3(Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl);
-			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
 			EstimateGasAndShow(COUNTER_TEST_ADDRESS, "0", data);
 
 			PrintInConsole("Sending transaction...");
@@ -224,6 +223,37 @@ namespace ComethSDK.Examples.Scripts
 			PrintInConsole("Sending query to get Counter...");
 			var counterAmount = await counterFunction.CallAsync<int>(_wallet.GetAddress());
 			PrintInConsole("Query successful, Counter = " + counterAmount);
+		}
+
+		public async void TestAddRemoveOwners()
+		{
+			var newOwner = "0x510c522ebCC6Eb376839E0CFf5D57bb2F422EB8b";
+
+			//var getOwnersFunction = await _wallet.GetOwners();
+			
+			/*var addOwnerSafeTxHash = await _wallet.AddOwner(newOwner);
+			var transactionReceipt = await _wallet.Wait(addOwnerSafeTxHash);
+			
+			if (transactionReceipt != null)
+			{
+				PrintInConsole("AddOwner Transaction confirmed");
+			}
+			else
+			{
+				PrintInConsole("Issue with AddOwner");
+			}*/
+			
+			var removeOwnerSafeTxHash = await _wallet.RemoveOwner(newOwner); 
+			var transactionReceipt = await _wallet.Wait(removeOwnerSafeTxHash);
+			
+			if (transactionReceipt != null)
+			{
+				PrintInConsole("RemoveOwner Transaction confirmed");
+			}
+			else
+			{ 
+				PrintInConsole("Issue with RemoveOwner");
+			}
 		}
 
 		public async void TestEstimateSafeTxGasWithSimulate()
