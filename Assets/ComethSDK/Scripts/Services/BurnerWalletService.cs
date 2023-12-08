@@ -84,6 +84,8 @@ namespace ComethSDK.Scripts.Services
 			var storagePrivateKey = PlayerPrefs.GetString("cometh-connect-" + walletAddress, null);
 			if (string.IsNullOrEmpty(storagePrivateKey))
 				throw new Exception("New Domain detected. You need to add that domain as signer.");
+			
+			Debug.Log("storagePrivateKey: " + storagePrivateKey);
 
 			var storageSigner = new Signer(new EthECKey(storagePrivateKey));
 

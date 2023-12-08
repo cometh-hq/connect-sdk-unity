@@ -33,6 +33,7 @@ namespace ComethSDK.Scripts.Tools
 		public static readonly string MUMBAI_SAFE_SINGLETON_ADDRESS = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E";
 		public static readonly string MUMBAI_SAFE_TX_ACCESSOR_ADDRESS = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da";
 
+		public static readonly string SAFE_SENTINEL_OWNERS = "0x1";
 
 		public static readonly Dictionary<Network, NetworkData> Networks = new()
 		{
