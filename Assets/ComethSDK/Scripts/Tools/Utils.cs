@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using System.Text;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.Enums;
 using ComethSDK.Scripts.Interfaces;
@@ -97,6 +98,16 @@ namespace ComethSDK.Scripts.Tools
 			var function = contract.GetFunction("nonce");
 			var result = await function.CallAsync<int>();
 			return result;
+		}
+		
+		public static string BytesToString(byte[] privateKey)
+		{
+			return Encoding.UTF8.GetString(privateKey);
+		}
+		
+		public static byte[] StringToBytes(string privateKey)
+		{
+			return Encoding.UTF8.GetBytes(privateKey);
 		}
 
 		public static bool IsNetworkSupported(string chainId)

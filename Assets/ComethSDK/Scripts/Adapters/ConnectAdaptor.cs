@@ -18,6 +18,7 @@ namespace ComethSDK.Scripts.Adapters
 		[SerializeField] private int chainId;
 		[SerializeField] private string apiKey;
 		[SerializeField] private string baseUrl;
+		[SerializeField] private string encryptionSalt;
 
 		private API _api;
 		private Signer _signer;
