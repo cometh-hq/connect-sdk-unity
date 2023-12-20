@@ -34,6 +34,7 @@ namespace ComethSDK.Scripts.Tools
 		public static readonly string MUMBAI_SAFE_TX_ACCESSOR_ADDRESS = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da";
 		
 		public static readonly string DEFAULT_ENCRYPTION_SALT = "COMETH-CONNECT";
+		public static readonly int PBKDF2_ITERATIONS = 1000000;
 
 
 		public static readonly Dictionary<Network, NetworkData> Networks = new()

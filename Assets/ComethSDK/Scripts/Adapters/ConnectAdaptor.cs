@@ -9,9 +9,7 @@ using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Tools.Signers.Interfaces;
 using ComethSDK.Scripts.Types;
 using Nethereum.Signer;
-using UnityEditor.VersionControl;
 using UnityEngine;
-using Task = System.Threading.Tasks.Task;
 
 namespace ComethSDK.Scripts.Adapters
 {
@@ -24,9 +22,9 @@ namespace ComethSDK.Scripts.Adapters
 		[SerializeField] private string encryptionSalt;
 
 		private API _api;
+		private string _provider;
 		private Signer _signer;
 		private string _walletAddress;
-		private string _provider;
 
 		private void Awake()
 		{
@@ -50,23 +48,16 @@ namespace ComethSDK.Scripts.Adapters
 				ThrowErrorWhenEoaFallbackIsDisabled();
 				_signer = await EoaFallbackService.GetSigner(_api, _provider, burnerAddress, encryptionSalt);
 				_walletAddress = burnerAddress;
-				
-				/*
-				await VerifyWalletAddress(burnerAddress);
-				_signer = await BurnerWalletService.GetSigner(burnerAddress, _api,
-					Constants.GetNetworkByChainID(ChainId).RPCUrl);*/
 			}
 			else
 			{
 				ThrowErrorWhenEoaFallbackIsDisabled();
-				var (signer, walletAddress) = await EoaFallbackService.CreateSigner(_api, encryptionSalt: encryptionSalt);
-				
+				var (signer, walletAddress) =
+					await EoaFallbackService.CreateSigner(_api, encryptionSalt: encryptionSalt);
+
 				_signer = signer;
 				_walletAddress = walletAddress;
-				
-				//_signer = await BurnerWalletService.CreateSigner(_api);
 			}
-			//_walletAddress = await InitAdaptorWalletAddress(burnerAddress);
 		}
 
 		public Task Logout()
@@ -156,7 +147,7 @@ namespace ComethSDK.Scripts.Adapters
 		{
 			if (_signer == null) throw new Exception("No signer instance found");
 		}
-		
+
 		private void ThrowErrorWhenEoaFallbackIsDisabled()
 		{
 			if (disableEoaFallback) throw new Exception("Passkeys are not compatible with your device");
