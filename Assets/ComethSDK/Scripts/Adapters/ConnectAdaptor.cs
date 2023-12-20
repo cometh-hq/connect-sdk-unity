@@ -45,20 +45,28 @@ namespace ComethSDK.Scripts.Adapters
 
 		public async Task Connect(string burnerAddress = "")
 		{
-			ThrowErrorWhenEoaFallbackIsDisabled();
-			_signer = await EoaFallbackService.GetSigner(_api, _provider, _walletAddress, encryptionSalt);
 			if (!string.IsNullOrEmpty(burnerAddress))
 			{
+				ThrowErrorWhenEoaFallbackIsDisabled();
+				_signer = await EoaFallbackService.GetSigner(_api, _provider, burnerAddress, encryptionSalt);
+				_walletAddress = burnerAddress;
+				
+				/*
 				await VerifyWalletAddress(burnerAddress);
 				_signer = await BurnerWalletService.GetSigner(burnerAddress, _api,
-					Constants.GetNetworkByChainID(ChainId).RPCUrl);
+					Constants.GetNetworkByChainID(ChainId).RPCUrl);*/
 			}
 			else
 			{
-				_signer = await BurnerWalletService.CreateSigner(_api);
+				ThrowErrorWhenEoaFallbackIsDisabled();
+				var (signer, walletAddress) = await EoaFallbackService.CreateSigner(_api, encryptionSalt: encryptionSalt);
+				
+				_signer = signer;
+				_walletAddress = walletAddress;
+				
+				//_signer = await BurnerWalletService.CreateSigner(_api);
 			}
-
-			_walletAddress = await InitAdaptorWalletAddress(burnerAddress);
+			//_walletAddress = await InitAdaptorWalletAddress(burnerAddress);
 		}
 
 		public Task Logout()

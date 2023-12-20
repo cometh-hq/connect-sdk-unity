@@ -7,7 +7,7 @@ using ComethSDK.Scripts.HTTP;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Types;
-using Newtonsoft.Json;
+using Nethereum.Signer;
 using UnityEngine;
 
 namespace ComethSDK.Scripts.Services
@@ -115,9 +115,23 @@ namespace ComethSDK.Scripts.Services
 		public static async Task<Signer> GetSigner(API api, string provider, string walletAddress,
 			string encryptionSalt)
 		{
-			//var storagePrivateKey = await
+			var storagePrivateKey = await GetSignerLocalStorage(walletAddress, encryptionSalt);
+			
+			if(!string.IsNullOrEmpty(storagePrivateKey))
+			{
+				throw new Exception("New Domain detected. You need to add that domain as signer.");
+			}
+			
+			var storageSigner = new Signer(new EthECKey(storagePrivateKey));
+			
+			var isOwner = await SafeService.IsSigner(storageSigner.GetAddress(), walletAddress, provider, api);
+			
+			if(!isOwner)
+			{
+				throw new Exception("New Domain detected. You need to add that domain as signer.");
+			}
 
-			return null;
+			return storageSigner;
 		}
 
 		public static async Task<string> GetSignerLocalStorage(string walletAddress, string encryptionSalt)
@@ -129,7 +143,8 @@ namespace ComethSDK.Scripts.Services
 
 			var localStorageV1 = PlayerPrefs.GetString($"cometh-connect-{walletAddress}");
 
-			var localStorageV2 = Application.persistentDataPath; //TODO: get from persistent data path
+			var localStorageV2 = SaveLoadPersistentData.Load("connect",
+				walletAddress);
 
 			if (!string.IsNullOrEmpty(localStorageV1))
 			{
@@ -141,16 +156,12 @@ namespace ComethSDK.Scripts.Services
 				return privateKey;
 			}
 
-			if (!string.IsNullOrEmpty(localStorageV2))
+			if (!string.IsNullOrEmpty(localStorageV2.encryptedPrivateKey) && !string.IsNullOrEmpty(localStorageV2.iv))
 			{
-				var encryptedData =
-					SaveLoadPersistentData.Load("connect",
-						walletAddress);
-				
 				var privateKey = await DecryptEoaFallback(
 					walletAddress,
-					Convert.FromBase64String(encryptedData.encryptedPrivateKey),
-					Convert.FromBase64String(encryptedData.iv),
+					Convert.FromBase64String(localStorageV2.encryptedPrivateKey),
+					Convert.FromBase64String(localStorageV2.iv),
 					encryptionSalt);
 
 				return privateKey;
@@ -162,15 +173,31 @@ namespace ComethSDK.Scripts.Services
 		public static async Task SetSignerLocalStorage(string walletAddress, string privateKey, string encryptionSalt)
 		{
 			var encryptedData = await EncryptEoaFallback(walletAddress, privateKey, encryptionSalt);
-
-			/*
-			// Encode data to JSON string
-			var jsonData = JsonUtility.ToJson((encryptedPrivateKey, iv));
-			// Create the full file path
-			var filePath = Path.Combine(dataPath, walletAddress);
-			// Write data to the file system
-			await File.WriteAllTextAsync(filePath, jsonData);*/
 			SaveLoadPersistentData.Save(encryptedData, "connect", walletAddress);
+		}
+
+		public static async Task<(Signer,string)> CreateSigner(API api, string walletAddress = "", string encryptionSalt = "")
+		{
+			var ethEcKey = EthECKey.GenerateKey();
+			var privateKey = ethEcKey.GetPrivateKey();
+			var signer = new Signer(ethEcKey);
+
+			if (string.IsNullOrEmpty(encryptionSalt))
+			{
+				encryptionSalt = Constants.DEFAULT_ENCRYPTION_SALT;
+			}
+			
+			if (!string.IsNullOrEmpty(walletAddress))
+			{
+				await SetSignerLocalStorage(walletAddress, privateKey, encryptionSalt);
+				return (signer, walletAddress);
+			}
+			
+			var predictedWalletAddress = await api.InitWallet(signer.GetAddress());
+			
+			await SetSignerLocalStorage(predictedWalletAddress, privateKey, encryptionSalt);
+			
+			return (signer, predictedWalletAddress);
 		}
 	}
 }
