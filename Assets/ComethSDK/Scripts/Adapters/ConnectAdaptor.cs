@@ -18,7 +18,6 @@ namespace ComethSDK.Scripts.Adapters
 		[SerializeField] private int chainId;
 		[SerializeField] private string apiKey;
 		[SerializeField] private string baseUrl;
-		[SerializeField] private bool disableEoaFallback;
 		[SerializeField] private string encryptionSalt;
 
 		private API _api;
@@ -45,13 +44,11 @@ namespace ComethSDK.Scripts.Adapters
 		{
 			if (!string.IsNullOrEmpty(burnerAddress))
 			{
-				ThrowErrorWhenEoaFallbackIsDisabled();
 				_signer = await EoaFallbackService.GetSigner(_api, _provider, burnerAddress, encryptionSalt);
 				_walletAddress = burnerAddress;
 			}
 			else
 			{
-				ThrowErrorWhenEoaFallbackIsDisabled();
 				var (signer, walletAddress) =
 					await EoaFallbackService.CreateSigner(_api, encryptionSalt: encryptionSalt);
 
@@ -146,11 +143,6 @@ namespace ComethSDK.Scripts.Adapters
 		private void CheckIfSignerIsSet()
 		{
 			if (_signer == null) throw new Exception("No signer instance found");
-		}
-
-		private void ThrowErrorWhenEoaFallbackIsDisabled()
-		{
-			if (disableEoaFallback) throw new Exception("Passkeys are not compatible with your device");
 		}
 	}
 }
