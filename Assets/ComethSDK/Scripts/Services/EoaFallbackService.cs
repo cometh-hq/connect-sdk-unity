@@ -71,9 +71,6 @@ namespace ComethSDK.Scripts.Services
 
 			var localStorageV1 = PlayerPrefs.GetString($"cometh-connect-{walletAddress}");
 
-			var localStorageV2 = SaveLoadPersistentData.Load("connect",
-				walletAddress);
-
 			if (!string.IsNullOrEmpty(localStorageV1))
 			{
 				var privateKey = localStorageV1;
@@ -83,7 +80,11 @@ namespace ComethSDK.Scripts.Services
 
 				return privateKey;
 			}
+			
+			var localStorageV2 = SaveLoadPersistentData.Load("connect",
+				walletAddress);
 
+			if(localStorageV2 == null) return null;
 			if (!string.IsNullOrEmpty(localStorageV2.encryptedPrivateKey) && !string.IsNullOrEmpty(localStorageV2.iv))
 			{
 				var privateKey = await DecryptEoaFallback(
