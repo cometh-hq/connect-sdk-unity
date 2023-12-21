@@ -13,7 +13,7 @@ namespace ComethSDK.Scripts.Services
 				return await Task.Run(() => deriveBytes.GetBytes(32));
 			}
 		}
-		
+
 		public static async Task<byte[]> EncryptAESCBC(byte[] encryptionKey, byte[] iv, byte[] data)
 		{
 			using (var aes = Aes.Create())
@@ -35,7 +35,7 @@ namespace ComethSDK.Scripts.Services
 				}
 			}
 		}
-		
+
 		public static async Task<byte[]> DecryptAESCBC(byte[] encryptionKey, byte[] iv, byte[] data)
 		{
 			using (var aes = Aes.Create())

@@ -4,6 +4,5 @@
 	{
 		public string encryptedPrivateKey { get; set; }
 		public string iv { get; set; }
-		
 	}
 }

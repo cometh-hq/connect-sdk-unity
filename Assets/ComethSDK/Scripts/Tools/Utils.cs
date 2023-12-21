@@ -99,12 +99,12 @@ namespace ComethSDK.Scripts.Tools
 			var result = await function.CallAsync<int>();
 			return result;
 		}
-		
+
 		public static string BytesToString(byte[] privateKey)
 		{
 			return Encoding.UTF8.GetString(privateKey);
 		}
-		
+
 		public static byte[] StringToBytes(string privateKey)
 		{
 			return Encoding.UTF8.GetBytes(privateKey);

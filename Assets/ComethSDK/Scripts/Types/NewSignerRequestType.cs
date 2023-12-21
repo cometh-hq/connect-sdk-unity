@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ComethSDK.Scripts.Types
+﻿namespace ComethSDK.Scripts.Types
 {
 	public static class NewSignerRequestType
 	{

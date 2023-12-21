@@ -80,11 +80,11 @@ namespace ComethSDK.Scripts.Services
 
 				return privateKey;
 			}
-			
+
 			var localStorageV2 = SaveLoadPersistentData.Load("connect",
 				walletAddress);
 
-			if(localStorageV2 == null) return null;
+			if (localStorageV2 == null) return null;
 			if (!string.IsNullOrEmpty(localStorageV2.encryptedPrivateKey) && !string.IsNullOrEmpty(localStorageV2.iv))
 			{
 				var privateKey = await DecryptEoaFallback(
