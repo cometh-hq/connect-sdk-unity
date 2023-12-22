@@ -68,18 +68,21 @@ namespace ComethSDK.Scripts.Tools
 							txSuccessEventFound = true;
 							break;
 						}
-					if (txSuccessEventFound == false) {
-					var filterExecFailure = _execFailureEventHandler.CreateFilterInput(
-						new BlockParameter(oldBlockNumber), null);
-					var allFailureEventsFound = await _execFailureEventHandler.GetAllChangesAsync(filterExecFailure);
-					foreach (var events in allFailureEventsFound)
-						if (safeTxHashBytes.SequenceEqual(events.Event.TxHash))
-						{
-							Debug.Log("Failure");
-							txFailureEvent = events;
-							txFailureEventFound = true;
-							break;
-						}
+
+					if (txSuccessEventFound == false)
+					{
+						var filterExecFailure = _execFailureEventHandler.CreateFilterInput(
+							new BlockParameter(oldBlockNumber), null);
+						var allFailureEventsFound =
+							await _execFailureEventHandler.GetAllChangesAsync(filterExecFailure);
+						foreach (var events in allFailureEventsFound)
+							if (safeTxHashBytes.SequenceEqual(events.Event.TxHash))
+							{
+								Debug.Log("Failure");
+								txFailureEvent = events;
+								txFailureEventFound = true;
+								break;
+							}
 					}
 				}
 			}

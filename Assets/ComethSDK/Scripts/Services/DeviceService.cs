@@ -7,7 +7,6 @@ namespace ComethSDK.Scripts.Services
 	{
 		public static DeviceData GetDeviceData()
 		{
-			
 			return new DeviceData
 			{
 				browser = "",

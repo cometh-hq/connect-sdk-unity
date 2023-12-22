@@ -18,8 +18,10 @@ namespace ComethSDK.Scripts.Adapters
 		[SerializeField] private int chainId;
 		[SerializeField] private string apiKey;
 		[SerializeField] private string baseUrl;
+		[SerializeField] private string encryptionSalt;
 
 		private API _api;
+		private string _provider;
 		private Signer _signer;
 		private string _walletAddress;
 
@@ -32,7 +34,7 @@ namespace ComethSDK.Scripts.Adapters
 
 			if (!Utils.IsNetworkSupported(chainId.ToString())) throw new Exception("This network is not supported");
 			ChainId = chainId.ToString();
-
+			_provider = Constants.GetNetworkByChainID(ChainId).RPCUrl;
 			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, chainId) : new API(apiKey, chainId, baseUrl);
 		}
 
@@ -42,16 +44,17 @@ namespace ComethSDK.Scripts.Adapters
 		{
 			if (!string.IsNullOrEmpty(burnerAddress))
 			{
-				await VerifyWalletAddress(burnerAddress);
-				_signer = await BurnerWalletService.GetSigner(burnerAddress, _api,
-					Constants.GetNetworkByChainID(ChainId).RPCUrl);
+				_signer = await EoaFallbackService.GetSigner(_api, _provider, burnerAddress, encryptionSalt);
+				_walletAddress = burnerAddress;
 			}
 			else
 			{
-				_signer = await BurnerWalletService.CreateSigner(_api);
-			}
+				var (signer, walletAddress) =
+					await EoaFallbackService.CreateSigner(_api, encryptionSalt: encryptionSalt);
 
-			_walletAddress = await InitAdaptorWalletAddress(burnerAddress);
+				_signer = signer;
+				_walletAddress = walletAddress;
+			}
 		}
 
 		public Task Logout()

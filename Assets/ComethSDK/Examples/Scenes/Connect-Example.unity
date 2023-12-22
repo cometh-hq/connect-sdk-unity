@@ -3895,6 +3895,7 @@ MonoBehaviour:
   chainId: 80001
   apiKey: 
   baseUrl: https://api.connect.cometh.io
+  encryptionSalt: 
 --- !u!114 &1442284380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3907,10 +3908,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 377acc6ba7b043fb9a664ef1ad409c10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  authAdaptor: {fileID: 1442284379}
+  connectAuthAdaptor: {fileID: 1442284379}
   console: {fileID: 693827447}
   walletAddress: 
   apiKey: 
+  baseUrl: 
 --- !u!1 &1444845274
 GameObject:
   m_ObjectHideFlags: 0
