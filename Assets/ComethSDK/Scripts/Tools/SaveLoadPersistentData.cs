@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace ComethSDK.Scripts.Tools
 {
-	public class SaveLoadPersistentData
+	public static class SaveLoadPersistentData
 	{
 		/// <summary>
 		///     Save data to a file (overwrite completely)
@@ -26,18 +26,9 @@ namespace ComethSDK.Scripts.Tools
 				Directory.CreateDirectory(Path.GetDirectoryName(dataPath));
 
 			// attempt to save here data
-			try
-			{
-				// save datahere
-				File.WriteAllBytes(dataPath, byteData);
-				Debug.Log("Save data to: " + dataPath);
-			}
-			catch (Exception e)
-			{
-				// write out error here
-				Debug.LogError("Failed to save data to: " + dataPath);
-				Debug.LogError("Error " + e.Message);
-			}
+			//can throw exception
+			File.WriteAllBytes(dataPath, byteData);
+			Debug.Log("Save data to: " + dataPath);
 		}
 
 		/// <summary>
@@ -52,40 +43,25 @@ namespace ComethSDK.Scripts.Tools
 			if (!Directory.Exists(Path.GetDirectoryName(dataPath)))
 			{
 				Debug.LogWarning("File or path does not exist! " + dataPath);
-				return null;
+				throw new Exception("File or path does not exist! " + dataPath);
 			}
 
 			// load in the save data as byte array
-			byte[] jsonDataAsBytes = null;
+			//can throw exception
+			var jsonDataAsBytes = File.ReadAllBytes(dataPath);
+			Debug.Log("<color=green>Loaded all data from: </color>" + dataPath);
 
-			try
-			{
-				jsonDataAsBytes = File.ReadAllBytes(dataPath);
-				Debug.Log("<color=green>Loaded all data from: </color>" + dataPath);
-			}
-			catch (Exception e)
-			{
-				Debug.LogWarning("Failed to load data from: " + dataPath);
-				Debug.LogWarning("Error: " + e.Message);
-				return null;
-			}
-
-			if (jsonDataAsBytes == null)
-				return null;
-
-			var jsonData =
-				// convert the byte array to json
-				Encoding.ASCII.GetString(jsonDataAsBytes);
+			// convert the byte array to json
+			var jsonData = Encoding.ASCII.GetString(jsonDataAsBytes);
 
 			// convert to the specified object type
 			return JsonConvert.DeserializeObject<EncryptionData>(jsonData);
-			;
 		}
 
 		/// <summary>
 		///     Create file path for where a file is stored on the specific platform given a folder name and file name
 		/// </summary>
-		private static string GetFilePath(string FolderName, string FileName = "")
+		private static string GetFilePath(string folderName, string fileName = "")
 		{
 			string filePath;
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
@@ -96,10 +72,10 @@ namespace ComethSDK.Scripts.Tools
             filePath = Path.Combine(filePath, (FileName + ".txt"));
 #elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 			// windows
-			filePath = Path.Combine(Application.persistentDataPath, "data/" + FolderName);
+			filePath = Path.Combine(Application.persistentDataPath, "data/" + folderName);
 
-			if (FileName != "")
-				filePath = Path.Combine(filePath, FileName + ".txt");
+			if (fileName != "")
+				filePath = Path.Combine(filePath, fileName + ".txt");
 #elif UNITY_ANDROID
         // android
         filePath = Path.Combine(Application.persistentDataPath, ("data/" + FolderName));
