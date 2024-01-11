@@ -13,19 +13,17 @@ using UnityEngine;
 
 namespace ComethSDK.Scripts.Adapters
 {
-	public class ConnectAdaptor : MonoBehaviour, IAuthAdaptor
+	public class ConnectAdaptor : IAuthAdaptor
 	{
-		[SerializeField] private int chainId;
-		[SerializeField] private string apiKey;
-		[SerializeField] private string baseUrl;
-		[SerializeField] private string encryptionSalt;
+		private readonly API _api;
 
-		private API _api;
-		private string _provider;
+		private string _baseUrl;
+		private readonly string _encryptionSalt;
+		private readonly string _provider;
 		private Signer _signer;
 		private string _walletAddress;
 
-		private void Awake()
+		public ConnectAdaptor(int chainId, string apiKey, string baseUrl = "", string encryptionSalt = "")
 		{
 			if (chainId == 0)
 				throw new Exception("ChainId is not set");
@@ -34,25 +32,27 @@ namespace ComethSDK.Scripts.Adapters
 
 			if (!Utils.IsNetworkSupported(chainId.ToString())) throw new Exception("This network is not supported");
 			ChainId = chainId.ToString();
+
+			_baseUrl = baseUrl;
+			_encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
 			_provider = Constants.GetNetworkByChainID(ChainId).RPCUrl;
 			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, chainId) : new API(apiKey, chainId, baseUrl);
-			encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
 		}
 
-		public string ChainId { get; private set; }
+		public string ChainId { get; }
 
 		public async Task Connect(string burnerAddress = "")
 		{
 			if (!string.IsNullOrEmpty(burnerAddress))
 			{
-				await EoaFallbackService.MigrateV1Keys(burnerAddress, encryptionSalt);
-				_signer = await EoaFallbackService.GetSigner(_api, _provider, burnerAddress, encryptionSalt);
+				await EoaFallbackService.MigrateV1Keys(burnerAddress, _encryptionSalt);
+				_signer = await EoaFallbackService.GetSigner(_api, _provider, burnerAddress, _encryptionSalt);
 				_walletAddress = burnerAddress;
 			}
 			else
 			{
 				var (signer, walletAddress) =
-					await EoaFallbackService.CreateSigner(_api, encryptionSalt: encryptionSalt);
+					await EoaFallbackService.CreateSigner(_api, encryptionSalt: _encryptionSalt);
 				_signer = signer;
 				_walletAddress = walletAddress;
 			}
