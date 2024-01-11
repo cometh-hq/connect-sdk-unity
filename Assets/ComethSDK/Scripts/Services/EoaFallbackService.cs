@@ -65,9 +65,9 @@ namespace ComethSDK.Scripts.Services
 			return storageSigner;
 		}
 
-		public static async Task<string> GetSignerLocalStorage(string walletAddress, string encryptionSalt)
+		public static async Task MigrateV1Keys(string walletAddress, string encryptionSalt)
 		{
-			if (string.IsNullOrEmpty(encryptionSalt)) encryptionSalt = Constants.DEFAULT_ENCRYPTION_SALT;
+			encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
 
 			var localStorageV1 = PlayerPrefs.GetString($"cometh-connect-{walletAddress}");
 
@@ -77,16 +77,19 @@ namespace ComethSDK.Scripts.Services
 
 				await SetSignerLocalStorage(walletAddress, privateKey, encryptionSalt);
 				PlayerPrefs.DeleteKey($"cometh-connect-{walletAddress}");
-
-				return privateKey;
 			}
+		}
 
+		public static async Task<string> GetSignerLocalStorage(string walletAddress, string encryptionSalt)
+		{
 			var localStorageV2 = SaveLoadPersistentData.Load("connect",
 				walletAddress);
 
 			if (localStorageV2 == null) return null;
 			if (!string.IsNullOrEmpty(localStorageV2.encryptedPrivateKey) && !string.IsNullOrEmpty(localStorageV2.iv))
 			{
+				encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
+
 				var privateKey = await DecryptEoaFallback(
 					walletAddress,
 					Convert.FromBase64String(localStorageV2.encryptedPrivateKey),
@@ -101,6 +104,7 @@ namespace ComethSDK.Scripts.Services
 
 		public static async Task SetSignerLocalStorage(string walletAddress, string privateKey, string encryptionSalt)
 		{
+			encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
 			var encryptedData = await EncryptEoaFallback(walletAddress, privateKey, encryptionSalt);
 			SaveLoadPersistentData.Save(encryptedData, "connect", walletAddress);
 		}

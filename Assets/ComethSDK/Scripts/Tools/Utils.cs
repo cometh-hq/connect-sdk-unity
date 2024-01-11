@@ -118,5 +118,10 @@ namespace ComethSDK.Scripts.Tools
 
 			return false;
 		}
+		
+		public static string GetEncryptionSaltOrDefault(string salt)
+		{
+			return string.IsNullOrEmpty(salt) ? Constants.DEFAULT_ENCRYPTION_SALT : salt;
+		}
 	}
 }
