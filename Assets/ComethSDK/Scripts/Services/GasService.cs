@@ -9,7 +9,6 @@ using ComethSDK.Scripts.Types.MessageTypes;
 using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.Hex.HexTypes;
-using Nethereum.JsonRpc.Client;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.RPC.Eth.Transactions;
 using Nethereum.Web3;
@@ -135,7 +134,7 @@ namespace ComethSDK.Scripts.Services
 				transaction.operation = 0;
 			}
 
-			//var isSafeDeployed = await SafeService.IsDeployed(walletAddress, provider); //TODO: this is not implemented
+			var isSafeDeployed = await SafeService.IsDeployed(walletAddress, provider);
 
 			var simulateTxContract = SimulateTxAcessorService.GetContract(simulateTxAccessorAddress, provider);
 			var simulateFunction = simulateTxContract.GetFunction("simulate");
@@ -145,7 +144,7 @@ namespace ComethSDK.Scripts.Services
 			var transactionDataToEstimate = simulateFunction.GetData(simulateFunctionInputs);
 
 			// if the Safe is not deployed we can use the singleton address to simulate
-			var to = singletonAddress; //isSafeDeployed ? walletAddress : singletonAddress;
+			var to = isSafeDeployed ? walletAddress : singletonAddress;
 
 			var web3 = new Web3(provider);
 			var safeContract = web3.Eth.GetContract(Constants.SAFE_ABI, to);
@@ -171,16 +170,8 @@ namespace ComethSDK.Scripts.Services
 				var safeTxGas = DecodeSafeTxGas(smartContractCustomErrorRevertException.ExceptionEncodedData);
 				return AddExtraGasForSafety(BigInteger.Parse(safeTxGas));
 			}
-			catch (RpcResponseException revertResponseException)
-			{
-				Debug.Log("Revert Reason:" + revertResponseException.RpcError.Message);
-			}
-			catch (RpcClientUnknownException e)
-			{
-				Debug.Log(e);
-			}
 
-			return "";
+			throw new Exception("Error while estimating gas");
 		}
 
 		private static string DecodeSafeTxGas(string encodedSafeTxGas)
@@ -196,7 +187,7 @@ namespace ComethSDK.Scripts.Services
 			var web3 = new Web3(provider);
 			var ethEstimateGas = new EthEstimateGas(web3.Client);
 
-			var transactionInput = new CallInput    
+			var transactionInput = new CallInput
 			{
 				Data = data,
 				To = to,

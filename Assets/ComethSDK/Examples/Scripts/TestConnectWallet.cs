@@ -1,4 +1,5 @@
-﻿using ComethSDK.Scripts.Adapters;
+﻿using System.Threading.Tasks;
+using ComethSDK.Scripts.Adapters;
 using ComethSDK.Scripts.Core;
 using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Services;
@@ -49,6 +50,9 @@ namespace ComethSDK.Examples.Scripts
 			else
 				await _wallet.Connect(walletAddress);
 			PrintInConsole("Connected");
+
+			await SafeService.IsDeployed(_wallet.GetAddress(),
+				Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl);
 		}
 
 		public override async void Disconnect()
@@ -227,33 +231,41 @@ namespace ComethSDK.Examples.Scripts
 
 		public async void TestAddRemoveOwners()
 		{
-			var newOwner = "0x510c522ebCC6Eb376839E0CFf5D57bb2F422EB8b";
+			await TestAddOwner();
+			await TestRemOwner();
+		}
 
-			//var getOwnersFunction = await _wallet.GetOwners();
-			
-			/*var addOwnerSafeTxHash = await _wallet.AddOwner(newOwner);
+		public async void GetOwners()
+		{
+			var getOwnersFunction = await _wallet.GetOwners();
+			foreach (var owner in getOwnersFunction) Debug.Log(owner);
+		}
+
+		public async Task TestAddOwner()
+		{
+			var newOwner = "0x4C971b2211f6158d474324994C687ba48F040057";
+			var getOwnersFunction = await _wallet.GetOwners();
+			Debug.Log(getOwnersFunction);
+
+			var addOwnerSafeTxHash = await _wallet.AddOwner(newOwner);
 			var transactionReceipt = await _wallet.Wait(addOwnerSafeTxHash);
-			
+
 			if (transactionReceipt != null)
-			{
 				PrintInConsole("AddOwner Transaction confirmed");
-			}
 			else
-			{
 				PrintInConsole("Issue with AddOwner");
-			}*/
-			
-			var removeOwnerSafeTxHash = await _wallet.RemoveOwner(newOwner); 
+		}
+
+		public async Task TestRemOwner()
+		{
+			var newOwner = "0x4C971b2211f6158d474324994C687ba48F040057";
+			var removeOwnerSafeTxHash = await _wallet.RemoveOwner(newOwner);
 			var transactionReceipt = await _wallet.Wait(removeOwnerSafeTxHash);
-			
+
 			if (transactionReceipt != null)
-			{
 				PrintInConsole("RemoveOwner Transaction confirmed");
-			}
 			else
-			{ 
 				PrintInConsole("Issue with RemoveOwner");
-			}
 		}
 
 		public async void TestEstimateSafeTxGasWithSimulate()
