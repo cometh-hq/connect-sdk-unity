@@ -59,6 +59,16 @@ namespace ComethSDK.Scripts.Tools
 					NetworkName = "Mumbai",
 					BlockExplorerUrl = "https://mumbai.polygonscan.com/"
 				}
+			},
+			{
+				Network.MUSTER,
+				new NetworkData
+				{
+					ChainId = "2121337",
+					RPCUrl = "https://muster-anytrust.alt.technology",
+					NetworkName = "Muster",
+					BlockExplorerUrl = "https://muster-anytrust-explorer.alt.technology/"
+				}
 			}
 		};
 
