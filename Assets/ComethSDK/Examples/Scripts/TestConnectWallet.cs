@@ -30,13 +30,13 @@ namespace ComethSDK.Examples.Scripts
 
 		private void Start()
 		{
-			_connectAuthAdaptor = new ConnectAdaptor(chainId, apiKey, baseUrl);
 			if (string.IsNullOrEmpty(apiKey) || chainId == 0)
 			{
 				Debug.LogError("Please set the apiKey and chainId serialised variables");
 				return;
 			}
-
+			
+			_connectAuthAdaptor = new ConnectAdaptor(chainId, apiKey, baseUrl);
 			_wallet = string.IsNullOrEmpty(baseUrl)
 				? new ComethWallet(_connectAuthAdaptor, apiKey)
 				: new ComethWallet(_connectAuthAdaptor, apiKey, baseUrl);
