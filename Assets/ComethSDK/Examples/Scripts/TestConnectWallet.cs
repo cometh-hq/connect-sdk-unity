@@ -1,4 +1,5 @@
-﻿using ComethSDK.Scripts.Adapters;
+﻿using System.Threading.Tasks;
+using ComethSDK.Scripts.Adapters;
 using ComethSDK.Scripts.Core;
 using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Services;
@@ -49,6 +50,9 @@ namespace ComethSDK.Examples.Scripts
 			else
 				await _wallet.Connect(walletAddress);
 			PrintInConsole("Connected");
+
+			await SafeService.IsDeployed(_wallet.GetAddress(),
+				Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl);
 		}
 
 		public override async void Disconnect()
@@ -147,7 +151,6 @@ namespace ComethSDK.Examples.Scripts
 			var countFunction = contract.GetFunction("count");
 			var data = countFunction.GetData();
 			var web3 = new Web3(Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl);
-			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
 			EstimateGasAndShow(COUNTER_TEST_ADDRESS, "0", data);
 
 			PrintInConsole("Sending transaction...");
@@ -224,6 +227,45 @@ namespace ComethSDK.Examples.Scripts
 			PrintInConsole("Sending query to get Counter...");
 			var counterAmount = await counterFunction.CallAsync<int>(_wallet.GetAddress());
 			PrintInConsole("Query successful, Counter = " + counterAmount);
+		}
+
+		public async void TestAddRemoveOwners()
+		{
+			await TestAddOwner();
+			await TestRemOwner();
+		}
+
+		public async void GetOwners()
+		{
+			var getOwnersFunction = await _wallet.GetOwners();
+			foreach (var owner in getOwnersFunction) Debug.Log(owner);
+		}
+
+		public async Task TestAddOwner()
+		{
+			var newOwner = "0x4C971b2211f6158d474324994C687ba48F040057";
+			var getOwnersFunction = await _wallet.GetOwners();
+			Debug.Log(getOwnersFunction);
+
+			var addOwnerSafeTxHash = await _wallet.AddOwner(newOwner);
+			var transactionReceipt = await _wallet.Wait(addOwnerSafeTxHash);
+
+			if (transactionReceipt != null)
+				PrintInConsole("AddOwner Transaction confirmed");
+			else
+				PrintInConsole("Issue with AddOwner");
+		}
+
+		public async Task TestRemOwner()
+		{
+			var newOwner = "0x4C971b2211f6158d474324994C687ba48F040057";
+			var removeOwnerSafeTxHash = await _wallet.RemoveOwner(newOwner);
+			var transactionReceipt = await _wallet.Wait(removeOwnerSafeTxHash);
+
+			if (transactionReceipt != null)
+				PrintInConsole("RemoveOwner Transaction confirmed");
+			else
+				PrintInConsole("Issue with RemoveOwner");
 		}
 
 		public async void TestEstimateSafeTxGasWithSimulate()

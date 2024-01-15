@@ -36,6 +36,7 @@ namespace ComethSDK.Scripts.Tools
 		public static readonly string DEFAULT_ENCRYPTION_SALT = "COMETH-CONNECT";
 		public static readonly int PBKDF2_ITERATIONS = 1000000;
 
+		public static readonly string SAFE_SENTINEL_OWNERS = "0x1";
 
 		public static readonly Dictionary<Network, NetworkData> Networks = new()
 		{
