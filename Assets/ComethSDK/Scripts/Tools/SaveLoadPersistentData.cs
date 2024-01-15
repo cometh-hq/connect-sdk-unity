@@ -65,11 +65,11 @@ namespace ComethSDK.Scripts.Tools
 		{
 			string filePath;
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-        // mac
-        filePath = Path.Combine(Application.streamingAssetsPath, ("data/" + FolderName));
+			// mac
+			filePath = Path.Combine(Application.persistentDataPath, ("data/" + folderName));
 
-        if (FileName != "")
-            filePath = Path.Combine(filePath, (FileName + ".txt"));
+			if (fileName != "")
+				filePath = Path.Combine(filePath, (fileName + ".txt"));
 #elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 			// windows
 			filePath = Path.Combine(Application.persistentDataPath, "data/" + folderName);
