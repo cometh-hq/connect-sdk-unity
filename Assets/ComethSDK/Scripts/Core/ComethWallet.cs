@@ -107,7 +107,6 @@ namespace ComethSDK.Scripts.Core
 		{
 			if (_authAdaptor == null) throw new Exception("Cannot provide user infos");
 
-			var userInfo = _authAdaptor.GetUserInfos();
 			var userInfos = new UserInfos
 			{
 				ownerAddress = _authAdaptor.GetAccount(),
@@ -135,22 +134,31 @@ namespace ComethSDK.Scripts.Core
 
 		public async Task<string> AddOwner(string newOwner)
 		{
-			if (!_connected)
-			{
-				Debug.Log("Please Login First");
-				return "";
-			}
+			CheckIsLoggedIn();
 
-			var to = _walletAddress;
-			const string value = "0";
+			var tx = await SafeService.PrepareAddOwnerTx(GetAddress(), newOwner, _provider);
 
-			var contract = _web3.Eth.GetContract(Constants.SAFE_ABI, _walletAddress);
-			var addOwnerWithThresholdFunction = contract.GetFunction("addOwnerWithThreshold");
-			var data = addOwnerWithThresholdFunction.GetData(newOwner, 1);
-
-			var safeTxHash = await SendTransaction(to, value, data);
+			var safeTxHash = await SendTransaction(tx);
 
 			return safeTxHash;
+		}
+
+		public async Task<string> RemoveOwner(string owner)
+		{
+			CheckIsLoggedIn();
+
+			var tx = await SafeService.PrepareRemoveOwnerTx(GetAddress(), owner, _provider);
+
+			//TODO: remove the local storage of the private key
+
+			var safeTxHash = await SendTransaction(tx);
+
+			return safeTxHash;
+		}
+
+		public async Task<List<string>> GetOwners()
+		{
+			return await SafeService.GetOwners(_walletAddress, _provider);
 		}
 
 		public void CancelWaitingForEvent()
@@ -206,25 +214,37 @@ namespace ComethSDK.Scripts.Core
 		//TODO: change return type to SendTransactionResponse
 		public async Task<string> SendTransaction(string to, string value, string data)
 		{
-			if (!_connected)
+			return await SendTransaction(new MetaTransactionData
 			{
-				Debug.Log("Please Login First");
-				return "";
-			}
+				to = to,
+				value = value,
+				data = data
+			});
+		}
+
+		public async Task<string> SendTransaction(MetaTransactionData safeTxData)
+		{
+			CheckIsLoggedIn();
+
+			var safeTxDataArray = new IMetaTransactionData[]
+			{
+				safeTxData
+			};
 
 			var nonce = await Utils.GetNonce(_web3, _walletAddress);
 			var typedData = Utils.CreateSafeTxTypedData(_chainId, _walletAddress);
-			var safeTx = Utils.CreateSafeTx(to, value, data, nonce);
+			var safeTx = Utils.CreateSafeTx(safeTxDataArray[0].to, safeTxDataArray[0].value, safeTxDataArray[0].data,
+				nonce);
 
-			if (!ToSponsoredAddress(safeTx.to))
+			if (!IsSponsoredTransaction(safeTxDataArray))
 			{
 				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress, "",
 					Constants.MUMBAI_SAFE_SINGLETON_ADDRESS, Constants.MUMBAI_SAFE_TX_ACCESSOR_ADDRESS, _provider);
-				await GasService.VerifyHasEnoughBalance(_walletAddress, to, value, data, nonce, _provider);
+				await GasService.VerifyHasEnoughBalance(_walletAddress, safeTxDataArray[0].to, safeTxDataArray[0].value,
+					safeTxDataArray[0].data, nonce, _provider);
 			}
 
 			var txSignature = await SignTypedData(safeTx, typedData);
-
 			Debug.Log("Sending Transaction");
 			return await _api.RelayTransaction(new RelayTransactionType(
 				safeTx, txSignature, _walletAddress)
@@ -234,14 +254,8 @@ namespace ComethSDK.Scripts.Core
 		//TODO: change return type to SendTransactionResponse
 		public async Task<string> SendBatchTransactions(IMetaTransactionData[] safeTxData)
 		{
+			CheckIsLoggedIn();
 			if (safeTxData.Length == 0) throw new Exception("Empty array provided, no transaction to send");
-
-			if (!_connected)
-			{
-				Debug.Log("Please Login First");
-				return "";
-			}
-
 			if (_projectParams == null) throw new Exception("Project params not found");
 
 			var nonce = await Utils.GetNonce(_web3, _walletAddress);
@@ -252,7 +266,7 @@ namespace ComethSDK.Scripts.Core
 				OperationType.DELEGATE_CALL);
 			var dataType = Utils.CreateSafeTxTypedData(_chainId, _walletAddress);
 
-			if (!await IsSponsoredTransaction(safeTxData))
+			if (!IsSponsoredTransaction(safeTxData))
 			{
 				var safeTxGasString = await GasService.EstimateSafeTxGasWithSimulate(_walletAddress, safeTxData,
 					_projectParams.MultiSendContractAddress,
@@ -314,13 +328,10 @@ namespace ComethSDK.Scripts.Core
 		private async Task<string> SignTypedData<T, TDomain>(T message, TypedData<TDomain> typedData)
 		{
 			var signer = _authAdaptor.GetSigner();
-			string signature;
-
-			signature = signer.SignTypedData(message, typedData);
-			return signature;
+			return signer.SignTypedData(message, typedData);
 		}
 
-		private async Task<bool> IsSponsoredTransaction(IMetaTransactionData[] safeTxDataArray)
+		private bool IsSponsoredTransaction(IMetaTransactionData[] safeTxDataArray)
 		{
 			foreach (var safeTxData in safeTxDataArray)
 			{
@@ -339,6 +350,15 @@ namespace ComethSDK.Scripts.Core
 			var index = _sponsoredAddresses.FindIndex(
 				sponsoredAddress => sponsoredAddress.targetAddress == to.ToLower());
 			return index >= 0;
+		}
+
+		private void CheckIsLoggedIn()
+		{
+			if (!_connected)
+			{
+				Debug.Log("Please Login First");
+				throw new InvalidOperationException("Connection not established. Please log in first.");
+			}
 		}
 	}
 }
