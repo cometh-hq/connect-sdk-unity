@@ -113,7 +113,7 @@ namespace ComethSDK.Scripts.Services
 		public static async Task<string> EstimateSafeTxGasWithSimulate(string walletAddress,
 			IMetaTransactionData[] safeTxData,
 			string multiSendAddress, string singletonAddress, string simulateTxAccessorAddress,
-			string provider) //TODO: transaction data into a n array to handle multisend
+			string provider)
 		{
 			IMetaTransactionData transaction;
 
@@ -202,19 +202,6 @@ namespace ComethSDK.Scripts.Services
 				Data = data,
 				To = to,
 				From = from
-			};
-			return await ethEstimateGas.SendRequestAsync(transactionInput);
-		}
-
-		private static async Task<BigInteger> CalculateSafeTxGas(string data, string to, string provider)
-		{
-			var web3 = new Web3(provider);
-			var ethEstimateGas = new EthEstimateGas(web3.Client);
-
-			var transactionInput = new CallInput
-			{
-				Data = data,
-				To = to
 			};
 			return await ethEstimateGas.SendRequestAsync(transactionInput);
 		}

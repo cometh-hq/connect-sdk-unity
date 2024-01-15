@@ -13,23 +13,32 @@ namespace ComethSDK.Examples.Scripts
 {
 	public class TestConnectWallet : TestWallet
 	{
-		[SerializeField] public ConnectAdaptor connectAuthAdaptor;
-		[SerializeField] private TMP_Text console;
-		[SerializeField] private string walletAddress;
-		[SerializeField] private string apiKey;
+		[Header("Required")] [SerializeField] private string apiKey;
+
+		[SerializeField] private int chainId;
+
+		[Header("Optional")] [SerializeField] private string walletAddress;
+
 		[SerializeField] private string baseUrl;
+
+		[Header("UI")] [SerializeField] private TMP_Text console;
+
+		private ConnectAdaptor _connectAuthAdaptor;
 
 		private ComethWallet _wallet;
 
 		private void Start()
 		{
-			if (!connectAuthAdaptor && string.IsNullOrEmpty(apiKey))
+			_connectAuthAdaptor = new ConnectAdaptor(chainId, apiKey, baseUrl);
+			if (string.IsNullOrEmpty(apiKey) || chainId == 0)
 			{
-				Debug.LogError("Please set the apiKey & connectAuthAdaptor serialised variables");
+				Debug.LogError("Please set the apiKey and chainId serialised variables");
 				return;
 			}
 
-			_wallet = string.IsNullOrEmpty(baseUrl) ? new ComethWallet(connectAuthAdaptor, apiKey) : new ComethWallet(connectAuthAdaptor, apiKey, baseUrl);
+			_wallet = string.IsNullOrEmpty(baseUrl)
+				? new ComethWallet(_connectAuthAdaptor, apiKey)
+				: new ComethWallet(_connectAuthAdaptor, apiKey, baseUrl);
 		}
 
 		public override async void Connect()
@@ -86,7 +95,7 @@ namespace ComethSDK.Examples.Scripts
 			var transactionReceipt = await _wallet.Wait(safeTxHash);
 			PrintInConsole("Transaction confirmed, see it on the block explorer: " +
 			               transactionReceipt.TransactionHash);
-			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, connectAuthAdaptor.ChainId);
+			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, _connectAuthAdaptor.ChainId);
 		}
 
 		public async void SendBatchTestTransaction(string to)
@@ -120,7 +129,7 @@ namespace ComethSDK.Examples.Scripts
 			var transactionReceipt = await _wallet.Wait(safeTxHash);
 			PrintInConsole("Transaction confirmed, see it on the block explorer: " +
 			               transactionReceipt.TransactionHash);
-			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, connectAuthAdaptor.ChainId);
+			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, _connectAuthAdaptor.ChainId);
 		}
 
 		public void GetAddress()
@@ -137,7 +146,7 @@ namespace ComethSDK.Examples.Scripts
 			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNTER_TEST_ADDRESS);
 			var countFunction = contract.GetFunction("count");
 			var data = countFunction.GetData();
-			var web3 = new Web3(Constants.GetNetworkByChainID(connectAuthAdaptor.ChainId).RPCUrl);
+			var web3 = new Web3(Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl);
 			var nonce = await Utils.GetNonce(web3, _wallet.GetAddress());
 			EstimateGasAndShow(COUNTER_TEST_ADDRESS, "0", data);
 
@@ -151,12 +160,12 @@ namespace ComethSDK.Examples.Scripts
 			{
 				PrintInConsole("Transaction confirmed, see it on the block explorer: " +
 				               transactionReceipt.TransactionHash);
-				SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, connectAuthAdaptor.ChainId);
+				SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, _connectAuthAdaptor.ChainId);
 			}
 			else
 			{
 				PrintInConsole("Issue with event, redirecting to wallet to see the transaction");
-				SeeWalletOnBlockExplorer(_wallet.GetAddress(), connectAuthAdaptor.ChainId);
+				SeeWalletOnBlockExplorer(_wallet.GetAddress(), _connectAuthAdaptor.ChainId);
 			}
 		}
 
@@ -196,12 +205,12 @@ namespace ComethSDK.Examples.Scripts
 			{
 				PrintInConsole("Transaction confirmed, see it on the block explorer: " +
 				               transactionReceipt.TransactionHash);
-				SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, connectAuthAdaptor.ChainId);
+				SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, _connectAuthAdaptor.ChainId);
 			}
 			else
 			{
 				PrintInConsole("Issue with event, redirecting to wallet to see the transaction");
-				SeeWalletOnBlockExplorer(_wallet.GetAddress(), connectAuthAdaptor.ChainId);
+				SeeWalletOnBlockExplorer(_wallet.GetAddress(), _connectAuthAdaptor.ChainId);
 			}
 		}
 
@@ -229,7 +238,7 @@ namespace ComethSDK.Examples.Scripts
 
 		private async void EstimateGasAndShow(string to, string value, string data)
 		{
-			var provider = Constants.GetNetworkByChainID(connectAuthAdaptor.ChainId).RPCUrl;
+			var provider = Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl;
 			var txData = new SafeTx
 			{
 				to = to,
@@ -245,7 +254,7 @@ namespace ComethSDK.Examples.Scripts
 
 		private async void EstimateGasAndShowWithSimulate(string to, string value, string data)
 		{
-			var provider = Constants.GetNetworkByChainID(connectAuthAdaptor.ChainId).RPCUrl;
+			var provider = Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl;
 			var txData = new SafeTx
 			{
 				to = to,
@@ -280,9 +289,9 @@ namespace ComethSDK.Examples.Scripts
 
 		private async void AddSignerRequestExamples()
 		{
-			var addSignerRequest = await connectAuthAdaptor.InitNewSignerRequest(walletAddress);
-			var newSignerRequests = await connectAuthAdaptor.GetNewSignerRequests();
-			
+			var addSignerRequest = await _connectAuthAdaptor.InitNewSignerRequest(walletAddress);
+			var newSignerRequests = await _connectAuthAdaptor.GetNewSignerRequests();
+
 			var newSignerRequest = newSignerRequests[0];
 			await _wallet.AddOwner(newSignerRequest.signerAddress);
 		}

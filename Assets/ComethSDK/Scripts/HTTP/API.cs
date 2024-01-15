@@ -32,7 +32,7 @@ namespace ComethSDK.Scripts.HTTP
 	public class API
 	{
 		private readonly HttpClient _api;
-		
+
 		public API(string apiKey, int chainId, string baseUrl = Constants.API_URL)
 		{
 			_api = new HttpClient();

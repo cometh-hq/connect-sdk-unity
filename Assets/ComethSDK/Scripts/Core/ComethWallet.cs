@@ -46,7 +46,9 @@ namespace ComethSDK.Scripts.Core
 		{
 			if (!Utils.IsNetworkSupported(authAdaptor.ChainId)) throw new Exception("This network is not supported");
 			_chainId = authAdaptor.ChainId;
-			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, int.Parse(_chainId)) : new API(apiKey, int.Parse(_chainId), baseUrl);
+			_api = string.IsNullOrEmpty(baseUrl)
+				? new API(apiKey, int.Parse(_chainId))
+				: new API(apiKey, int.Parse(_chainId), baseUrl);
 			_authAdaptor = authAdaptor;
 		}
 
