@@ -35,7 +35,7 @@ namespace ComethSDK.Examples.Scripts
 				Debug.LogError("Please set the apiKey and chainId serialised variables");
 				return;
 			}
-			
+
 			_connectAuthAdaptor = new ConnectAdaptor(chainId, apiKey, baseUrl);
 			_wallet = string.IsNullOrEmpty(baseUrl)
 				? new ComethWallet(_connectAuthAdaptor, apiKey)
@@ -187,13 +187,13 @@ namespace ComethSDK.Examples.Scripts
 				new MetaTransactionData
 				{
 					to = COUNTER_TEST_ADDRESS,
-					value = "0x00",
+					value = "0",
 					data = data
 				},
 				new MetaTransactionData
 				{
 					to = COUNTER_TEST_ADDRESS,
-					value = "0x00",
+					value = "0",
 					data = data
 				}
 			};
@@ -306,7 +306,9 @@ namespace ComethSDK.Examples.Scripts
 
 			var txDataArray = new IMetaTransactionData[] { txData };
 			var gas = await GasService.EstimateSafeTxGasWithSimulate(walletAddress, txDataArray, "",
-				Constants.MUMBAI_SAFE_SINGLETON_ADDRESS, Constants.MUMBAI_SAFE_TX_ACCESSOR_ADDRESS, provider);
+				Constants.GetNetworkByChainID(chainId.ToString()).SafeSingletonAddress,
+				Constants.GetNetworkByChainID(chainId.ToString()).SafeTxAccessorAddress,
+				provider);
 
 			PrintInConsole("Estimated safeTxGas gas Simulated: " + gas);
 		}

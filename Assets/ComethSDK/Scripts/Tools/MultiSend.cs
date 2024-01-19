@@ -23,13 +23,13 @@ namespace ComethSDK.Scripts.Tools
 			var web3 = new Web3(provider);
 
 			var contract = web3.Eth.GetContract(Constants.MULTI_SEND_ABI, multiSendContractAddress);
-			var countFunction = contract.GetFunction("multiSend");
-			var data = countFunction.GetData(transactionEncoded.HexToByteArray());
+			var multiSendFunction = contract.GetFunction("multiSend");
+			var data = multiSendFunction.GetData(transactionEncoded.HexToByteArray());
 
 			var metaTransaction = new MetaTransactionData
 			{
 				to = multiSendContractAddress,
-				value = "0x00",
+				value = "0",
 				data = data
 			};
 			return metaTransaction;
@@ -38,7 +38,7 @@ namespace ComethSDK.Scripts.Tools
 		private static byte[] EncodeMultiSend(IMetaTransactionData safeTxData)
 		{
 			var callData = safeTxData.data.HexToByteArray();
-			var operation = new ABIValue("uint8", 1);
+			var operation = new ABIValue("uint8", 0);
 			var address = new ABIValue("address", safeTxData.to);
 			var value = new ABIValue("uint256", safeTxData.value);
 			var dataLength = new ABIValue("uint256", callData.Length);
