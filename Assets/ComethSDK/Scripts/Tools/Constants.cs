@@ -9,7 +9,8 @@ namespace ComethSDK.Scripts.Tools
 		public enum Network
 		{
 			POLYGON,
-			MUMBAI
+			MUMBAI,
+			MUSTER
 		}
 
 		public const string API_URL = "https://api.connect.cometh.io/";
@@ -30,9 +31,6 @@ namespace ComethSDK.Scripts.Tools
 		public static readonly BigInteger BLOCK_EVENT_GAP = -500;
 		public static readonly BigInteger DEFAULT_BASE_GAS = 80000;
 
-		public static readonly string MUMBAI_SAFE_SINGLETON_ADDRESS = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E";
-		public static readonly string MUMBAI_SAFE_TX_ACCESSOR_ADDRESS = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da";
-
 		public static readonly string DEFAULT_ENCRYPTION_SALT = "COMETH-CONNECT";
 		public static readonly int PBKDF2_ITERATIONS = 1000000;
 
@@ -47,7 +45,9 @@ namespace ComethSDK.Scripts.Tools
 					ChainId = "137",
 					RPCUrl = "https://polygon-rpc.com",
 					NetworkName = "Polygon",
-					BlockExplorerUrl = "https://polygonscan.com/"
+					BlockExplorerUrl = "https://polygonscan.com/",
+					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
+					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
 				}
 			},
 			{
@@ -57,7 +57,31 @@ namespace ComethSDK.Scripts.Tools
 					ChainId = "80001",
 					RPCUrl = "https://rpc-mumbai.maticvigil.com",
 					NetworkName = "Mumbai",
-					BlockExplorerUrl = "https://mumbai.polygonscan.com/"
+					BlockExplorerUrl = "https://mumbai.polygonscan.com/",
+					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
+					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
+				}
+			},
+			{
+				Network.MUSTER,
+				new NetworkData
+				{
+					ChainId = "2121337",
+					RPCUrl = "https://muster-anytrust.alt.technology",
+					NetworkName = "Muster",
+					BlockExplorerUrl = "https://muster-anytrust-explorer.alt.technology/",
+					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
+					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
+				}
+			},
+			{
+				Network.MUSTER,
+				new NetworkData
+				{
+					ChainId = "2121337",
+					RPCUrl = "https://muster-anytrust.alt.technology",
+					NetworkName = "Muster",
+					BlockExplorerUrl = "https://muster-anytrust-explorer.alt.technology/"
 				}
 			}
 		};
@@ -79,6 +103,8 @@ namespace ComethSDK.Scripts.Tools
 			public string NetworkName;
 			public string P256FactoryContractAddress;
 			public string RPCUrl;
+			public string SafeSingletonAddress;
+			public string SafeTxAccessorAddress;
 		}
 	}
 }

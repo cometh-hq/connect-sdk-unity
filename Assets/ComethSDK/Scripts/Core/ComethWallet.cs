@@ -239,7 +239,9 @@ namespace ComethSDK.Scripts.Core
 			if (!IsSponsoredTransaction(safeTxDataArray))
 			{
 				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress, "",
-					Constants.MUMBAI_SAFE_SINGLETON_ADDRESS, Constants.MUMBAI_SAFE_TX_ACCESSOR_ADDRESS, _provider);
+					Constants.GetNetworkByChainID(_chainId).SafeSingletonAddress,
+					Constants.GetNetworkByChainID(_chainId).SafeTxAccessorAddress
+					, _provider);
 				await GasService.VerifyHasEnoughBalance(_walletAddress, safeTxDataArray[0].to, safeTxDataArray[0].value,
 					safeTxDataArray[0].data, nonce, _provider);
 			}
@@ -262,7 +264,7 @@ namespace ComethSDK.Scripts.Core
 			var multiSendData = MultiSend
 				.EncodeMultiSendArray(safeTxData, _provider, _projectParams.MultiSendContractAddress)
 				.data;
-			var safeTx = Utils.CreateSafeTx(_projectParams.MultiSendContractAddress, "0x00", multiSendData, nonce,
+			var safeTx = Utils.CreateSafeTx(_projectParams.MultiSendContractAddress, "0", multiSendData, nonce,
 				OperationType.DELEGATE_CALL);
 			var dataType = Utils.CreateSafeTxTypedData(_chainId, _walletAddress);
 
@@ -270,7 +272,9 @@ namespace ComethSDK.Scripts.Core
 			{
 				var safeTxGasString = await GasService.EstimateSafeTxGasWithSimulate(_walletAddress, safeTxData,
 					_projectParams.MultiSendContractAddress,
-					Constants.MUMBAI_SAFE_SINGLETON_ADDRESS, Constants.MUMBAI_SAFE_TX_ACCESSOR_ADDRESS, _provider);
+					Constants.GetNetworkByChainID(_chainId).SafeSingletonAddress,
+					Constants.GetNetworkByChainID(_chainId).SafeTxAccessorAddress,
+					_provider);
 
 				var gasEstimates = new GasEstimates
 				{

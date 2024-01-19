@@ -96,6 +96,8 @@ namespace ComethSDK.Scripts.Services
 
 		public static async Task<List<string>> GetOwners(string walletAddress, string provider)
 		{
+			if (!await IsDeployed(walletAddress, provider)) throw new Exception("Wallet is not deployed");
+
 			var web3 = new Web3(provider);
 			var contract = web3.Eth.GetContract(Constants.SAFE_ABI, walletAddress);
 			var getOwnersFunction = contract.GetFunction("getOwners");
@@ -106,15 +108,12 @@ namespace ComethSDK.Scripts.Services
 
 		private static async Task<bool> IsSafeOwner(string walletAddress, string signerAddress, string provider)
 		{
+			if (!await IsDeployed(walletAddress, provider)) throw new Exception("Wallet is not deployed");
+
 			var web3 = new Web3(provider);
 			var service = new GnosisSafeService(web3, walletAddress);
 
-			if (await IsDeployed(walletAddress, provider))
-			{
-				return await service.IsOwnerQueryAsync(signerAddress);
-			}
-
-			throw new Exception("Wallet is not deployed");
+			return await service.IsOwnerQueryAsync(signerAddress);
 		}
 
 		public static async Task<bool> IsDeployed(string walletAddress, string provider)

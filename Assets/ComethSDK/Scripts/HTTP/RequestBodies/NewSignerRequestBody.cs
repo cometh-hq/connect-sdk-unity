@@ -8,5 +8,8 @@ namespace ComethSDK.Scripts.HTTP.RequestBodies
 		public string signerAddress { get; set; }
 		public DeviceData deviceData { get; set; }
 		public string type { get; set; }
+		public string publicKeyId { get; set; }
+		public string publicKeyX { get; set; }
+		public string publicKeyY { get; set; }
 	}
 }
