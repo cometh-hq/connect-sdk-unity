@@ -284,7 +284,7 @@ namespace ComethSDK.Examples.Scripts
 
 		private async void EstimateGasAndShow(string to, string value, string data)
 		{
-			var provider = Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl;
+			var rpcUrl = Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl;
 			var txData = new SafeTx
 			{
 				to = to,
@@ -294,13 +294,13 @@ namespace ComethSDK.Examples.Scripts
 
 			IMetaTransactionData[] safeTxDataArray = { txData };
 
-			var estimates = await GasService.EstimateTransactionGas(safeTxDataArray, walletAddress, provider);
+			var estimates = await GasService.EstimateTransactionGas(safeTxDataArray, walletAddress, rpcUrl);
 			PrintInConsole("Estimated safeTxGas Normal: " + estimates);
 		}
 
 		private async void EstimateGasAndShowWithSimulate(string to, string value, string data)
 		{
-			var provider = Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl;
+			var rpcUrl = Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl;
 			var txData = new SafeTx
 			{
 				to = to,
@@ -312,7 +312,7 @@ namespace ComethSDK.Examples.Scripts
 			var gas = await GasService.EstimateSafeTxGasWithSimulate(walletAddress, txDataArray, "",
 				Constants.GetNetworkByChainID(chainId.ToString()).SafeSingletonAddress,
 				Constants.GetNetworkByChainID(chainId.ToString()).SafeTxAccessorAddress,
-				provider);
+				rpcUrl);
 
 			PrintInConsole("Estimated safeTxGas gas Simulated: " + gas);
 		}

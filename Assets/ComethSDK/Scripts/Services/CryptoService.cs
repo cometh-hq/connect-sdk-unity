@@ -60,7 +60,7 @@ namespace ComethSDK.Scripts.Services
 
 		public static byte[] GetRandomIV()
 		{
-			using (var rng = new RNGCryptoServiceProvider())
+			using (var rng = new RNGCryptoServicerpcUrl())
 			{
 				var iv = new byte[16];
 				rng.GetBytes(iv);

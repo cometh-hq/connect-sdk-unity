@@ -5,5 +5,7 @@
 		public string ChainId;
 		public string MultiSendContractAddress;
 		public string P256FactoryContractAddress;
+		public string SafeSingletonAddress;
+		public string SafeTxAccessorAddress;
 	}
 }

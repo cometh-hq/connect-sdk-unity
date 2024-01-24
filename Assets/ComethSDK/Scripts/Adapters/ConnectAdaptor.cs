@@ -18,7 +18,6 @@ namespace ComethSDK.Scripts.Adapters
 		private readonly API _api;
 		private readonly string _encryptionSalt;
 		private readonly string _rpcUrl;
-
 		private Signer _signer;
 		private string _walletAddress;
 
