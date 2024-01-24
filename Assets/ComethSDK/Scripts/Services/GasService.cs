@@ -110,9 +110,8 @@ namespace ComethSDK.Scripts.Services
 		}
 
 		public static async Task<string> EstimateSafeTxGasWithSimulate(string walletAddress,
-			IMetaTransactionData[] safeTxData,
-			string multiSendAddress, string singletonAddress, string simulateTxAccessorAddress,
-			string rpcUrl)
+			IMetaTransactionData[] safeTxData, string multiSendAddress, string singletonAddress, 
+			string simulateTxAccessorAddress, string rpcUrl)
 		{
 			IMetaTransactionData transaction;
 
@@ -200,7 +199,7 @@ namespace ComethSDK.Scripts.Services
 		{
 			var safeTxGasInt = (int)safeTxGas;
 
-			return Math.Round(safeTxGasInt * 1.1, 0).ToString();
+			return Math.Round(safeTxGasInt * 1.2, 0).ToString();
 		}
 	}
 }

@@ -23,7 +23,7 @@ namespace ComethSDK.Scripts.Adapters
 		private Signer _signer;
 		private string _walletAddress;
 
-		public ConnectAdaptor(int chainId, string apiKey, string baseUrl = "", string encryptionSalt = "")
+		public ConnectAdaptor(int chainId, string apiKey, string baseUrl = "", string encryptionSalt = "", string rpcUrl = "")
 		{
 			if (chainId == 0)
 				throw new Exception("ChainId is not set");
@@ -35,7 +35,9 @@ namespace ComethSDK.Scripts.Adapters
 
 			_baseUrl = baseUrl;
 			_encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
-			_rpcUrl = Constants.GetNetworkByChainID(ChainId).RPCUrl;
+			_rpcUrl = string.IsNullOrEmpty(rpcUrl)
+				? Constants.GetNetworkByChainID(_chainId).RPCUrl
+				: rpcUrl;
 			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, chainId) : new API(apiKey, chainId, baseUrl);
 		}
 
@@ -115,30 +117,6 @@ namespace ComethSDK.Scripts.Adapters
 		{
 			var walletAddress = await GetWalletAddress();
 			return await _api.GetNewSignerRequests(walletAddress);
-		}
-
-		private async Task<string> InitAdaptorWalletAddress(string address)
-		{
-			if (_signer == null) throw new Exception("No signer instance found");
-
-			return string.IsNullOrEmpty(address)
-				? address
-				: await _api.GetWalletAddress(_signer.GetAddress());
-		}
-
-		private async Task VerifyWalletAddress(string walletAddress)
-		{
-			WalletInfos connectWallet;
-			try
-			{
-				connectWallet = await _api.GetWalletInfos(walletAddress);
-			}
-			catch
-			{
-				throw new Exception("Invalid address format");
-			}
-
-			if (connectWallet == null) throw new Exception("Wallet does not exist");
 		}
 
 		private void CheckIfSignerIsSet()

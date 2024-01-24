@@ -52,14 +52,13 @@ namespace ComethSDK.Scripts.Core
 			_rpcUrl = string.IsNullOrEmpty(rpcUrl)
 				? Constants.GetNetworkByChainID(_chainId).RPCUrl
 				: rpcUrl;
+			__web3 = new Web3(_rpcUrl)
 			_authAdaptor = authAdaptor;
 		}
 
 		public async Task Connect([CanBeNull] string burnerAddress = "")
 		{
 			if (_authAdaptor == null) throw new Exception("No auth adaptor found");
-
-			_web3 = new Web3(_rpcUrl);
 
 			await _authAdaptor.Connect(burnerAddress);
 
@@ -71,7 +70,7 @@ namespace ComethSDK.Scripts.Core
 			var nonce = await _api.GetNonce(predictedWalletAddress);
 			if (nonce == null) throw new Exception("Error while getting nonce");
 
-			var message = CreateMessage(predictedWalletAddress, nonce);
+			var message = SiweService.CreateMessage(predictedWalletAddress, nonce);
 			var messageToSign = SiweMessageStringBuilder.BuildMessage(message);
 			var signatureSiwe = await SignMessage(messageToSign);
 
@@ -138,7 +137,7 @@ namespace ComethSDK.Scripts.Core
 		{
 			CheckIsLoggedIn();
 
-			var tx = await SafeService.PrepareAddOwnerTx(GetAddress(), newOwner, _provider);
+			var tx = await SafeService.PrepareAddOwnerTx(GetAddress(), newOwner, _rpcUrl);
 
 			var safeTxHash = await SendTransaction(tx);
 
@@ -149,7 +148,7 @@ namespace ComethSDK.Scripts.Core
 		{
 			CheckIsLoggedIn();
 
-			var tx = await SafeService.PrepareRemoveOwnerTx(GetAddress(), owner, _provider);
+			var tx = await SafeService.PrepareRemoveOwnerTx(GetAddress(), owner, _rpcUrl);
 
 			//TODO: remove the local storage of the private key
 
@@ -160,7 +159,7 @@ namespace ComethSDK.Scripts.Core
 
 		public async Task<List<string>> GetOwners()
 		{
-			return await SafeService.GetOwners(_walletAddress, _provider);
+			return await SafeService.GetOwners(_walletAddress, _rpcUrl);
 		}
 
 		public void CancelWaitingForEvent()
@@ -243,9 +242,9 @@ namespace ComethSDK.Scripts.Core
 				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress, _projectParams.MultiSendContractAddress,
 					_projectParams.SafeSingletonAddress,
 					_projectParams.SafeTxAccessorAddress
-					, _provider);
+					, _rpcUrl);
 				await GasService.VerifyHasEnoughBalance(_walletAddress, safeTxDataArray[0].to, safeTxDataArray[0].value,
-					safeTxDataArray[0].data, nonce, _provider);
+					safeTxDataArray[0].data, nonce, _rpcUrl);
 			}
 
 			var txSignature = await SignTypedData(safeTx, typedData);
@@ -264,7 +263,7 @@ namespace ComethSDK.Scripts.Core
 
 			var nonce = await Utils.GetNonce(_web3, _walletAddress);
 			var multiSendData = MultiSend
-				.EncodeMultiSendArray(safeTxData, _provider, _projectParams.MultiSendContractAddress)
+				.EncodeMultiSendArray(safeTxData, _rpcUrl, _projectParams.MultiSendContractAddress)
 				.data;
 			var safeTx = Utils.CreateSafeTx(_projectParams.MultiSendContractAddress, "0", multiSendData, nonce,
 				OperationType.DELEGATE_CALL);
@@ -276,17 +275,17 @@ namespace ComethSDK.Scripts.Core
 					_projectParams.MultiSendContractAddress,
 					_projectParams.SafeSingletonAddress,
 					_projectParams.SafeTxAccessorAddress,
-					_provider);
+					_rpcUrl);
 
 				var gasEstimates = new GasEstimates
 				{
 					baseGas = BASE_GAS,
-					gasPrice = await GasService.GetGasPrice(_provider),
+					gasPrice = await GasService.GetGasPrice(_rpcUrl),
 					safeTxGas = BigInteger.Parse(safeTxGasString)
 				};
 
 				var txValue = SafeService.GetTransactionsTotalValue(safeTxData);
-				await GasService.VerifyHasEnoughBalance(_walletAddress, gasEstimates, txValue, _provider);
+				await GasService.VerifyHasEnoughBalance(_walletAddress, gasEstimates, txValue, _rpcUrl);
 
 				safeTx.safeTxGas += gasEstimates.safeTxGas;
 				safeTx.baseGas = gasEstimates.baseGas;
@@ -309,27 +308,6 @@ namespace ComethSDK.Scripts.Core
 		/**
 		 * Private Methods
 		 */
-		private SiweMessage CreateMessage(string address, string nonce)
-		{
-			var domain = _uri.Host;
-			var origin = _uri.Scheme + "://" + _uri.Host;
-			const string statement = "Sign in with Ethereum to Cometh";
-
-			var message = new SiweMessage
-			{
-				Domain = domain,
-				Address = address,
-				Statement = statement,
-				Uri = origin,
-				Version = "1",
-				ChainId = _chainId,
-				Nonce = nonce
-			};
-
-			message.SetIssuedAtNow();
-
-			return message;
-		}
 
 		private async Task<string> SignTypedData<T, TDomain>(T message, TypedData<TDomain> typedData)
 		{
