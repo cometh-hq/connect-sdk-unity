@@ -36,19 +36,22 @@ namespace ComethSDK.Scripts.Core
 		private EventHandler _eventHandler;
 		private Constants.Network _network;
 		private ProjectParams _projectParams;
-		private string _provider;
+		private string _rpcUrl;
 
 		private List<SponsoredAddressResponse.SponsoredAddress> _sponsoredAddresses = new();
 		private string _walletAddress;
 		private Web3 _web3;
 
-		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey, string baseUrl = "")
+		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey, string baseUrl = "", string rpcUrl = "")
 		{
 			if (!Utils.IsNetworkSupported(authAdaptor.ChainId)) throw new Exception("This network is not supported");
 			_chainId = authAdaptor.ChainId;
 			_api = string.IsNullOrEmpty(baseUrl)
 				? new API(apiKey, int.Parse(_chainId))
 				: new API(apiKey, int.Parse(_chainId), baseUrl);
+			_rpcUrl = string.IsNullOrEmpty(rpcUrl)
+				? Constants.GetNetworkByChainID(_chainId).RPCUrl
+				: rpcUrl;
 			_authAdaptor = authAdaptor;
 		}
 
@@ -56,8 +59,7 @@ namespace ComethSDK.Scripts.Core
 		{
 			if (_authAdaptor == null) throw new Exception("No auth adaptor found");
 
-			_provider = Constants.GetNetworkByChainID(_chainId).RPCUrl;
-			_web3 = new Web3(_provider);
+			_web3 = new Web3(_rpcUrl);
 
 			await _authAdaptor.Connect(burnerAddress);
 
@@ -238,9 +240,9 @@ namespace ComethSDK.Scripts.Core
 
 			if (!IsSponsoredTransaction(safeTxDataArray))
 			{
-				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress, "",
-					Constants.GetNetworkByChainID(_chainId).SafeSingletonAddress,
-					Constants.GetNetworkByChainID(_chainId).SafeTxAccessorAddress
+				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress, _projectParams.MultiSendContractAddress,
+					_projectParams.SafeSingletonAddress,
+					_projectParams.SafeTxAccessorAddress
 					, _provider);
 				await GasService.VerifyHasEnoughBalance(_walletAddress, safeTxDataArray[0].to, safeTxDataArray[0].value,
 					safeTxDataArray[0].data, nonce, _provider);
@@ -272,8 +274,8 @@ namespace ComethSDK.Scripts.Core
 			{
 				var safeTxGasString = await GasService.EstimateSafeTxGasWithSimulate(_walletAddress, safeTxData,
 					_projectParams.MultiSendContractAddress,
-					Constants.GetNetworkByChainID(_chainId).SafeSingletonAddress,
-					Constants.GetNetworkByChainID(_chainId).SafeTxAccessorAddress,
+					_projectParams.SafeSingletonAddress,
+					_projectParams.SafeTxAccessorAddress,
 					_provider);
 
 				var gasEstimates = new GasEstimates

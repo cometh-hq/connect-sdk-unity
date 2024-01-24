@@ -47,8 +47,6 @@ namespace ComethSDK.Scripts.Tools
 					RPCUrl = "https://polygon-rpc.com",
 					NetworkName = "Polygon",
 					BlockExplorerUrl = "https://polygonscan.com/",
-					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
-					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
 				}
 			},
 			{
@@ -59,8 +57,6 @@ namespace ComethSDK.Scripts.Tools
 					RPCUrl = "https://rpc-mumbai.maticvigil.com",
 					NetworkName = "Mumbai",
 					BlockExplorerUrl = "https://mumbai.polygonscan.com/",
-					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
-					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
 				}
 			},
 			{
@@ -71,8 +67,6 @@ namespace ComethSDK.Scripts.Tools
 					RPCUrl = "https://muster-anytrust.alt.technology",
 					NetworkName = "Muster",
 					BlockExplorerUrl = "https://muster-anytrust-explorer.alt.technology/",
-					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
-					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
 				}
 			},
 			{
@@ -83,8 +77,6 @@ namespace ComethSDK.Scripts.Tools
 					RPCUrl = "https://muster.alt.technology",
 					NetworkName = "Muster",
 					BlockExplorerUrl = "https://muster-explorer.alt.technology",
-					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
-					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
 				}
 			}
 		};

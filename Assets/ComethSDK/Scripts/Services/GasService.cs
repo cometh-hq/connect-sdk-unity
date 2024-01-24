@@ -21,9 +21,9 @@ namespace ComethSDK.Scripts.Services
 		private static readonly decimal REWARD_PERCENTILE = Constants.DEFAULT_REWARD_PERCENTILE;
 		private static readonly BigInteger BASE_GAS = Constants.DEFAULT_BASE_GAS;
 
-		public static async Task<BigInteger> GetGasPrice(string provider)
+		public static async Task<BigInteger> GetGasPrice(string rpcUrl)
 		{
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 			var ethFeeHistory = await web3.Eth.FeeHistory.SendRequestAsync(
 				new HexBigInteger(1),
 				new BlockParameter(),
@@ -36,19 +36,19 @@ namespace ComethSDK.Scripts.Services
 		}
 
 		public static async Task VerifyHasEnoughBalance(string from, string to, string value, string data, int nonce,
-			string provider)
+			string rpcUrl)
 		{
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 			var walletBalance = await web3.Eth.GetBalance.SendRequestAsync(from);
-			var totalGasCost = await CalculateMaxFees(from, to, value, data, nonce, BASE_GAS, provider);
+			var totalGasCost = await CalculateMaxFees(from, to, value, data, nonce, BASE_GAS, rpcUrl);
 			if (walletBalance.Value < totalGasCost)
 				throw new Exception("Not enough balance to send this value and pay for gas");
 		}
 
 		public static async Task VerifyHasEnoughBalance(string walletAddress, GasEstimates gasEstimates, string txValue,
-			string provider)
+			string rpcUrl)
 		{
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 			var walletBalance = await web3.Eth.GetBalance.SendRequestAsync(walletAddress);
 			var totalGasCost = GetTotalGasCost(gasEstimates);
 			var totalValue = BigInteger.Parse(txValue);
@@ -64,46 +64,46 @@ namespace ComethSDK.Scripts.Services
 
 
 		public static async Task<BigInteger> EstimateTransactionGas(IMetaTransactionData[] safeTxDataArray,
-			string from, string provider)
+			string from, string rpcUrl)
 		{
 			var safeTxGas = BigInteger.Zero;
 
 			foreach (var safeTxData in safeTxDataArray)
-				safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to, from, provider);
+				safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to, from, rpcUrl);
 
 			return safeTxGas;
 		}
 
 		public static async Task<SafeTx> SetTransactionGas(SafeTx safeTxDataTyped, string from, BigInteger baseGas,
-			string provider)
+			string rpcUrl)
 		{
 			safeTxDataTyped.safeTxGas =
-				await EstimateTransactionGas(new IMetaTransactionData[] { safeTxDataTyped }, from, provider);
+				await EstimateTransactionGas(new IMetaTransactionData[] { safeTxDataTyped }, from, rpcUrl);
 			safeTxDataTyped.baseGas = baseGas;
-			safeTxDataTyped.gasPrice = await GetGasPrice(provider);
+			safeTxDataTyped.gasPrice = await GetGasPrice(rpcUrl);
 
 			return safeTxDataTyped;
 		}
 
 		public static async Task<SafeTx> SetTransactionGasWithSimulate(SafeTx safeTxDataTyped, string walletAddress,
-			string multiSendAddress, string singletonAddress, string simulateTxAccessorAddress, string provider)
+			string multiSendAddress, string singletonAddress, string simulateTxAccessorAddress, string rpcUrl)
 		{
 			var safeTxDataArray = new IMetaTransactionData[] { safeTxDataTyped };
 			var gasEstimates = await EstimateSafeTxGasWithSimulate(walletAddress, safeTxDataArray,
-				multiSendAddress, singletonAddress, simulateTxAccessorAddress, provider);
+				multiSendAddress, singletonAddress, simulateTxAccessorAddress, rpcUrl);
 
 			safeTxDataTyped.safeTxGas = BigInteger.Parse(gasEstimates);
 			safeTxDataTyped.baseGas = BASE_GAS;
-			safeTxDataTyped.gasPrice += await GetGasPrice(provider);
+			safeTxDataTyped.gasPrice = await GetGasPrice(rpcUrl);
 
 			return safeTxDataTyped;
 		}
 
 		public static async Task<BigInteger> CalculateMaxFees(string from, string to, string value, string data,
-			int nonce, BigInteger baseGas, string provider)
+			int nonce, BigInteger baseGas, string rpcUrl)
 		{
 			var safeTx = Utils.CreateSafeTx(to, value, data, nonce);
-			safeTx = await SetTransactionGas(safeTx, from, baseGas, provider);
+			safeTx = await SetTransactionGas(safeTx, from, baseGas, rpcUrl);
 
 			var totalGasCost = (safeTx.safeTxGas + safeTx.baseGas) * safeTx.gasPrice;
 			return totalGasCost + BigInteger.Parse(value);
@@ -112,13 +112,13 @@ namespace ComethSDK.Scripts.Services
 		public static async Task<string> EstimateSafeTxGasWithSimulate(string walletAddress,
 			IMetaTransactionData[] safeTxData,
 			string multiSendAddress, string singletonAddress, string simulateTxAccessorAddress,
-			string provider)
+			string rpcUrl)
 		{
 			IMetaTransactionData transaction;
 
 			if (safeTxData.Length != 1)
 			{
-				var multiSendData = MultiSend.EncodeMultiSendArray(safeTxData, provider, multiSendAddress).data;
+				var multiSendData = MultiSend.EncodeMultiSendArray(safeTxData, rpcUrl, multiSendAddress).data;
 
 				transaction = new MetaTransactionData
 				{
@@ -134,9 +134,9 @@ namespace ComethSDK.Scripts.Services
 				transaction.operation = 0;
 			}
 
-			var isSafeDeployed = await SafeService.IsDeployed(walletAddress, provider);
+			var isSafeDeployed = await SafeService.IsDeployed(walletAddress, rpcUrl);
 
-			var simulateTxContract = SimulateTxAcessorService.GetContract(simulateTxAccessorAddress, provider);
+			var simulateTxContract = SimulateTxAcessorService.GetContract(simulateTxAccessorAddress, rpcUrl);
 			var simulateFunction = simulateTxContract.GetFunction("simulate");
 
 			object[] simulateFunctionInputs =
@@ -146,7 +146,7 @@ namespace ComethSDK.Scripts.Services
 			// if the Safe is not deployed we can use the singleton address to simulate
 			var to = isSafeDeployed ? walletAddress : singletonAddress;
 
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 			var safeContract = web3.Eth.GetContract(Constants.SAFE_ABI, to);
 			var safeFunction = safeContract.GetFunction("simulateAndRevert");
 			object[] simulateAndRevertFunctionInputs =
@@ -182,9 +182,9 @@ namespace ComethSDK.Scripts.Services
 			return gasNum.ToString();
 		}
 
-		private static async Task<BigInteger> CalculateSafeTxGas(string data, string to, string from, string provider)
+		private static async Task<BigInteger> CalculateSafeTxGas(string data, string to, string from, string rpcUrl)
 		{
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 			var ethEstimateGas = new EthEstimateGas(web3.Client);
 
 			var transactionInput = new CallInput

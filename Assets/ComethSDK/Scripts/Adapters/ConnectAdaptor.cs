@@ -19,7 +19,7 @@ namespace ComethSDK.Scripts.Adapters
 
 		private string _baseUrl;
 		private readonly string _encryptionSalt;
-		private readonly string _provider;
+		private readonly string _rpcUrl;
 		private Signer _signer;
 		private string _walletAddress;
 
@@ -35,7 +35,7 @@ namespace ComethSDK.Scripts.Adapters
 
 			_baseUrl = baseUrl;
 			_encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
-			_provider = Constants.GetNetworkByChainID(ChainId).RPCUrl;
+			_rpcUrl = Constants.GetNetworkByChainID(ChainId).RPCUrl;
 			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, chainId) : new API(apiKey, chainId, baseUrl);
 		}
 
@@ -46,7 +46,7 @@ namespace ComethSDK.Scripts.Adapters
 			if (!string.IsNullOrEmpty(burnerAddress))
 			{
 				await EoaFallbackService.MigrateV1Keys(burnerAddress, _encryptionSalt);
-				_signer = await EoaFallbackService.GetSigner(_api, _provider, burnerAddress, _encryptionSalt);
+				_signer = await EoaFallbackService.GetSigner(_api, _rpcUrl, burnerAddress, _encryptionSalt);
 				_walletAddress = burnerAddress;
 			}
 			else
