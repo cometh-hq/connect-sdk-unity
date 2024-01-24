@@ -10,7 +10,8 @@ namespace ComethSDK.Scripts.Tools
 		{
 			POLYGON,
 			MUMBAI,
-			MUSTER
+			MUSTER,
+			MUSTER_MAINNET
 		}
 
 		public const string API_URL = "https://api.connect.cometh.io/";
@@ -75,13 +76,15 @@ namespace ComethSDK.Scripts.Tools
 				}
 			},
 			{
-				Network.MUSTER,
+				Network.MUSTER_MAINNET,
 				new NetworkData
 				{
-					ChainId = "2121337",
-					RPCUrl = "https://muster-anytrust.alt.technology",
+					ChainId = "4078",
+					RPCUrl = "https://muster.alt.technology",
 					NetworkName = "Muster",
-					BlockExplorerUrl = "https://muster-anytrust-explorer.alt.technology/"
+					BlockExplorerUrl = "https://muster-explorer.alt.technology",
+					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
+					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
 				}
 			}
 		};
