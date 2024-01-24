@@ -18,7 +18,6 @@ using Nethereum.Contracts;
 using Nethereum.Hex.HexConvertors.Extensions;
 using Nethereum.RPC.Eth.DTOs;
 using Nethereum.Signer;
-using Nethereum.Siwe.Core;
 using Nethereum.Web3;
 using UnityEngine;
 using EventHandler = ComethSDK.Scripts.Tools.EventHandler;
@@ -30,7 +29,6 @@ namespace ComethSDK.Scripts.Core
 		private readonly API _api;
 		private readonly IAuthAdaptor _authAdaptor;
 		private readonly string _chainId;
-		private readonly Uri _uri = new("https://api.connect.cometh.io");
 		private readonly BigInteger BASE_GAS = Constants.DEFAULT_BASE_GAS;
 		private bool _connected;
 		private EventHandler _eventHandler;
@@ -53,6 +51,7 @@ namespace ComethSDK.Scripts.Core
 			_provider = string.IsNullOrEmpty(provider)
 				? Constants.GetNetworkByChainID(_chainId).RPCUrl
 				: provider;
+			_web3 = new Web3(_provider);
 			_authAdaptor = authAdaptor;
 			_transactionTimeoutTimer = transactionTimeoutTimer;
 		}
@@ -295,27 +294,6 @@ namespace ComethSDK.Scripts.Core
 		/**
 		 * Private Methods
 		 */
-		private SiweMessage CreateMessage(string address, string nonce)
-		{
-			var domain = _uri.Host;
-			var origin = _uri.Scheme + "://" + _uri.Host;
-			const string statement = "Sign in with Ethereum to Cometh";
-
-			var message = new SiweMessage
-			{
-				Domain = domain,
-				Address = address,
-				Statement = statement,
-				Uri = origin,
-				Version = "1",
-				ChainId = _chainId,
-				Nonce = nonce
-			};
-
-			message.SetIssuedAtNow();
-
-			return message;
-		}
 
 		private async Task<string> SignTypedData<T, TDomain>(T message, TypedData<TDomain> typedData)
 		{

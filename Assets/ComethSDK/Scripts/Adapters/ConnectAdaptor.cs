@@ -17,7 +17,7 @@ namespace ComethSDK.Scripts.Adapters
 	{
 		private readonly API _api;
 		private readonly string _encryptionSalt;
-		private readonly string _rpcUrl;
+		private readonly string _provider;
 		private Signer _signer;
 		private string _walletAddress;
 
@@ -33,7 +33,7 @@ namespace ComethSDK.Scripts.Adapters
 			ChainId = chainId.ToString();
 
 			_encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
-			_rpcUrl = string.IsNullOrEmpty(rpcUrl)
+			_provider = string.IsNullOrEmpty(rpcUrl)
 				? Constants.GetNetworkByChainID(ChainId).RPCUrl
 				: rpcUrl;
 			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, chainId) : new API(apiKey, chainId, baseUrl);
@@ -89,7 +89,7 @@ namespace ComethSDK.Scripts.Adapters
 			var wallet = await _api.GetWalletInfos(walletAddress);
 			if (wallet == null) throw new Exception("Wallet does not exist");
 			
-			_signer = await EoaFallbackService.GetSigner(_api, _rpcUrl, walletAddress, _encryptionSalt);
+			_signer = await EoaFallbackService.GetSigner(_api, _provider, walletAddress, _encryptionSalt);
 			_walletAddress = walletAddress;
 		}
 
