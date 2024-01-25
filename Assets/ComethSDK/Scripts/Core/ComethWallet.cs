@@ -36,11 +36,11 @@ namespace ComethSDK.Scripts.Core
 		private EventHandler _eventHandler;
 		private Constants.Network _network;
 		private ProjectParams _projectParams;
-		private string _rpcUrl;
+		private readonly string _rpcUrl;
 
 		private List<SponsoredAddressResponse.SponsoredAddress> _sponsoredAddresses = new();
 		private string _walletAddress;
-		private Web3 _web3;
+		private readonly Web3 _web3;
 
 		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey, string baseUrl = "", string rpcUrl = "")
 		{
@@ -52,7 +52,7 @@ namespace ComethSDK.Scripts.Core
 			_rpcUrl = string.IsNullOrEmpty(rpcUrl)
 				? Constants.GetNetworkByChainID(_chainId).RPCUrl
 				: rpcUrl;
-			__web3 = new Web3(_rpcUrl)
+			_web3 = new Web3(_rpcUrl);
 			_authAdaptor = authAdaptor;
 		}
 
@@ -70,7 +70,7 @@ namespace ComethSDK.Scripts.Core
 			var nonce = await _api.GetNonce(predictedWalletAddress);
 			if (nonce == null) throw new Exception("Error while getting nonce");
 
-			var message = SiweService.CreateMessage(predictedWalletAddress, nonce);
+			var message = SiweService.CreateMessage(predictedWalletAddress, nonce, _chainId, _uri);
 			var messageToSign = SiweMessageStringBuilder.BuildMessage(message);
 			var signatureSiwe = await SignMessage(messageToSign);
 
@@ -239,7 +239,8 @@ namespace ComethSDK.Scripts.Core
 
 			if (!IsSponsoredTransaction(safeTxDataArray))
 			{
-				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress, _projectParams.MultiSendContractAddress,
+				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress,
+					_projectParams.MultiSendContractAddress,
 					_projectParams.SafeSingletonAddress,
 					_projectParams.SafeTxAccessorAddress
 					, _rpcUrl);
@@ -308,7 +309,6 @@ namespace ComethSDK.Scripts.Core
 		/**
 		 * Private Methods
 		 */
-
 		private async Task<string> SignTypedData<T, TDomain>(T message, TypedData<TDomain> typedData)
 		{
 			var signer = _authAdaptor.GetSigner();

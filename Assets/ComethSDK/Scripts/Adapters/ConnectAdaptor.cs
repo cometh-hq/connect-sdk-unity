@@ -16,14 +16,14 @@ namespace ComethSDK.Scripts.Adapters
 	public class ConnectAdaptor : IAuthAdaptor
 	{
 		private readonly API _api;
-
-		private string _baseUrl;
 		private readonly string _encryptionSalt;
 		private readonly string _rpcUrl;
+
 		private Signer _signer;
 		private string _walletAddress;
 
-		public ConnectAdaptor(int chainId, string apiKey, string baseUrl = "", string encryptionSalt = "", string rpcUrl = "")
+		public ConnectAdaptor(int chainId, string apiKey, string baseUrl = "", string encryptionSalt = "",
+			string rpcUrl = "")
 		{
 			if (chainId == 0)
 				throw new Exception("ChainId is not set");
@@ -33,10 +33,9 @@ namespace ComethSDK.Scripts.Adapters
 			if (!Utils.IsNetworkSupported(chainId.ToString())) throw new Exception("This network is not supported");
 			ChainId = chainId.ToString();
 
-			_baseUrl = baseUrl;
 			_encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
 			_rpcUrl = string.IsNullOrEmpty(rpcUrl)
-				? Constants.GetNetworkByChainID(_chainId).RPCUrl
+				? Constants.GetNetworkByChainID(ChainId).RPCUrl
 				: rpcUrl;
 			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, chainId) : new API(apiKey, chainId, baseUrl);
 		}
