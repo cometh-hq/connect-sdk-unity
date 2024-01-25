@@ -225,7 +225,8 @@ namespace ComethSDK.Scripts.Core
 
 			if (!IsSponsoredTransaction(safeTxDataArray))
 			{
-				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress, _projectParams.MultiSendContractAddress,
+				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress,
+					_projectParams.MultiSendContractAddress,
 					_projectParams.SafeSingletonAddress,
 					_projectParams.SafeTxAccessorAddress
 					, _provider);
@@ -294,7 +295,6 @@ namespace ComethSDK.Scripts.Core
 		/**
 		 * Private Methods
 		 */
-
 		private async Task<string> SignTypedData<T, TDomain>(T message, TypedData<TDomain> typedData)
 		{
 			var signer = _authAdaptor.GetSigner();
