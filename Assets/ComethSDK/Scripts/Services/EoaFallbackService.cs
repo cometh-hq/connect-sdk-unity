@@ -48,7 +48,7 @@ namespace ComethSDK.Scripts.Services
 			return Encoding.UTF8.GetString(privateKey);
 		}
 
-		public static async Task<Signer> GetSigner(API api, string provider, string walletAddress,
+		public static async Task<Signer> GetSigner(API api, string rpcUrl, string walletAddress,
 			string encryptionSalt)
 		{
 			var storagePrivateKey = await GetSignerLocalStorage(walletAddress, encryptionSalt);
@@ -58,7 +58,7 @@ namespace ComethSDK.Scripts.Services
 
 			var storageSigner = new Signer(new EthECKey(storagePrivateKey));
 
-			var isOwner = await SafeService.IsSigner(storageSigner.GetAddress(), walletAddress, provider, api);
+			var isOwner = await SafeService.IsSigner(storageSigner.GetAddress(), walletAddress, rpcUrl, api);
 
 			if (!isOwner) throw new Exception("New Domain detected. You need to add that domain as signer.");
 

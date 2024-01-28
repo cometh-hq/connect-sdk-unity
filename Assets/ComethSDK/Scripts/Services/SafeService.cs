@@ -12,11 +12,11 @@ namespace ComethSDK.Scripts.Services
 {
 	public static class SafeService
 	{
-		public static async Task<bool> IsSigner(string signerAddress, string walletAddress, string provider, API api)
+		public static async Task<bool> IsSigner(string signerAddress, string walletAddress, string rpcUrl, API api)
 		{
 			try
 			{
-				var owner = await IsSafeOwner(walletAddress, signerAddress, provider);
+				var owner = await IsSafeOwner(walletAddress, signerAddress, rpcUrl);
 
 				if (!owner) return false;
 			}
@@ -30,10 +30,10 @@ namespace ComethSDK.Scripts.Services
 			return true;
 		}
 
-		public static string EncodeFunctionData(string functionName, string safeAddress, string provider,
+		public static string EncodeFunctionData(string functionName, string safeAddress, string rpcUrl,
 			params object[] functionInput)
 		{
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 			var contract = web3.Eth.GetContract(Constants.SAFE_ABI, safeAddress);
 			var function = contract.GetFunction(functionName);
 			var data = function.GetData(functionInput);
@@ -41,9 +41,9 @@ namespace ComethSDK.Scripts.Services
 		}
 
 		public static async Task<MetaTransactionData> PrepareAddOwnerTx(string walletAddress, string newOwner,
-			string provider)
+			string rpcUrl)
 		{
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 			var contract = web3.Eth.GetContract(Constants.SAFE_ABI, walletAddress);
 			var addOwnerWithThresholdFunction = contract.GetFunction("addOwnerWithThreshold");
 			var data = addOwnerWithThresholdFunction.GetData(newOwner, 1);
@@ -60,11 +60,11 @@ namespace ComethSDK.Scripts.Services
 		}
 
 		public static async Task<MetaTransactionData> PrepareRemoveOwnerTx(string walletAddress, string ownerAddress,
-			string provider)
+			string rpcUrl)
 		{
-			var prevOwner = await GetSafePreviousOwner(walletAddress, ownerAddress, provider);
+			var prevOwner = await GetSafePreviousOwner(walletAddress, ownerAddress, rpcUrl);
 
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 			var contract = web3.Eth.GetContract(Constants.SAFE_ABI, walletAddress);
 			var removeOwnerFunction = contract.GetFunction("removeOwner");
 			var data = removeOwnerFunction.GetData(prevOwner, ownerAddress, 1);
@@ -80,9 +80,9 @@ namespace ComethSDK.Scripts.Services
 			return tx;
 		}
 
-		public static async Task<string> GetSafePreviousOwner(string walletAddress, string owner, string provider)
+		public static async Task<string> GetSafePreviousOwner(string walletAddress, string owner, string rpcUrl)
 		{
-			var ownerList = await GetOwners(walletAddress, provider);
+			var ownerList = await GetOwners(walletAddress, rpcUrl);
 
 			var findIndex = ownerList.FindIndex(ownerToFind => ownerToFind == owner);
 			if (findIndex == -1) throw new Exception("Address is not an owner of the wallet");
@@ -94,11 +94,11 @@ namespace ComethSDK.Scripts.Services
 			return prevOwner;
 		}
 
-		public static async Task<List<string>> GetOwners(string walletAddress, string provider)
+		public static async Task<List<string>> GetOwners(string walletAddress, string rpcUrl)
 		{
-			if (!await IsDeployed(walletAddress, provider)) throw new Exception("Wallet is not deployed");
+			if (!await IsDeployed(walletAddress, rpcUrl)) throw new Exception("Wallet is not deployed");
 
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 			var contract = web3.Eth.GetContract(Constants.SAFE_ABI, walletAddress);
 			var getOwnersFunction = contract.GetFunction("getOwners");
 			var owners = await getOwnersFunction.CallAsync<List<string>>();
@@ -106,19 +106,19 @@ namespace ComethSDK.Scripts.Services
 			return owners;
 		}
 
-		private static async Task<bool> IsSafeOwner(string walletAddress, string signerAddress, string provider)
+		private static async Task<bool> IsSafeOwner(string walletAddress, string signerAddress, string rpcUrl)
 		{
-			if (!await IsDeployed(walletAddress, provider)) throw new Exception("Wallet is not deployed");
+			if (!await IsDeployed(walletAddress, rpcUrl)) throw new Exception("Wallet is not deployed");
 
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 			var service = new GnosisSafeService(web3, walletAddress);
 
 			return await service.IsOwnerQueryAsync(signerAddress);
 		}
 
-		public static async Task<bool> IsDeployed(string walletAddress, string provider)
+		public static async Task<bool> IsDeployed(string walletAddress, string rpcUrl)
 		{
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 			var result = await web3.Eth.GetCode.SendRequestAsync(walletAddress);
 
 			if (result == "0x") return false;

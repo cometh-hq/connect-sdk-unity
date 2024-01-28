@@ -130,49 +130,6 @@ namespace ComethSDK.Scripts.HTTP
 			return null;
 		}
 
-		public async Task<string> ConnectToComethAuth(string jwtToken)
-		{
-			const string requestUri = "/key-store/connect";
-			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-			request.Headers.Add("token", jwtToken);
-			var response = await _api.SendAsync(request);
-			var contentReceived = response.Content.ReadAsStringAsync().Result;
-			var contentDeserializeObject =
-				JsonConvert.DeserializeObject<ConnectToComethAuthResponse>(contentReceived);
-
-			if (contentDeserializeObject is { success: true }) return contentDeserializeObject.address;
-
-			Debug.LogError("Error in ConnectToComethAuth");
-			return null;
-		}
-
-		public async Task<string> SignTypedDataWithComethAuth(string jwtToken,
-			DomainWithChainIdAndVerifyingContractLowerCase domain, IDictionary<string, MemberDescription[]> types,
-			IDictionary<string, object> value)
-		{
-			const string requestUri = "/key-store/signTypedData";
-			var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-			request.Headers.Add("token", jwtToken);
-
-			var body = new SignTypedDataWithComethAuthBody
-			{
-				domain = domain,
-				types = types,
-				value = value
-			};
-			var json = JsonConvert.SerializeObject(body);
-			var content = new StringContent(json, Encoding.UTF8, "application/json");
-			request.Content = content;
-
-			var response = await _api.SendAsync(request);
-			var contentReceived = response.Content.ReadAsStringAsync().Result;
-			var contentDeserializeObject =
-				JsonConvert.DeserializeObject<SignTypedDataWithComethAuthResponse>(contentReceived);
-			if (contentDeserializeObject is { success: true }) return contentDeserializeObject.signature;
-
-			Debug.LogError("Error in SignTypedDataWithComethAuth");
-			return null;
-		}
 
 		public async Task<bool> IsValidSignature(string walletAddress, string message, string signature)
 		{

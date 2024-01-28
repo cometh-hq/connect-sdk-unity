@@ -9,7 +9,7 @@ namespace ComethSDK.Scripts.Tools
 	public static class MultiSend
 	{
 		public static IMetaTransactionData EncodeMultiSendArray(IMetaTransactionData[] safeTransactionDataPartials,
-			string provider, string multiSendContractAddress)
+			string rpcUrl, string multiSendContractAddress)
 		{
 			var transactionEncoded = "0x";
 			foreach (var safeTransaction in safeTransactionDataPartials)
@@ -20,7 +20,7 @@ namespace ComethSDK.Scripts.Tools
 				transactionEncoded += encodedHexDataWithoutPrefix;
 			}
 
-			var web3 = new Web3(provider);
+			var web3 = new Web3(rpcUrl);
 
 			var contract = web3.Eth.GetContract(Constants.MULTI_SEND_ABI, multiSendContractAddress);
 			var multiSendFunction = contract.GetFunction("multiSend");
