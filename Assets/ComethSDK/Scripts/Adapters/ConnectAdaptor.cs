@@ -46,16 +46,24 @@ namespace ComethSDK.Scripts.Adapters
 		{
 			if (!string.IsNullOrEmpty(walletAddress))
 			{
+				var wallet = await _api.GetWalletInfos(walletAddress);
+				if (wallet == null) throw new Exception("Wallet does not exist");
+
 				await EoaFallbackService.MigrateV1Keys(walletAddress, _encryptionSalt);
 				_signer = await EoaFallbackService.GetSigner(_api, _rpcUrl, walletAddress, _encryptionSalt);
 				_walletAddress = walletAddress;
 			}
 			else
 			{
-				var (signer, newWalletAddress) =
+				var signer =
 					await EoaFallbackService.CreateSigner(_api, encryptionSalt: _encryptionSalt);
+
+				var predictedWalletAddress = await _api.InitWallet(signer.GetAddress());
+				await EoaFallbackService.SetSignerLocalStorage(predictedWalletAddress, signer.GetPrivateKey(),
+					_encryptionSalt);
+
 				_signer = signer;
-				_walletAddress = newWalletAddress;
+				_walletAddress = predictedWalletAddress;
 			}
 		}
 

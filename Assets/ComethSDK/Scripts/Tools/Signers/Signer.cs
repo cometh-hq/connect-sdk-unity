@@ -34,5 +34,10 @@ namespace ComethSDK.Scripts.Tools.Signers
 		{
 			return _ethEcKey.GetPublicAddress();
 		}
+		
+		public string GetPrivateKey()
+		{
+			return _ethEcKey.GetPrivateKey();
+		}
 	}
 }

@@ -109,7 +109,7 @@ namespace ComethSDK.Scripts.Services
 			SaveLoadPersistentData.Save(encryptedData, "connect", walletAddress);
 		}
 
-		public static async Task<(Signer, string)> CreateSigner(API api, string walletAddress = "",
+		public static async Task<Signer> CreateSigner(API api, string walletAddress = "",
 			string encryptionSalt = "")
 		{
 			var ethEcKey = EthECKey.GenerateKey();
@@ -121,14 +121,10 @@ namespace ComethSDK.Scripts.Services
 			if (!string.IsNullOrEmpty(walletAddress))
 			{
 				await SetSignerLocalStorage(walletAddress, privateKey, encryptionSalt);
-				return (signer, walletAddress);
+				return signer;
 			}
 
-			var predictedWalletAddress = await api.InitWallet(signer.GetAddress());
-
-			await SetSignerLocalStorage(predictedWalletAddress, privateKey, encryptionSalt);
-
-			return (signer, predictedWalletAddress);
+			return signer;
 		}
 	}
 }

@@ -50,9 +50,6 @@ namespace ComethSDK.Examples.Scripts
 			else
 				await _wallet.Connect(walletAddress);
 			PrintInConsole("Connected");
-
-			await SafeService.IsDeployed(_wallet.GetAddress(),
-				Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl);
 		}
 
 		public override async void Disconnect()
