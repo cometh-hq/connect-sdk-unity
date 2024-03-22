@@ -56,7 +56,7 @@ namespace ComethSDK.Scripts.Tools
 				new NetworkData
 				{
 					ChainId = "80001",
-					RPCUrl = "https://rpc-mumbai.maticvigil.com",
+					RPCUrl = "https://rpc.ankr.com/polygon_mumbai",
 					NetworkName = "Mumbai",
 					BlockExplorerUrl = "https://mumbai.polygonscan.com/",
 					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
