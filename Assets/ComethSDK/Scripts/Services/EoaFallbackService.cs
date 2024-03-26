@@ -65,19 +65,6 @@ namespace ComethSDK.Scripts.Services
 			return storageSigner;
 		}
 
-		public static async Task MigrateV1Keys(string walletAddress, string encryptionSalt)
-		{
-			encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
-
-			var localStorageV1 = PlayerPrefs.GetString($"cometh-connect-{walletAddress}");
-
-			if (!string.IsNullOrEmpty(localStorageV1))
-			{
-				await SetSignerLocalStorage(walletAddress, new Signer(new EthECKey(localStorageV1)), encryptionSalt);
-				PlayerPrefs.DeleteKey($"cometh-connect-{walletAddress}");
-			}
-		}
-
 		public static async Task<string> GetSignerLocalStorage(string walletAddress, string encryptionSalt)
 		{
 			var localStorageV2 = SaveLoadPersistentData.Load("connect",
