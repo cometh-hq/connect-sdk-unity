@@ -27,6 +27,13 @@ namespace ComethSDK.Examples.Scripts
 		private ConnectAdaptor _connectAuthAdaptor;
 
 		private ComethWallet _wallet;
+		
+		private const string COUNT_ADDRESS_MUMBAI = "0x4FbF9EE4B2AF774D4617eAb027ac2901a41a7b5F";
+		private const string COUNT_ADDRESS_POLYGON = "0x84ADD3fa2c2463C8cF2C95aD70e4b5F602332160";
+		
+		private const string COUNT_ADDRESS_MUNSTER_TESTNET = "0x3633A1bE570fBD902D10aC6ADd65BB11FC914624";
+		private const string COUNT_ADDRESS_MUNSTER_MAINNET = "0x3633A1bE570fBD902D10aC6ADd65BB11FC914624";
+		
 
 		private void Start()
 		{
@@ -141,17 +148,14 @@ namespace ComethSDK.Examples.Scripts
 
 		public override async void TestCallToCount()
 		{
-			const string
-				COUNTER_TEST_ADDRESS =
-					"0x3633A1bE570fBD902D10aC6ADd65BB11FC914624"; //On polygon : 0x84ADD3fa2c2463C8cF2C95aD70e4b5F602332160";
-			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNTER_TEST_ADDRESS);
+			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNT_ADDRESS_MUMBAI);
 			var countFunction = contract.GetFunction("count");
 			var data = countFunction.GetData();
 			var web3 = new Web3(Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl);
-			EstimateGasAndShow(COUNTER_TEST_ADDRESS, "0", data);
+			EstimateGasAndShow(COUNT_ADDRESS_MUMBAI, "0", data);
 
 			PrintInConsole("Sending transaction...");
-			var safeTxHash = await _wallet.SendTransaction(COUNTER_TEST_ADDRESS, "0", data);
+			var safeTxHash = await _wallet.SendTransaction(COUNT_ADDRESS_MUMBAI, "0", data);
 			PrintInConsole("Safe transaction hash: " + safeTxHash);
 			PrintInConsole("Transaction sent, waiting for confirmation...");
 			var transactionReceipt = await _wallet.Wait(safeTxHash);
@@ -171,25 +175,22 @@ namespace ComethSDK.Examples.Scripts
 
 		public async void TestCallToCountBatch()
 		{
-			const string
-				COUNTER_TEST_ADDRESS =
-					"0x3633A1bE570fBD902D10aC6ADd65BB11FC914624"; //On polygon : 0x84ADD3fa2c2463C8cF2C95aD70e4b5F602332160";
-			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNTER_TEST_ADDRESS);
+			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNT_ADDRESS_MUMBAI);
 			var countFunction = contract.GetFunction("count");
 			var data = countFunction.GetData();
-			EstimateGasAndShow(COUNTER_TEST_ADDRESS, "0", data);
+			EstimateGasAndShow(COUNT_ADDRESS_MUMBAI, "0", data);
 
 			var dataArr = new[]
 			{
 				new MetaTransactionData
 				{
-					to = COUNTER_TEST_ADDRESS,
+					to = COUNT_ADDRESS_MUMBAI,
 					value = "0",
 					data = data
 				},
 				new MetaTransactionData
 				{
-					to = COUNTER_TEST_ADDRESS,
+					to = COUNT_ADDRESS_MUMBAI,
 					value = "0",
 					data = data
 				}
@@ -216,10 +217,7 @@ namespace ComethSDK.Examples.Scripts
 
 		public async void TestCallToCounter()
 		{
-			const string
-				COUNTER_TEST_ADDRESS =
-					"0x3633A1bE570fBD902D10aC6ADd65BB11FC914624"; //On polygon : 0x84ADD3fa2c2463C8cF2C95aD70e4b5F602332160";
-			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNTER_TEST_ADDRESS);
+			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNT_ADDRESS_MUMBAI);
 			var counterFunction = contract.GetFunction("counters");
 			PrintInConsole("Sending query to get Counter...");
 			var counterAmount = await counterFunction.CallAsync<int>(_wallet.GetAddress());
