@@ -193,7 +193,7 @@ namespace ComethSDK.Scripts.Services
 				To = to,
 				From = from
 			};
-			return await ethEstimateGas.SendRequestAsync(transactionInput);
+			return await ethEstimateGas.SendRequestAsync(transactionInput); // Will return an error if contract is not deployed
 		}
 
 		private static string AddExtraGasForSafety(BigInteger safeTxGas)

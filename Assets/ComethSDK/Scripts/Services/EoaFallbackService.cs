@@ -67,8 +67,19 @@ namespace ComethSDK.Scripts.Services
 
 		public static async Task<string> GetSignerLocalStorage(string walletAddress, string encryptionSalt)
 		{
-			var localStorageV2 = SaveLoadPersistentData.Load("connect",
-				walletAddress);
+			EncryptionData localStorageV2;
+				
+			try
+			{
+				localStorageV2 = SaveLoadPersistentData.Load("connect",
+					walletAddress);
+			}
+			catch (Exception)
+			{
+				Debug.LogError("No signer available for this address.");
+				throw new Exception("No signer available for this address.");
+			}
+			
 
 			if (localStorageV2 == null) return null;
 

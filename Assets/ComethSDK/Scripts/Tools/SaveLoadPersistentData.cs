@@ -42,13 +42,13 @@ namespace ComethSDK.Scripts.Tools
 			// if the file Directory does not exist, return the default SO
 			if (!Directory.Exists(Path.GetDirectoryName(dataPath)))
 			{
-				Debug.LogWarning("Directory does not exist! " + dataPath);
+				Debug.LogError("Directory does not exist! " + dataPath);
 				throw new Exception("Directory does not exist! " + dataPath);
 			}
 			
 			if(!File.Exists(dataPath))
 			{
-				Debug.LogWarning("File does not exist! " + dataPath);
+				Debug.LogError("File does not exist! " + dataPath);
 				throw new Exception("File does not exist! " + dataPath);
 			}
 
