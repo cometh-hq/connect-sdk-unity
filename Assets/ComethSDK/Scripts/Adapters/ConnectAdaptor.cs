@@ -79,7 +79,7 @@ namespace ComethSDK.Scripts.Adapters
 			};
 		}
 
-		public async Task<string> GetWalletAddress()
+		public string GetWalletAddress()
 		{
 			if (string.IsNullOrEmpty(_walletAddress)) throw new Exception("No wallet Instance found");
 			return _walletAddress;
@@ -125,7 +125,7 @@ namespace ComethSDK.Scripts.Adapters
 
 		public async Task<NewSignerRequestBody[]> GetNewSignerRequests()
 		{
-			var walletAddress = await GetWalletAddress();
+			var walletAddress = GetWalletAddress();
 			return await _api.GetNewSignerRequests(walletAddress);
 		}
 

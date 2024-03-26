@@ -62,16 +62,7 @@ namespace ComethSDK.Scripts.Core
 			await _authAdaptor.Connect(walletAddress);
 
 			_projectParams = await _api.GetProjectParams();
-
-			if (string.IsNullOrEmpty(walletAddress))
-			{
-				var account = _authAdaptor.GetAccount();
-				_walletAddress = await _api.GetWalletAddress(account);
-			}
-			else
-			{
-				_walletAddress = walletAddress;
-			}
+			_walletAddress = _authAdaptor.GetWalletAddress();
 
 			_sponsoredAddresses = await _api.GetSponsoredAddresses();
 			if (_sponsoredAddresses == null) throw new Exception("Error while getting sponsored addresses");

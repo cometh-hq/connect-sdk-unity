@@ -46,7 +46,6 @@ namespace ComethSDK.Scripts.Tools
 				throw new Exception("Directory does not exist! " + dataPath);
 			}
 			
-			// if the file does not exist, return the default SO
 			if(!File.Exists(dataPath))
 			{
 				Debug.LogWarning("File does not exist! " + dataPath);
