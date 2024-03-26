@@ -52,34 +52,17 @@ namespace ComethSDK.Scripts.Core
 			_authAdaptor = authAdaptor;
 		}
 
-		public async Task Connect([CanBeNull] string burnerAddress = "")
+		public async Task Connect([CanBeNull] string walletAddress = "")
 		{
 			if (_authAdaptor == null) throw new Exception("No auth adaptor found");
 
 			_provider = Constants.GetNetworkByChainID(_chainId).RPCUrl;
 			_web3 = new Web3(_provider);
 
-			await _authAdaptor.Connect(burnerAddress);
+			await _authAdaptor.Connect(walletAddress);
 
 			_projectParams = await _api.GetProjectParams();
-			var account = _authAdaptor.GetAccount();
-			var predictedWalletAddress = await _api.GetWalletAddress(account);
-			_walletAddress = predictedWalletAddress ?? throw new Exception("Error while getting wallet address");
-
-			var nonce = await _api.GetNonce(predictedWalletAddress);
-			if (nonce == null) throw new Exception("Error while getting nonce");
-
-			var message = CreateMessage(predictedWalletAddress, nonce);
-			var messageToSign = SiweMessageStringBuilder.BuildMessage(message);
-			var signatureSiwe = await SignMessage(messageToSign);
-
-			//SAFE ADDRESS
-			var walletAddress = await _api.ConnectToComethWallet(
-				message,
-				signatureSiwe,
-				predictedWalletAddress
-			);
-			if (walletAddress == null) throw new Exception("Error while connecting to Cometh Wallet");
+			_walletAddress = _authAdaptor.GetWalletAddress();
 
 			_sponsoredAddresses = await _api.GetSponsoredAddresses();
 			if (_sponsoredAddresses == null) throw new Exception("Error while getting sponsored addresses");
@@ -352,7 +335,7 @@ namespace ComethSDK.Scripts.Core
 		{
 			//if index >= 0 then address is sponsored
 			var index = _sponsoredAddresses.FindIndex(
-				sponsoredAddress => sponsoredAddress.targetAddress == to.ToLower());
+				sponsoredAddress => sponsoredAddress.targetAddress == to);
 			return index >= 0;
 		}
 

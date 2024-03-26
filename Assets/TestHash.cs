@@ -12,14 +12,14 @@ public class TestHash : MonoBehaviour
 
 	private async void Test()
 	{
-		var walletAddress = "0x5B76Bb156C4E9Aa322143d0061AFBd856482648D";
+		/*var walletAddress = "0x5B76Bb156C4E9Aa322143d0061AFBd856482648D";
 		var privateKey = "0x58476d0865927d3536ee46ad35d36899e5e362cf0825800f453f6ef7c8547dbe";
 		var salt = "COMETH-CONNECT";
 		
 		await EoaFallbackService.SetSignerLocalStorage(walletAddress, privateKey, salt);
 		var result = await EoaFallbackService.GetSignerLocalStorage(walletAddress, salt);
 		
-		Debug.Log("result :"+result);
+		Debug.Log("result :"+result);*/
 		
 		/*
 		var result = await EoaFallbackService.EncryptEoaFallback(walletAddress,privateKey,salt);
