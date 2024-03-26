@@ -18,10 +18,14 @@ namespace ComethSDK.Scripts.Tools
 		private readonly Web3 _web3;
 
 		private bool _cancelled;
+		private float _timerCurrent;
+		private float _timerMax;
 
-		public EventHandler(Web3 web3, string safeAddress)
+
+		public EventHandler(Web3 web3, string safeAddress, float timerMax)
 		{
 			_web3 = web3;
+			_timerMax = timerMax;
 			_execSuccessEventHandler = _web3.Eth.GetEvent<ExecutionSuccessEventDTO>(safeAddress);
 			_execFailureEventHandler = _web3.Eth.GetEvent<ExecutionFailureEventDTO>(safeAddress);
 
@@ -39,6 +43,7 @@ namespace ComethSDK.Scripts.Tools
 		{
 			//set it to false in case it was cancelled before
 			_cancelled = false;
+			_timerCurrent = 0;
 
 			var safeTxHashBytes = safeTxHash.RemoveHexPrefix().HexToByteArray();
 
@@ -61,28 +66,34 @@ namespace ComethSDK.Scripts.Tools
 					var allSuccessfulEventsFound = await _execSuccessEventHandler.GetAllChangesAsync(filterExecSuccess);
 
 					foreach (var events in allSuccessfulEventsFound)
-						if (safeTxHashBytes.SequenceEqual(events.Event.TxHash))
-						{
-							Debug.Log("Success");
-							txSuccessEvent = events;
-							txSuccessEventFound = true;
-							break;
-						}
-
-					if (txSuccessEventFound == false)
 					{
-						var filterExecFailure = _execFailureEventHandler.CreateFilterInput(
-							new BlockParameter(oldBlockNumber), null);
-						var allFailureEventsFound =
-							await _execFailureEventHandler.GetAllChangesAsync(filterExecFailure);
-						foreach (var events in allFailureEventsFound)
-							if (safeTxHashBytes.SequenceEqual(events.Event.TxHash))
-							{
-								Debug.Log("Failure");
-								txFailureEvent = events;
-								txFailureEventFound = true;
-								break;
-							}
+						if (!safeTxHashBytes.SequenceEqual(events.Event.TxHash)) continue;
+						
+						Debug.Log("Success");
+						txSuccessEvent = events;
+						txSuccessEventFound = true;
+						break;
+					}
+						
+					var filterExecFailure = _execFailureEventHandler.CreateFilterInput(
+						new BlockParameter(oldBlockNumber), null);
+					var allFailureEventsFound =
+						await _execFailureEventHandler.GetAllChangesAsync(filterExecFailure);
+					foreach (var events in allFailureEventsFound)
+					{
+						if (!safeTxHashBytes.SequenceEqual(events.Event.TxHash)) continue;
+						
+						Debug.Log("Failure");
+						txFailureEvent = events;
+						txFailureEventFound = true;
+						break;
+					}
+					
+					_timerCurrent += Time.deltaTime;
+					if (_timerCurrent >= _timerMax)
+					{
+						Debug.Log("Timeout");
+						return null;
 					}
 				}
 			}

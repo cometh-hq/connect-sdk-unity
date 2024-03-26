@@ -41,8 +41,9 @@ namespace ComethSDK.Scripts.Core
 		private List<SponsoredAddressResponse.SponsoredAddress> _sponsoredAddresses = new();
 		private string _walletAddress;
 		private Web3 _web3;
+		private float _transactionTimeoutTimer;
 
-		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey, string baseUrl = "")
+		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey, string baseUrl = "", float transactionTimeoutTimer = 60f)
 		{
 			if (!Utils.IsNetworkSupported(authAdaptor.ChainId)) throw new Exception("This network is not supported");
 			_chainId = authAdaptor.ChainId;
@@ -50,8 +51,10 @@ namespace ComethSDK.Scripts.Core
 				? new API(apiKey, int.Parse(_chainId))
 				: new API(apiKey, int.Parse(_chainId), baseUrl);
 			_authAdaptor = authAdaptor;
+			_transactionTimeoutTimer = transactionTimeoutTimer;
 		}
 
+		//transactionTimeoutTimer is in seconds
 		public async Task Connect([CanBeNull] string walletAddress = "")
 		{
 			if (_authAdaptor == null) throw new Exception("No auth adaptor found");
@@ -68,7 +71,7 @@ namespace ComethSDK.Scripts.Core
 			if (_sponsoredAddresses == null) throw new Exception("Error while getting sponsored addresses");
 
 			_connected = true;
-			_eventHandler = new EventHandler(_web3, _walletAddress);
+			_eventHandler = new EventHandler(_web3, _walletAddress, _transactionTimeoutTimer);
 		}
 
 		public async Task<TransactionReceipt> Wait(string safeTxHash)

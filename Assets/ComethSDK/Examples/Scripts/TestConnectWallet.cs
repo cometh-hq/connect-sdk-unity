@@ -21,6 +21,7 @@ namespace ComethSDK.Examples.Scripts
 		[Header("Optional")] [SerializeField] private string walletAddress;
 
 		[SerializeField] private string baseUrl;
+		[SerializeField] private float transactionTimeoutTimer;
 
 		[Header("UI")] [SerializeField] private TMP_Text console;
 
@@ -44,9 +45,20 @@ namespace ComethSDK.Examples.Scripts
 			}
 
 			_connectAuthAdaptor = new ConnectAdaptor(chainId, apiKey, baseUrl);
-			_wallet = string.IsNullOrEmpty(baseUrl)
-				? new ComethWallet(_connectAuthAdaptor, apiKey)
-				: new ComethWallet(_connectAuthAdaptor, apiKey, baseUrl);
+
+			if (string.IsNullOrEmpty(baseUrl))
+			{
+				_wallet = transactionTimeoutTimer == 0 
+					? new ComethWallet(_connectAuthAdaptor, apiKey) 
+					: new ComethWallet(_connectAuthAdaptor, apiKey, transactionTimeoutTimer:transactionTimeoutTimer);
+			}
+			else
+			{
+				_wallet = transactionTimeoutTimer == 0 
+					? new ComethWallet(_connectAuthAdaptor, apiKey, baseUrl)
+					: new ComethWallet(_connectAuthAdaptor, apiKey, baseUrl, transactionTimeoutTimer:transactionTimeoutTimer);
+			}
+			
 		}
 
 		public override async void Connect()
