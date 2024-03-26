@@ -151,8 +151,6 @@ namespace ComethSDK.Examples.Scripts
 			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNT_ADDRESS_MUMBAI);
 			var countFunction = contract.GetFunction("count");
 			var data = countFunction.GetData();
-			var web3 = new Web3(Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl);
-			EstimateGasAndShow(COUNT_ADDRESS_MUMBAI, "0", data);
 
 			PrintInConsole("Sending transaction...");
 			var safeTxHash = await _wallet.SendTransaction(COUNT_ADDRESS_MUMBAI, "0", data);
@@ -178,7 +176,6 @@ namespace ComethSDK.Examples.Scripts
 			var contract = _wallet.GetContract(Constants.COUNTER_ABI, COUNT_ADDRESS_MUMBAI);
 			var countFunction = contract.GetFunction("count");
 			var data = countFunction.GetData();
-			EstimateGasAndShow(COUNT_ADDRESS_MUMBAI, "0", data);
 
 			var dataArr = new[]
 			{
