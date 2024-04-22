@@ -18,11 +18,12 @@ namespace ComethSDK.Scripts.Adapters
 		private readonly API _api;
 		private readonly string _encryptionSalt;
 		private readonly string _provider;
+
 		private Signer _signer;
 		private string _walletAddress;
 
 		public ConnectAdaptor(int chainId, string apiKey, string baseUrl = "", string encryptionSalt = "",
-			string rpcUrl = "")
+			string provider = "")
 		{
 			if (chainId == 0)
 				throw new Exception("ChainId is not set");
@@ -33,9 +34,9 @@ namespace ComethSDK.Scripts.Adapters
 			ChainId = chainId.ToString();
 
 			_encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
-			_provider = string.IsNullOrEmpty(rpcUrl)
+			_provider = string.IsNullOrEmpty(provider)
 				? Constants.GetNetworkByChainID(ChainId).RPCUrl
-				: rpcUrl;
+				: provider;
 			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, chainId) : new API(apiKey, chainId, baseUrl);
 		}
 

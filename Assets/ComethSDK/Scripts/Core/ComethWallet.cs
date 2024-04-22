@@ -34,7 +34,7 @@ namespace ComethSDK.Scripts.Core
 		private EventHandler _eventHandler;
 		private Constants.Network _network;
 		private ProjectParams _projectParams;
-		private string _provider;
+		private readonly string _provider;
 
 		private List<SponsoredAddressResponse.SponsoredAddress> _sponsoredAddresses = new();
 		private string _walletAddress;
@@ -123,7 +123,7 @@ namespace ComethSDK.Scripts.Core
 		{
 			CheckIsLoggedIn();
 
-			var tx = await SafeService.PrepareAddOwnerTx(GetAddress(), newOwner, _provider);
+			var tx = await SafeService.PrepareAddOwnerTx(GetAddress(), newOwner, _rpcUrl);
 
 			var safeTxHash = await SendTransaction(tx);
 
@@ -134,7 +134,7 @@ namespace ComethSDK.Scripts.Core
 		{
 			CheckIsLoggedIn();
 
-			var tx = await SafeService.PrepareRemoveOwnerTx(GetAddress(), owner, _provider);
+			var tx = await SafeService.PrepareRemoveOwnerTx(GetAddress(), owner, _rpcUrl);
 
 			//TODO: remove the local storage of the private key
 
@@ -145,7 +145,7 @@ namespace ComethSDK.Scripts.Core
 
 		public async Task<List<string>> GetOwners()
 		{
-			return await SafeService.GetOwners(_walletAddress, _provider);
+			return await SafeService.GetOwners(_walletAddress, _rpcUrl);
 		}
 
 		public void CancelWaitingForEvent()
