@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using ComethSDK.Scripts.Tools.Signers.Interfaces;
+﻿using ComethSDK.Scripts.Tools.Signers.Interfaces;
 using Nethereum.ABI.EIP712;
 using Nethereum.Signer;
 using Nethereum.Signer.EIP712;
@@ -24,15 +21,14 @@ namespace ComethSDK.Scripts.Tools.Signers
 			return SignTypedDataV4(message, typedData, _ethEcKey);
 		}
 
-		public Task<string> SignTypedData(DomainWithChainIdAndVerifyingContract domain,
-			IDictionary<string, MemberDescription[]> types, IDictionary<string, object> value)
-		{
-			throw new NotImplementedException();
-		}
-
 		public string GetAddress()
 		{
 			return _ethEcKey.GetPublicAddress();
+		}
+
+		public string GetPrivateKey()
+		{
+			return _ethEcKey.GetPrivateKey();
 		}
 	}
 }

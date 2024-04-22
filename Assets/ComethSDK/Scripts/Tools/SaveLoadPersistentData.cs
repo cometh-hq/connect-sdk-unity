@@ -39,11 +39,17 @@ namespace ComethSDK.Scripts.Tools
 			// get the data path of this save data
 			var dataPath = GetFilePath(folder, file);
 
-			// if the file path or name does not exist, return the default SO
+			// if the file Directory does not exist, return the default SO
 			if (!Directory.Exists(Path.GetDirectoryName(dataPath)))
 			{
-				Debug.LogWarning("File or path does not exist! " + dataPath);
-				throw new Exception("File or path does not exist! " + dataPath);
+				Debug.LogError("Directory does not exist! " + dataPath);
+				throw new Exception("Directory does not exist! " + dataPath);
+			}
+			
+			if(!File.Exists(dataPath))
+			{
+				Debug.LogError("File does not exist! " + dataPath);
+				throw new Exception("File does not exist! " + dataPath);
 			}
 
 			// load in the save data as byte array

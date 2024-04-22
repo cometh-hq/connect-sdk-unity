@@ -65,70 +65,77 @@ namespace ComethSDK.Scripts.Services
 			return storageSigner;
 		}
 
-		public static async Task MigrateV1Keys(string walletAddress, string encryptionSalt)
-		{
-			encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
-
-			var localStorageV1 = PlayerPrefs.GetString($"cometh-connect-{walletAddress}");
-
-			if (!string.IsNullOrEmpty(localStorageV1))
-			{
-				var privateKey = localStorageV1;
-
-				await SetSignerLocalStorage(walletAddress, privateKey, encryptionSalt);
-				PlayerPrefs.DeleteKey($"cometh-connect-{walletAddress}");
-			}
-		}
-
 		public static async Task<string> GetSignerLocalStorage(string walletAddress, string encryptionSalt)
 		{
-			var localStorageV2 = SaveLoadPersistentData.Load("connect",
-				walletAddress);
+			EncryptionData localStorageV2;
+				
+			try
+			{
+				localStorageV2 = SaveLoadPersistentData.Load("connect",
+					walletAddress);
+			}
+			catch (Exception)
+			{
+				Debug.LogError("No signer available for this address.");
+				throw new Exception("No signer available for this address.");
+			}
+			
 
 			if (localStorageV2 == null) return null;
-			if (!string.IsNullOrEmpty(localStorageV2.encryptedPrivateKey) && !string.IsNullOrEmpty(localStorageV2.iv))
-			{
-				encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
 
-				var privateKey = await DecryptEoaFallback(
-					walletAddress,
-					Convert.FromBase64String(localStorageV2.encryptedPrivateKey),
-					Convert.FromBase64String(localStorageV2.iv),
-					encryptionSalt);
+			if (string.IsNullOrEmpty(localStorageV2.encryptedPrivateKey) && string.IsNullOrEmpty(localStorageV2.iv))
+				throw new Exception("Local storage exists but no encryptedPrivateKey and ivs were inside.");
 
-				return privateKey;
-			}
+			if (string.IsNullOrEmpty(localStorageV2.encryptedPrivateKey))
+				throw new Exception("Local storage exists but no encryptedPrivateKey was inside.");
 
-			return null;
+			if (string.IsNullOrEmpty(localStorageV2.iv))
+				throw new Exception("Local storage exists but no iv was inside.");
+
+			encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
+
+			var privateKey = await DecryptEoaFallback(
+				walletAddress,
+				Convert.FromBase64String(localStorageV2.encryptedPrivateKey),
+				Convert.FromBase64String(localStorageV2.iv),
+				encryptionSalt);
+
+			return privateKey;
 		}
 
-		public static async Task SetSignerLocalStorage(string walletAddress, string privateKey, string encryptionSalt)
+		public static async Task SetSignerLocalStorage(string walletAddress, Signer signer, string encryptionSalt)
 		{
 			encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
-			var encryptedData = await EncryptEoaFallback(walletAddress, privateKey, encryptionSalt);
+			var encryptedData = await EncryptEoaFallback(walletAddress, signer.GetPrivateKey(), encryptionSalt);
 			SaveLoadPersistentData.Save(encryptedData, "connect", walletAddress);
 		}
 
-		public static async Task<(Signer, string)> CreateSigner(API api, string walletAddress = "",
+		public static async Task<(Signer signer, string walletAddress)> CreateSigner(API api, string walletAddress = "",
 			string encryptionSalt = "")
 		{
-			var ethEcKey = EthECKey.GenerateKey();
-			var privateKey = ethEcKey.GetPrivateKey();
-			var signer = new Signer(ethEcKey);
+			var signer = CreateRandomWallet();
 
 			if (string.IsNullOrEmpty(encryptionSalt)) encryptionSalt = Constants.DEFAULT_ENCRYPTION_SALT;
 
 			if (!string.IsNullOrEmpty(walletAddress))
 			{
-				await SetSignerLocalStorage(walletAddress, privateKey, encryptionSalt);
+				await SetSignerLocalStorage(walletAddress, signer, encryptionSalt);
 				return (signer, walletAddress);
 			}
 
-			var predictedWalletAddress = await api.InitWallet(signer.GetAddress());
-
-			await SetSignerLocalStorage(predictedWalletAddress, privateKey, encryptionSalt);
+			var predictedWalletAddress = await api.GetWalletAddress(signer.GetAddress());
+			if(string.IsNullOrEmpty(predictedWalletAddress)) throw new Exception("Error in GetWalletAddress");
+			
+			await SetSignerLocalStorage(predictedWalletAddress, signer,
+				encryptionSalt);
 
 			return (signer, predictedWalletAddress);
+		}
+
+		private static Signer CreateRandomWallet()
+		{
+			var ethEcKey = EthECKey.GenerateKey();
+			return new Signer(ethEcKey);
 		}
 	}
 }

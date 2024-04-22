@@ -16,14 +16,14 @@ namespace ComethSDK.Scripts.Adapters
 	public class ConnectAdaptor : IAuthAdaptor
 	{
 		private readonly API _api;
-
-		private string _baseUrl;
 		private readonly string _encryptionSalt;
-		private readonly string _provider;
+		private readonly string _rpcUrl;
+
 		private Signer _signer;
 		private string _walletAddress;
 
-		public ConnectAdaptor(int chainId, string apiKey, string baseUrl = "", string encryptionSalt = "")
+		public ConnectAdaptor(int chainId, string apiKey, string baseUrl = "", string encryptionSalt = "",
+			string rpcUrl = "")
 		{
 			if (chainId == 0)
 				throw new Exception("ChainId is not set");
@@ -33,29 +33,21 @@ namespace ComethSDK.Scripts.Adapters
 			if (!Utils.IsNetworkSupported(chainId.ToString())) throw new Exception("This network is not supported");
 			ChainId = chainId.ToString();
 
-			_baseUrl = baseUrl;
 			_encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
-			_provider = Constants.GetNetworkByChainID(ChainId).RPCUrl;
+			_rpcUrl = string.IsNullOrEmpty(rpcUrl)
+				? Constants.GetNetworkByChainID(ChainId).RPCUrl
+				: rpcUrl;
 			_api = string.IsNullOrEmpty(baseUrl) ? new API(apiKey, chainId) : new API(apiKey, chainId, baseUrl);
 		}
 
 		public string ChainId { get; }
 
-		public async Task Connect(string burnerAddress = "")
+		public async Task Connect(string walletAddress = "")
 		{
-			if (!string.IsNullOrEmpty(burnerAddress))
-			{
-				await EoaFallbackService.MigrateV1Keys(burnerAddress, _encryptionSalt);
-				_signer = await EoaFallbackService.GetSigner(_api, _provider, burnerAddress, _encryptionSalt);
-				_walletAddress = burnerAddress;
-			}
+			if (!string.IsNullOrEmpty(walletAddress))
+				await Reconnect(walletAddress);
 			else
-			{
-				var (signer, walletAddress) =
-					await EoaFallbackService.CreateSigner(_api, encryptionSalt: _encryptionSalt);
-				_signer = signer;
-				_walletAddress = walletAddress;
-			}
+				await CreateWallet();
 		}
 
 		public Task Logout()
@@ -87,10 +79,29 @@ namespace ComethSDK.Scripts.Adapters
 			};
 		}
 
-		public async Task<string> GetWalletAddress()
+		public string GetWalletAddress()
 		{
 			if (string.IsNullOrEmpty(_walletAddress)) throw new Exception("No wallet Instance found");
 			return _walletAddress;
+		}
+
+		private async Task Reconnect(string walletAddress)
+		{
+			var wallet = await _api.GetWalletInfos(walletAddress);
+			if (wallet == null) throw new Exception("Wallet does not exist");
+			
+			_signer = await EoaFallbackService.GetSigner(_api, _rpcUrl, walletAddress, _encryptionSalt);
+			_walletAddress = walletAddress;
+		}
+
+		private async Task CreateWallet()
+		{
+			var (signer, walletAddress) =
+				await EoaFallbackService.CreateSigner(_api, encryptionSalt: _encryptionSalt);
+			_signer = signer;
+			_walletAddress = walletAddress;
+
+			await _api.InitWallet(signer.GetAddress());
 		}
 
 		public async Task<NewSignerRequestBody> InitNewSignerRequest(string walletAddress)
@@ -113,32 +124,8 @@ namespace ComethSDK.Scripts.Adapters
 
 		public async Task<NewSignerRequestBody[]> GetNewSignerRequests()
 		{
-			var walletAddress = await GetWalletAddress();
+			var walletAddress = GetWalletAddress();
 			return await _api.GetNewSignerRequests(walletAddress);
-		}
-
-		private async Task<string> InitAdaptorWalletAddress(string address)
-		{
-			if (_signer == null) throw new Exception("No signer instance found");
-
-			return string.IsNullOrEmpty(address)
-				? address
-				: await _api.GetWalletAddress(_signer.GetAddress());
-		}
-
-		private async Task VerifyWalletAddress(string walletAddress)
-		{
-			WalletInfos connectWallet;
-			try
-			{
-				connectWallet = await _api.GetWalletInfos(walletAddress);
-			}
-			catch
-			{
-				throw new Exception("Invalid address format");
-			}
-
-			if (connectWallet == null) throw new Exception("Wallet does not exist");
 		}
 
 		private void CheckIfSignerIsSet()
