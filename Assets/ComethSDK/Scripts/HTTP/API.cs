@@ -82,7 +82,11 @@ namespace ComethSDK.Scripts.HTTP
 				var sponsoredAddresses = new List<SponsoredAddressResponse.SponsoredAddress>();
 
 				foreach (var sponsoredAddress in sponsoredAddressesResponse.sponsoredAddresses)
-					sponsoredAddresses.Add(sponsoredAddress);
+				{
+					var newSponsoredAddress = sponsoredAddress;
+					newSponsoredAddress.targetAddress = sponsoredAddress.targetAddress.ToLower();
+					sponsoredAddresses.Add(newSponsoredAddress);
+				}
 
 				return sponsoredAddresses;
 			}

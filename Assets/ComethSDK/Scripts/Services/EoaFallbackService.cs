@@ -124,6 +124,8 @@ namespace ComethSDK.Scripts.Services
 			}
 
 			var predictedWalletAddress = await api.GetWalletAddress(signer.GetAddress());
+			if(string.IsNullOrEmpty(predictedWalletAddress)) throw new Exception("Error in GetWalletAddress");
+			
 			await SetSignerLocalStorage(predictedWalletAddress, signer,
 				encryptionSalt);
 
