@@ -153,6 +153,7 @@ namespace ComethSDK.Scripts.Core
 		public async Task<List<string>> GetOwners(string walletAddress)
 		{
 			return await SafeService.GetOwners(walletAddress, _provider);
+			return await SafeService.GetOwners(_walletAddress, _provider);
 		}
 
 		public void CancelWaitingForEvent()
