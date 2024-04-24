@@ -123,7 +123,7 @@ namespace ComethSDK.Scripts.Core
 		{
 			CheckIsLoggedIn();
 
-			var tx = await SafeService.PrepareAddOwnerTx(GetAddress(), newOwner, _rpcUrl);
+			var tx = await SafeService.PrepareAddOwnerTx(GetAddress(), newOwner, _provider);
 
 			var safeTxHash = await SendTransaction(tx);
 
@@ -134,7 +134,7 @@ namespace ComethSDK.Scripts.Core
 		{
 			CheckIsLoggedIn();
 
-			var tx = await SafeService.PrepareRemoveOwnerTx(GetAddress(), owner, _rpcUrl);
+			var tx = await SafeService.PrepareRemoveOwnerTx(GetAddress(), owner, _provider);
 
 			//TODO: remove the local storage of the private key
 
@@ -145,7 +145,7 @@ namespace ComethSDK.Scripts.Core
 
 		public async Task<List<string>> GetOwners()
 		{
-			return await SafeService.GetOwners(_walletAddress, _rpcUrl);
+			return await SafeService.GetOwners(_walletAddress, _provider);
 		}
 
 		public void CancelWaitingForEvent()
