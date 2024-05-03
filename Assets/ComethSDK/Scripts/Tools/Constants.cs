@@ -75,7 +75,7 @@ namespace ComethSDK.Scripts.Tools
 					ChainId = "2121337",
 					RPCUrl = "https://muster-anytrust.alt.technology",
 					NetworkName = "Muster",
-					BlockExplorerUrl = "https://muster-anytrust-explorer.alt.technology/",
+					BlockExplorerUrl = "https://muster-anytrust-explorer-v2.alt.technology",
 				}
 			},
 			{
