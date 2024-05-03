@@ -64,12 +64,12 @@ namespace ComethSDK.Scripts.Services
 
 
 		public static async Task<BigInteger> EstimateTransactionGas(IMetaTransactionData[] safeTxDataArray,
-			string from, string provider, string value = default)
+			string from, string provider)
 		{
 			var safeTxGas = BigInteger.Zero;
 
 			foreach (var safeTxData in safeTxDataArray)
-				safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to, from, provider, value);
+				safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to, from, provider, safeTxData.value);
 
 			return safeTxGas;
 		}
