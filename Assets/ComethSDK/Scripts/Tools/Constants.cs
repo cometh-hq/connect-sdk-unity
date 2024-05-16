@@ -11,7 +11,8 @@ namespace ComethSDK.Scripts.Tools
 			POLYGON,
 			MUMBAI,
 			MUSTER,
-			MUSTER_MAINNET
+			MUSTER_MAINNET,
+			ARBITRUM_SEPOLIA
 		}
 
 		public const string API_URL = "https://api.connect.cometh.io/";
