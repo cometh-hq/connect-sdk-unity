@@ -66,7 +66,7 @@ namespace ComethSDK.Scripts.HTTP
 
 			if (contentDeserializeObject is { success: true }) return contentDeserializeObject.safeTxHash;
 
-			Debug.LogError("Error in RelayTransaction");
+			Debug.LogError("Error in RelayTransaction: " + contentDeserializeObject.error);
 			return null;
 		}
 

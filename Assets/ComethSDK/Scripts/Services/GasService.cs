@@ -35,24 +35,12 @@ namespace ComethSDK.Scripts.Services
 			return reward + baseFee + (reward + baseFee) / 10;
 		}
 
-		public static async Task VerifyHasEnoughBalance(string from, string to, string value, string data, int nonce,
+		public static async Task VerifyHasEnoughBalance(string from, BigInteger totalGasCost, BigInteger txValue,
 			string provider)
 		{
 			var web3 = new Web3(provider);
 			var walletBalance = await web3.Eth.GetBalance.SendRequestAsync(from);
-			var totalGasCost = await CalculateMaxFees(from, to, value, data, nonce, BASE_GAS, provider);
-			if (walletBalance.Value < totalGasCost)
-				throw new Exception("Not enough balance to send this value and pay for gas");
-		}
-
-		public static async Task VerifyHasEnoughBalance(string walletAddress, GasEstimates gasEstimates, string txValue,
-			string provider)
-		{
-			var web3 = new Web3(provider);
-			var walletBalance = await web3.Eth.GetBalance.SendRequestAsync(walletAddress);
-			var totalGasCost = GetTotalGasCost(gasEstimates);
-			var totalValue = BigInteger.Parse(txValue);
-			if (walletBalance.Value < BigInteger.Add(totalGasCost, totalValue))
+			if (walletBalance.Value < totalGasCost+txValue)
 				throw new Exception("Not enough balance to send this value and pay for gas");
 		}
 
@@ -85,18 +73,32 @@ namespace ComethSDK.Scripts.Services
 			return safeTxDataTyped;
 		}
 
-		public static async Task<SafeTx> SetTransactionGasWithSimulate(SafeTx safeTxDataTyped, string walletAddress,
+		public static async Task<(BigInteger,BigInteger,BigInteger,BigInteger)> GetTransactionGasWithSimulate(IMetaTransactionData safeTxDataTyped, string walletAddress,
 			string multiSendAddress, string singletonAddress, string simulateTxAccessorAddress, string provider)
 		{
-			var safeTxDataArray = new IMetaTransactionData[] { safeTxDataTyped };
-			var gasEstimates = await EstimateSafeTxGasWithSimulate(walletAddress, safeTxDataArray,
+			var gasEstimates = await SetTxDataAndGetTxGasWithSimulate(walletAddress, safeTxDataTyped,
 				multiSendAddress, singletonAddress, simulateTxAccessorAddress, provider);
 
-			safeTxDataTyped.safeTxGas = BigInteger.Parse(gasEstimates);
-			safeTxDataTyped.baseGas = BASE_GAS;
-			safeTxDataTyped.gasPrice = await GetGasPrice(provider);
+			 var safeTxGas = BigInteger.Parse(gasEstimates);
+			 var baseGas = BASE_GAS;
+			 var gasPrice = await GetGasPrice(provider);
+			 var totalGasCost = GetTotalGasCost(new GasEstimates(safeTxGas, baseGas, gasPrice));
 
-			return safeTxDataTyped;
+			return (safeTxGas, baseGas, gasPrice, totalGasCost);
+		}
+		
+		public static async Task<(BigInteger,BigInteger,BigInteger,BigInteger)> GetTransactionGasWithSimulate(IMetaTransactionData[] safeTxDataTypedArray, string walletAddress,
+			string multiSendAddress, string singletonAddress, string simulateTxAccessorAddress, string provider)
+		{
+			var gasEstimates = await SetTxDataAndGetTxGasWithSimulate(walletAddress, safeTxDataTypedArray,
+				multiSendAddress, singletonAddress, simulateTxAccessorAddress, provider);
+
+			var safeTxGas = BigInteger.Parse(gasEstimates);
+			var baseGas = BASE_GAS;
+			var gasPrice = await GetGasPrice(provider);
+			var totalGasCost = GetTotalGasCost(new GasEstimates(safeTxGas, baseGas, gasPrice));
+
+			return (safeTxGas, baseGas, gasPrice, totalGasCost);
 		}
 
 		public static async Task<BigInteger> CalculateMaxFees(string from, string to, string value, string data,
@@ -109,30 +111,36 @@ namespace ComethSDK.Scripts.Services
 			return totalGasCost + BigInteger.Parse(value);
 		}
 
-		public static async Task<string> EstimateSafeTxGasWithSimulate(string walletAddress,
-			IMetaTransactionData[] safeTxData, string multiSendAddress, string singletonAddress, 
-			string simulateTxAccessorAddress, string provider, string value = "0")
+		private static async Task<string> SetTxDataAndGetTxGasWithSimulate(string walletAddress,
+			IMetaTransactionData safeTxData, string multiSendAddress, string singletonAddress, 
+			string simulateTxAccessorAddress, string provider)
 		{
-			IMetaTransactionData transaction;
+			safeTxData.operation = 0;
+			return await EstimateSafeTxGasWithSimulate(safeTxData, walletAddress, singletonAddress, simulateTxAccessorAddress, provider);
+		}
 
-			if (safeTxData.Length != 1)
+		private static async Task<string> SetTxDataAndGetTxGasWithSimulate(string walletAddress,
+			IMetaTransactionData[] safeTxData, string multiSendAddress, string singletonAddress,
+			string simulateTxAccessorAddress, string provider)
+		{
+			var multiSendData = MultiSend.EncodeMultiSendArray(safeTxData, provider, multiSendAddress).data;
+
+			IMetaTransactionData transaction = new MetaTransactionData
 			{
-				var multiSendData = MultiSend.EncodeMultiSendArray(safeTxData, provider, multiSendAddress).data;
+				to = multiSendAddress,
+				value = "0",
+				data = multiSendData,
+				operation = OperationType.DELEGATE_CALL
+			};
 
-				transaction = new MetaTransactionData
-				{
-					to = multiSendAddress,
-					value = value,
-					data = multiSendData,
-					operation = OperationType.DELEGATE_CALL
-				};
-			}
-			else
-			{
-				transaction = safeTxData[0];
-				transaction.operation = 0;
-			}
+			return await EstimateSafeTxGasWithSimulate(transaction, walletAddress, singletonAddress,
+				simulateTxAccessorAddress, provider);
+		}
 
+		private static async Task<string> EstimateSafeTxGasWithSimulate(IMetaTransactionData transaction, string walletAddress, string singletonAddress,
+			string simulateTxAccessorAddress, string provider)
+		{
+			
 			var isSafeDeployed = await SafeService.IsDeployed(walletAddress, provider);
 
 			var simulateTxContract = SimulateTxAcessorService.GetContract(simulateTxAccessorAddress, provider);
@@ -175,9 +183,11 @@ namespace ComethSDK.Scripts.Services
 
 		private static string DecodeSafeTxGas(string encodedSafeTxGas)
 		{
+			//var encodedSafe = encodedSafeTxGas.Substring(9);
 			Debug.Log("encodedSafeTxGasLenght:" + encodedSafeTxGas.Length);
-			var gasHex = encodedSafeTxGas.Substring(184, 10);
-			var gasNum = Convert.ToUInt64(gasHex, 16);
+			var hexSubstring = encodedSafeTxGas.Substring(184, 10);
+			var hexString = "0x" + hexSubstring;
+			var gasNum = Convert.ToUInt64(hexString, 16);
 			return gasNum.ToString();
 		}
 

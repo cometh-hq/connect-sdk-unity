@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.HTTP;
 using ComethSDK.Scripts.Interfaces;
@@ -131,13 +132,13 @@ namespace ComethSDK.Scripts.Services
 			return metaTransactionData.data.Length < 10 ? metaTransactionData.data : metaTransactionData.data[..10];
 		}
 
-		public static string GetTransactionsTotalValue(IMetaTransactionData[] safeTxData)
+		public static BigInteger GetTransactionsTotalValue(IMetaTransactionData[] safeTxData)
 		{
-			var txValue = 0;
+			BigInteger txValue = 0;
 
-			foreach (var safeTx in safeTxData) txValue += int.Parse(safeTx.value);
+			foreach (var safeTx in safeTxData) txValue += BigInteger.Parse(safeTx.value);
 
-			return txValue.ToString();
+			return txValue;
 		}
 	}
 }
