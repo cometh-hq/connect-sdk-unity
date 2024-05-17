@@ -11,7 +11,8 @@ namespace ComethSDK.Scripts.Tools
 			POLYGON,
 			MUMBAI,
 			MUSTER,
-			MUSTER_MAINNET
+			MUSTER_MAINNET,
+			ARBITRUM_SEPOLIA
 		}
 
 		public const string API_URL = "https://api.connect.cometh.io/";
@@ -77,6 +78,16 @@ namespace ComethSDK.Scripts.Tools
 					RPCUrl = "https://muster.alt.technology",
 					NetworkName = "Muster",
 					BlockExplorerUrl = "https://muster-explorer.alt.technology",
+				}
+			},
+			{
+				Network.ARBITRUM_SEPOLIA,
+				new NetworkData
+				{
+					ChainId = "421614",
+					RPCUrl = "https://arbitrum-sepolia.infura.io/v3/2e1346349a5d4a24aeba9dee6c7b20b5",
+					NetworkName = "Arbitrum Sepolia",
+					BlockExplorerUrl = "https://sepolia.arbiscan.io",
 				}
 			}
 		};
