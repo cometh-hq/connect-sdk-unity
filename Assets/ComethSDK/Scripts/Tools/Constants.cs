@@ -47,9 +47,7 @@ namespace ComethSDK.Scripts.Tools
 					ChainId = "137",
 					RPCUrl = "https://polygon-rpc.com",
 					NetworkName = "Polygon",
-					BlockExplorerUrl = "https://polygonscan.com/",
-					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
-					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
+					BlockExplorerUrl = "https://polygonscan.com/"
 				}
 			},
 			{
@@ -59,9 +57,7 @@ namespace ComethSDK.Scripts.Tools
 					ChainId = "80001",
 					RPCUrl = "https://rpc.ankr.com/polygon_mumbai",
 					NetworkName = "Mumbai",
-					BlockExplorerUrl = "https://mumbai.polygonscan.com/",
-					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
-					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
+					BlockExplorerUrl = "https://mumbai.polygonscan.com/"
 				}
 			},
 			{
@@ -71,9 +67,7 @@ namespace ComethSDK.Scripts.Tools
 					ChainId = "2121337",
 					RPCUrl = "https://muster-anytrust.alt.technology",
 					NetworkName = "Muster",
-					BlockExplorerUrl = "https://muster-anytrust-explorer.alt.technology/",
-					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
-					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
+					BlockExplorerUrl = "https://muster-anytrust-explorer.alt.technology/"
 				}
 			},
 			{
@@ -83,9 +77,7 @@ namespace ComethSDK.Scripts.Tools
 					ChainId = "4078",
 					RPCUrl = "https://muster.alt.technology",
 					NetworkName = "Muster",
-					BlockExplorerUrl = "https://muster-explorer.alt.technology",
-					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
-					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
+					BlockExplorerUrl = "https://muster-explorer.alt.technology"
 				}
 			},
 			{
@@ -95,9 +87,7 @@ namespace ComethSDK.Scripts.Tools
 					ChainId = "421614",
 					RPCUrl = "https://arbitrum-sepolia.infura.io/v3/2e1346349a5d4a24aeba9dee6c7b20b5",
 					NetworkName = "Arbitrum Sepolia",
-					BlockExplorerUrl = "https://sepolia.arbiscan.io",
-					SafeSingletonAddress = "0x3E5c63644E683549055b9Be8653de26E0B4CD36E",
-					SafeTxAccessorAddress = "0x59AD6735bCd8152B84860Cb256dD9e96b85F69Da"
+					BlockExplorerUrl = "https://sepolia.arbiscan.io"
 				}
 			}
 		};
