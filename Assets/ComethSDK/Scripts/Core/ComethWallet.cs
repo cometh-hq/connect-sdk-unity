@@ -209,29 +209,28 @@ namespace ComethSDK.Scripts.Core
 			});
 		}
 
-		public async Task<string> SendTransaction(MetaTransactionData safeTxData)
+		public async Task<string> SendTransaction(IMetaTransactionData safeTxData)
 		{
 			CheckIsLoggedIn();
 
-			var safeTxDataArray = new IMetaTransactionData[]
-			{
-				safeTxData
-			};
-
 			var nonce = await Utils.GetNonce(_web3, _walletAddress);
 			var typedData = Utils.CreateSafeTxTypedData(_chainId, _walletAddress);
-			var safeTx = Utils.CreateSafeTx(safeTxDataArray[0].to, safeTxDataArray[0].value, safeTxDataArray[0].data,
+			var safeTx = Utils.CreateSafeTx(safeTxData.to, safeTxData.value, safeTxData.data,
 				nonce);
 
-			if (!IsSponsoredTransaction(safeTxDataArray))
+			if (!IsSponsoredTransaction(safeTxData))
 			{
-				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress,
+				var (safeTxGas, baseGas, gasPrice, totalGasCost) = await GasService.GetTransactionGasWithSimulate(safeTxData, _walletAddress,
 					_projectParams.MultiSendContractAddress,
 					_projectParams.singletonAddress,
 					_projectParams.simulateTxAcessorAddress
 					, _provider);
-				await GasService.VerifyHasEnoughBalance(_walletAddress, safeTxDataArray[0].to, safeTxDataArray[0].value,
-					safeTxDataArray[0].data, nonce, _provider);
+				
+				safeTx.safeTxGas = safeTxGas;
+				safeTx.baseGas = baseGas;
+				safeTx.gasPrice = gasPrice;
+				
+				await GasService.VerifyHasEnoughBalance(_walletAddress, totalGasCost, BigInteger.Parse(safeTxData.value), _provider);
 			}
 
 			var txSignature = await SignTypedData(safeTx, typedData);
@@ -258,25 +257,18 @@ namespace ComethSDK.Scripts.Core
 
 			if (!IsSponsoredTransaction(safeTxData))
 			{
-				var safeTxGasString = await GasService.EstimateSafeTxGasWithSimulate(_walletAddress, safeTxData,
+				var (safeTxGas, baseGas, gasPrice, totalGasCost) = await GasService.GetTransactionGasWithSimulate(safeTxData, _walletAddress,
 					_projectParams.MultiSendContractAddress,
 					_projectParams.singletonAddress,
-					_projectParams.simulateTxAcessorAddress,
-					_provider);
-
-				var gasEstimates = new GasEstimates
-				{
-					baseGas = BASE_GAS,
-					gasPrice = await GasService.GetGasPrice(_provider),
-					safeTxGas = BigInteger.Parse(safeTxGasString)
-				};
+					_projectParams.simulateTxAcessorAddress
+					, _provider);
+				
+				safeTx.safeTxGas = safeTxGas;
+				safeTx.baseGas = baseGas;
+				safeTx.gasPrice = gasPrice;
 
 				var txValue = SafeService.GetTransactionsTotalValue(safeTxData);
-				await GasService.VerifyHasEnoughBalance(_walletAddress, gasEstimates, txValue, _provider);
-
-				safeTx.safeTxGas += gasEstimates.safeTxGas;
-				safeTx.baseGas = gasEstimates.baseGas;
-				safeTx.gasPrice += gasEstimates.gasPrice;
+				await GasService.VerifyHasEnoughBalance(_walletAddress, totalGasCost, txValue, _provider);
 			}
 
 			return await SignAndSendTransaction(safeTx, dataType);
@@ -310,6 +302,16 @@ namespace ComethSDK.Scripts.Core
 
 				if (!sponsoredAddress && functionSelector != Constants.ADD_OWNER_FUNCTION_SELECTOR) return false;
 			}
+
+			return true;
+		}
+		
+		private bool IsSponsoredTransaction(IMetaTransactionData safeTxData)
+		{
+			var functionSelector = SafeService.GetFunctionSelector(safeTxData);
+			var sponsoredAddress = ToSponsoredAddress(safeTxData.to);
+
+			if (!sponsoredAddress && functionSelector != Constants.ADD_OWNER_FUNCTION_SELECTOR) return false;
 
 			return true;
 		}
