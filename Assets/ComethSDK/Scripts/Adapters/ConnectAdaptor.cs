@@ -142,12 +142,5 @@ namespace ComethSDK.Scripts.Adapters
 		{
 			if (_signer == null) throw new Exception("No signer instance found");
 		}
-
-		public async Task<Signer> CreateNewSigner(string walletAddress)
-		{
-			var (signer, _) = await EoaFallbackService.CreateSigner(_api, walletAddress, _encryptionSalt);
-
-			return signer;
-		}
 	}
 }
