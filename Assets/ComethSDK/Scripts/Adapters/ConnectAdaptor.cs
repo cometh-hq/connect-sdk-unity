@@ -89,7 +89,7 @@ namespace ComethSDK.Scripts.Adapters
 		{
 			var wallet = await _api.GetWalletInfos(walletAddress);
 			if (wallet == null) throw new Exception("Wallet does not exist");
-			
+
 			_signer = await EoaFallbackService.GetSigner(_api, _provider, walletAddress, _encryptionSalt);
 			_walletAddress = walletAddress;
 		}
@@ -131,6 +131,13 @@ namespace ComethSDK.Scripts.Adapters
 		private void CheckIfSignerIsSet()
 		{
 			if (_signer == null) throw new Exception("No signer instance found");
+		}
+
+		public async Task<Signer> CreateNewSigner(string walletAddress)
+		{
+			var (signer, _) = await EoaFallbackService.CreateSigner(_api, walletAddress, _encryptionSalt);
+
+			return signer;
 		}
 	}
 }
