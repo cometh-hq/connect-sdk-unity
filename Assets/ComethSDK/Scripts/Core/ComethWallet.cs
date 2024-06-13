@@ -10,6 +10,7 @@ using ComethSDK.Scripts.HTTP.Responses;
 using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
+using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
 using JetBrains.Annotations;
@@ -290,6 +291,11 @@ namespace ComethSDK.Scripts.Core
 			return await _api.RelayTransaction(new RelayTransactionType(
 				safeTx, txSignature, _walletAddress)
 			);
+		}
+
+		public Task<Signer> CreateNewSigner(string walletAddress)
+		{
+			return _authAdaptor.CreateNewSigner(walletAddress);
 		}
 
 		/**
