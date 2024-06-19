@@ -29,6 +29,10 @@ namespace ComethSDK.Scripts.Tools
 
 		public const decimal DEFAULT_REWARD_PERCENTILE = 80;
 		public const string ADD_OWNER_FUNCTION_SELECTOR = "0x0d582f13";
+		public const string REMOVE_OWNER_FUNCTION_SELECTOR = "0xf8dc5dd9";
+		public const string SET_DELAY_TX_NONCE_SELECTOR = "0x46ba2307";
+
+		public static List<string> SPONSORED_FUNCTIONS = new() { ADD_OWNER_FUNCTION_SELECTOR, REMOVE_OWNER_FUNCTION_SELECTOR, SET_DELAY_TX_NONCE_SELECTOR };
 
 		public static readonly BigInteger BLOCK_EVENT_GAP = -500;
 		public static readonly BigInteger DEFAULT_BASE_GAS = 80000;

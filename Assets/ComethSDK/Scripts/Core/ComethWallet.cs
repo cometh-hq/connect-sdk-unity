@@ -298,6 +298,30 @@ namespace ComethSDK.Scripts.Core
 			return _authAdaptor.CreateNewSigner(walletAddress);
 		}
 
+		public async Task<bool> OnGoingRecovery(string walletAddress)
+		{
+			return await DelayService.OnGoingRecovery(walletAddress, _api, _web3);
+		}
+
+		public async Task<string> CancelRecovery()
+		{
+			CheckIsLoggedIn();
+
+			bool onGoingRecovery = await DelayService.OnGoingRecovery(GetAddress(), _api, _web3);
+
+			if (!onGoingRecovery)
+			{
+				Debug.Log("No on going recovery found");
+				throw new InvalidOperationException("No on going recovery found");
+			}
+
+			var tx = await DelayService.PrepareCancelRecoveryTx(GetAddress(), _api, _web3);
+
+			var safeTxHash = await SendTransaction(tx);
+
+			return safeTxHash;
+		}
+
 		/**
 		 * Private Methods
 		 */
@@ -314,7 +338,10 @@ namespace ComethSDK.Scripts.Core
 				var functionSelector = SafeService.GetFunctionSelector(safeTxData);
 				var sponsoredAddress = ToSponsoredAddress(safeTxData.to);
 
-				if (!sponsoredAddress && functionSelector != Constants.ADD_OWNER_FUNCTION_SELECTOR) return false;
+				if (!sponsoredAddress && !Constants.SPONSORED_FUNCTIONS.Contains(functionSelector))
+				{
+					return false;
+				}
 			}
 
 			return true;

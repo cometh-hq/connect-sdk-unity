@@ -7,6 +7,7 @@ namespace ComethSDK.Scripts.Types
 		public string address { get; set; }
 		public DateTime connectionDate { get; set; }
 		public DateTime creationDate { get; set; }
+		public string proxyDelayAddress { get; set; }
 		public string userId { get; set; }
 	}
 }
