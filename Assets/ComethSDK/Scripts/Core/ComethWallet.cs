@@ -10,6 +10,7 @@ using ComethSDK.Scripts.HTTP.Responses;
 using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
+using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
 using JetBrains.Annotations;
@@ -41,7 +42,7 @@ namespace ComethSDK.Scripts.Core
 		private Web3 _web3;
 		private float _transactionTimeoutTimer;
 
-		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey, string baseUrl = "" , string provider = "", float transactionTimeoutTimer = 60f)
+		public ComethWallet(IAuthAdaptor authAdaptor, string apiKey, string baseUrl = "", string provider = "", float transactionTimeoutTimer = 60f)
 		{
 			if (!Utils.IsNetworkSupported(authAdaptor.ChainId)) throw new Exception("This network is not supported");
 			_chainId = authAdaptor.ChainId;
@@ -123,7 +124,7 @@ namespace ComethSDK.Scripts.Core
 		{
 			CheckIsLoggedIn();
 
-			var tx = await SafeService.PrepareAddOwnerTx(GetAddress(), newOwner, _rpcUrl);
+			var tx = await SafeService.PrepareAddOwnerTx(GetAddress(), newOwner, _provider);
 
 			var safeTxHash = await SendTransaction(tx);
 
@@ -134,7 +135,7 @@ namespace ComethSDK.Scripts.Core
 		{
 			CheckIsLoggedIn();
 
-			var tx = await SafeService.PrepareRemoveOwnerTx(GetAddress(), owner, _rpcUrl);
+			var tx = await SafeService.PrepareRemoveOwnerTx(GetAddress(), owner, _provider);
 
 			//TODO: remove the local storage of the private key
 
@@ -145,7 +146,7 @@ namespace ComethSDK.Scripts.Core
 
 		public async Task<List<string>> GetOwners()
 		{
-			return await SafeService.GetOwners(_walletAddress, _rpcUrl);
+			return await SafeService.GetOwners(_walletAddress, _provider);
 		}
 
 		public void CancelWaitingForEvent()
@@ -290,6 +291,11 @@ namespace ComethSDK.Scripts.Core
 			return await _api.RelayTransaction(new RelayTransactionType(
 				safeTx, txSignature, _walletAddress)
 			);
+		}
+
+		public Task<Signer> CreateNewSigner(string walletAddress)
+		{
+			return _authAdaptor.CreateNewSigner(walletAddress);
 		}
 
 		/**

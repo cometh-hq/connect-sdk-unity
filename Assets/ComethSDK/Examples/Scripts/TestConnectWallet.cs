@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using ComethSDK.Scripts.Adapters;
 using ComethSDK.Scripts.Core;
 using ComethSDK.Scripts.Interfaces;
@@ -14,27 +15,27 @@ namespace ComethSDK.Examples.Scripts
 {
 	public class TestConnectWallet : TestWallet
 	{
-		[Header("Required")] [SerializeField] private string apiKey;
+		[Header("Required")][SerializeField] private string apiKey;
 
 		[SerializeField] private int chainId;
 
-		[Header("Optional")] [SerializeField] private string walletAddress;
+		[Header("Optional")][SerializeField] private string walletAddress;
 
 		[SerializeField] private string baseUrl;
 		[SerializeField] private float transactionTimeoutTimer;
 
-		[Header("UI")] [SerializeField] private TMP_Text console;
+		[Header("UI")][SerializeField] private TMP_Text console;
 
 		private ConnectAdaptor _connectAuthAdaptor;
 
 		private ComethWallet _wallet;
-		
+
 		private const string COUNT_ADDRESS_MUMBAI = "0x4FbF9EE4B2AF774D4617eAb027ac2901a41a7b5F";
 		private const string COUNT_ADDRESS_POLYGON = "0x84ADD3fa2c2463C8cF2C95aD70e4b5F602332160";
-		
+
 		private const string COUNT_ADDRESS_MUNSTER_TESTNET = "0x3633A1bE570fBD902D10aC6ADd65BB11FC914624";
 		private const string COUNT_ADDRESS_MUNSTER_MAINNET = "0x3633A1bE570fBD902D10aC6ADd65BB11FC914624";
-		
+
 
 		private void Start()
 		{
@@ -48,17 +49,17 @@ namespace ComethSDK.Examples.Scripts
 
 			if (string.IsNullOrEmpty(baseUrl))
 			{
-				_wallet = transactionTimeoutTimer == 0 
-					? new ComethWallet(_connectAuthAdaptor, apiKey) 
-					: new ComethWallet(_connectAuthAdaptor, apiKey, transactionTimeoutTimer:transactionTimeoutTimer);
+				_wallet = transactionTimeoutTimer == 0
+					? new ComethWallet(_connectAuthAdaptor, apiKey)
+					: new ComethWallet(_connectAuthAdaptor, apiKey, transactionTimeoutTimer: transactionTimeoutTimer);
 			}
 			else
 			{
-				_wallet = transactionTimeoutTimer == 0 
+				_wallet = transactionTimeoutTimer == 0
 					? new ComethWallet(_connectAuthAdaptor, apiKey, baseUrl)
-					: new ComethWallet(_connectAuthAdaptor, apiKey, baseUrl, transactionTimeoutTimer:transactionTimeoutTimer);
+					: new ComethWallet(_connectAuthAdaptor, apiKey, baseUrl, transactionTimeoutTimer: transactionTimeoutTimer);
 			}
-			
+
 		}
 
 		public override async void Connect()
@@ -114,7 +115,7 @@ namespace ComethSDK.Examples.Scripts
 			PrintInConsole("Transaction sent, waiting for confirmation...");
 			var transactionReceipt = await _wallet.Wait(safeTxHash);
 			PrintInConsole("Transaction confirmed, see it on the block explorer: " +
-			               transactionReceipt.TransactionHash);
+						   transactionReceipt.TransactionHash);
 			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, _connectAuthAdaptor.ChainId);
 		}
 
@@ -148,7 +149,7 @@ namespace ComethSDK.Examples.Scripts
 			PrintInConsole("Transaction sent, waiting for confirmation...");
 			var transactionReceipt = await _wallet.Wait(safeTxHash);
 			PrintInConsole("Transaction confirmed, see it on the block explorer: " +
-			               transactionReceipt.TransactionHash);
+						   transactionReceipt.TransactionHash);
 			SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, _connectAuthAdaptor.ChainId);
 		}
 
@@ -173,7 +174,7 @@ namespace ComethSDK.Examples.Scripts
 			if (transactionReceipt != null)
 			{
 				PrintInConsole("Transaction confirmed, see it on the block explorer: " +
-				               transactionReceipt.TransactionHash);
+							   transactionReceipt.TransactionHash);
 				SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, _connectAuthAdaptor.ChainId);
 			}
 			else
@@ -214,7 +215,7 @@ namespace ComethSDK.Examples.Scripts
 			if (transactionReceipt != null)
 			{
 				PrintInConsole("Transaction confirmed, see it on the block explorer: " +
-				               transactionReceipt.TransactionHash);
+							   transactionReceipt.TransactionHash);
 				SeeTransactionReceiptOnBlockExplorer(transactionReceipt.TransactionHash, _connectAuthAdaptor.ChainId);
 			}
 			else
@@ -280,6 +281,11 @@ namespace ComethSDK.Examples.Scripts
 
 			EstimateGasAndShowWithSimulate(to, value, data);
 			EstimateGasAndShow(to, value, data);
+		}
+
+		public async void TestCreateNewSigner()
+		{
+			await _connectAuthAdaptor.CreateNewSigner(walletAddress);
 		}
 
 		private async void EstimateGasAndShow(string to, string value, string data)

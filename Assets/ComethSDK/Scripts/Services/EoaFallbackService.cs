@@ -68,7 +68,7 @@ namespace ComethSDK.Scripts.Services
 		public static async Task<string> GetSignerLocalStorage(string walletAddress, string encryptionSalt)
 		{
 			EncryptionData localStorageV2;
-				
+
 			try
 			{
 				localStorageV2 = SaveLoadPersistentData.Load("connect",
@@ -79,7 +79,7 @@ namespace ComethSDK.Scripts.Services
 				Debug.LogError("No signer available for this address.");
 				throw new Exception("No signer available for this address.");
 			}
-			
+
 
 			if (localStorageV2 == null) return null;
 
@@ -107,12 +107,17 @@ namespace ComethSDK.Scripts.Services
 		{
 			encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
 			var encryptedData = await EncryptEoaFallback(walletAddress, signer.GetPrivateKey(), encryptionSalt);
-			SaveLoadPersistentData.Save(encryptedData, "connect", walletAddress);
+			SaveLoadPersistentData.Save(encryptedData, Constants.DEFAULT_DATA_FOLDER, walletAddress);
 		}
 
 		public static async Task<(Signer signer, string walletAddress)> CreateSigner(API api, string walletAddress = "",
 			string encryptionSalt = "")
 		{
+			if (SaveLoadPersistentData.FileExists(Constants.DEFAULT_DATA_FOLDER, walletAddress))
+			{
+				throw new Exception($"Cannot create signer: file {walletAddress} already exists");
+			}
+
 			var signer = CreateRandomWallet();
 
 			if (string.IsNullOrEmpty(encryptionSalt)) encryptionSalt = Constants.DEFAULT_ENCRYPTION_SALT;
@@ -124,8 +129,8 @@ namespace ComethSDK.Scripts.Services
 			}
 
 			var predictedWalletAddress = await api.GetWalletAddress(signer.GetAddress());
-			if(string.IsNullOrEmpty(predictedWalletAddress)) throw new Exception("Error in GetWalletAddress");
-			
+			if (string.IsNullOrEmpty(predictedWalletAddress)) throw new Exception("Error in GetWalletAddress");
+
 			await SetSignerLocalStorage(predictedWalletAddress, signer,
 				encryptionSalt);
 

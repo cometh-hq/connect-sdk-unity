@@ -45,8 +45,8 @@ namespace ComethSDK.Scripts.Tools
 				Debug.LogError("Directory does not exist! " + dataPath);
 				throw new Exception("Directory does not exist! " + dataPath);
 			}
-			
-			if(!File.Exists(dataPath))
+
+			if (!File.Exists(dataPath))
 			{
 				Debug.LogError("File does not exist! " + dataPath);
 				throw new Exception("File does not exist! " + dataPath);
@@ -62,6 +62,21 @@ namespace ComethSDK.Scripts.Tools
 
 			// convert to the specified object type
 			return JsonConvert.DeserializeObject<EncryptionData>(jsonData);
+		}
+
+		/// <summary>
+		///     Check if a file exists at a specified file and folder location
+		/// </summary>
+		public static bool FileExists(string folder, string file)
+		{
+			if (string.IsNullOrEmpty(file))
+			{
+				return false;
+			}
+
+			var dataPath = GetFilePath(folder, file);
+
+			return File.Exists(dataPath);
 		}
 
 		/// <summary>
