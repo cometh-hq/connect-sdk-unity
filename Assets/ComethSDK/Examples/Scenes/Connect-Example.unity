@@ -4965,10 +4965,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 377acc6ba7b043fb9a664ef1ad409c10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  apiKey: K9hupLJs7yND2JuorBSm8xVHI2VgL2iJ
-  chainId: 421614
-  walletAddress: 0xf9C19dc17b8a2cb2F7135f84681Db7C7Ec9F1dbe
-  baseUrl: https://api.connect.develop.core.cometh.tech
+  apiKey: 
+  chainId: 0
+  walletAddress: 
+  baseUrl: 
   transactionTimeoutTimer: 0
   console: {fileID: 693827447}
 --- !u!1 &1444845274
