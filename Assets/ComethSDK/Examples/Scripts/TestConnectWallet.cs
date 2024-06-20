@@ -5,6 +5,7 @@ using ComethSDK.Scripts.Core;
 using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
+using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
 using Nethereum.Web3;
@@ -285,7 +286,29 @@ namespace ComethSDK.Examples.Scripts
 
 		public async void TestCreateNewSigner()
 		{
-			await _connectAuthAdaptor.CreateNewSigner(walletAddress);
+			PrintInConsole($"Creating new signer...");
+			Signer newSigner = await _connectAuthAdaptor.CreateNewSigner(walletAddress);
+			PrintInConsole($"New Signer: {newSigner.GetAddress()}");
+		}
+
+		public async void TestOnGoingRecovery()
+		{
+			PrintInConsole($"Check on going recovery...");
+			var onGoingRecovery = await _wallet.OnGoingRecovery(walletAddress);
+			PrintInConsole($"On Going Recovery: {onGoingRecovery}");
+		}
+
+		public async void TestCancelRecovery()
+		{
+			PrintInConsole($"Cancel recovery...");
+
+			var cancelRecoverySafeTxHash = await _wallet.CancelRecovery();
+			var transactionReceipt = await _wallet.Wait(cancelRecoverySafeTxHash);
+
+			if (transactionReceipt != null)
+				PrintInConsole("Cancel Recovery Transaction confirmed");
+			else
+				PrintInConsole("Issue with Cancel Recovery");
 		}
 
 		private async void EstimateGasAndShow(string to, string value, string data)
