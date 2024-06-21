@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.HTTP;
@@ -26,6 +27,34 @@ namespace ComethSDK.Scripts.Services
             var queueNonce = await queueNonceFunction.CallAsync<int>();
 
             return txNonce != queueNonce;
+        }
+
+        public static async Task<long> RecoveryCooldown(string walletAddress, API api, Web3 web3)
+        {
+            WalletInfos info = await api.GetWalletInfos(walletAddress);
+
+            string abiPath = Path.Combine(Application.dataPath, "ComethSDK/ABI", "delay.json");
+            string abi = File.ReadAllText(abiPath);
+
+            string proxyDelayAddress = info.proxyDelayAddress;
+            var delayContract = web3.Eth.GetContract(abi, proxyDelayAddress);
+
+            var txNonceFunction = delayContract.GetFunction("txNonce");
+            var txNonce = await txNonceFunction.CallAsync<int>();
+
+            var txCreatedAtFunction = delayContract.GetFunction("txCreatedAt");
+            var txCreatedAt = await txCreatedAtFunction.CallAsync<int>(txNonce);
+
+            var txCooldownFunction = delayContract.GetFunction("txCooldown");
+            var txCooldown = await txCooldownFunction.CallAsync<int>();
+
+            long endTime = txCreatedAt + txCooldown;
+
+            long currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+            long timeRemaining = endTime - currentTime;
+
+            return timeRemaining;
         }
 
         public static async Task<MetaTransactionData> PrepareCancelRecoveryTx(string walletAddress, API api, Web3 web3)

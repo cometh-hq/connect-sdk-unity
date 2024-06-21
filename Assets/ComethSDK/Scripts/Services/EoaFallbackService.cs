@@ -71,15 +71,12 @@ namespace ComethSDK.Scripts.Services
 
 			try
 			{
-				localStorageV2 = SaveLoadPersistentData.Load("connect",
-					walletAddress);
+				localStorageV2 = SaveLoadPersistentData.Load(Constants.DEFAULT_DATA_FOLDER, walletAddress);
 			}
 			catch (Exception)
 			{
-				Debug.LogError("No signer available for this address.");
-				throw new Exception("No signer available for this address.");
+				throw new SignerNotFoundException($"No signer available for this address: {walletAddress}.");
 			}
-
 
 			if (localStorageV2 == null) return null;
 

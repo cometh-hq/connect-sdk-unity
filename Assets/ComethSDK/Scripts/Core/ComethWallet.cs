@@ -303,6 +303,18 @@ namespace ComethSDK.Scripts.Core
 			return await DelayService.OnGoingRecovery(walletAddress, _api, _web3);
 		}
 
+		public async Task<long> RecoveryCooldown(string walletAddress)
+		{
+			bool onGoingRecovery = await DelayService.OnGoingRecovery(walletAddress, _api, _web3);
+
+			if (!onGoingRecovery)
+			{
+				throw new InvalidOperationException("No on going recovery found");
+			}
+
+			return await DelayService.RecoveryCooldown(walletAddress, _api, _web3);
+		}
+
 		public async Task<string> CancelRecovery()
 		{
 			CheckIsLoggedIn();
@@ -311,7 +323,6 @@ namespace ComethSDK.Scripts.Core
 
 			if (!onGoingRecovery)
 			{
-				Debug.Log("No on going recovery found");
 				throw new InvalidOperationException("No on going recovery found");
 			}
 

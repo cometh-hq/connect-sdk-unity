@@ -298,6 +298,13 @@ namespace ComethSDK.Examples.Scripts
 			PrintInConsole($"On Going Recovery: {onGoingRecovery}");
 		}
 
+		public async void TestRecoveryCooldown()
+		{
+			PrintInConsole($"Get recovery cooldown...");
+			var cooldown = await _wallet.RecoveryCooldown(walletAddress);
+			PrintInConsole($"Get recovery cooldown: {cooldown}");
+		}
+
 		public async void TestCancelRecovery()
 		{
 			PrintInConsole($"Cancel recovery...");
