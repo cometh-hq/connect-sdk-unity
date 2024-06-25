@@ -53,6 +53,7 @@ namespace ComethSDK.Scripts.Services
 		{
 			var storagePrivateKey = await GetSignerLocalStorage(walletAddress, encryptionSalt);
 
+			// TODO: this happens if the file is corrupted? Recreate the file?
 			if (string.IsNullOrEmpty(storagePrivateKey))
 				throw new Exception("New Domain detected. You need to add that domain as signer.");
 
@@ -60,7 +61,7 @@ namespace ComethSDK.Scripts.Services
 
 			var isOwner = await SafeService.IsSigner(storageSigner.GetAddress(), walletAddress, rpcUrl, api);
 
-			if (!isOwner) throw new Exception("New Domain detected. You need to add that domain as signer.");
+			if (!isOwner) throw new SignerUnauthorizedException("New Domain detected. You need to add that domain as signer.");
 
 			return storageSigner;
 		}
