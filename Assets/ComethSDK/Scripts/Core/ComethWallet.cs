@@ -146,7 +146,12 @@ namespace ComethSDK.Scripts.Core
 
 		public async Task<List<string>> GetOwners()
 		{
-			return await SafeService.GetOwners(_walletAddress, _provider);
+			return await GetOwners(_walletAddress);
+		}
+
+		public async Task<List<string>> GetOwners(string walletAddress)
+		{
+			return await SafeService.GetOwners(walletAddress, _provider);
 		}
 
 		public void CancelWaitingForEvent()
@@ -349,13 +354,20 @@ namespace ComethSDK.Scripts.Core
 				var functionSelector = SafeService.GetFunctionSelector(safeTxData);
 				var sponsoredAddress = ToSponsoredAddress(safeTxData.to);
 
-				if (!sponsoredAddress && !Constants.SPONSORED_FUNCTIONS.Contains(functionSelector))
+				if (!sponsoredAddress && !IsSponsoredFunction(functionSelector, safeTxData.to))
 				{
 					return false;
 				}
 			}
 
 			return true;
+		}
+
+		private bool IsSponsoredFunction(string functionSelector, string address)
+		{
+			// TODO: check the combination of functionSelector and address
+
+			return Constants.SPONSORED_FUNCTIONS.Contains(functionSelector);
 		}
 
 		private bool ToSponsoredAddress(string to)
