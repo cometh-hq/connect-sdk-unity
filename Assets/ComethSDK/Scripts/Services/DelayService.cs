@@ -1,10 +1,9 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.HTTP;
+using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Types;
 using Nethereum.Web3;
-using UnityEngine;
 
 namespace ComethSDK.Scripts.Services
 {
@@ -14,11 +13,8 @@ namespace ComethSDK.Scripts.Services
         {
             WalletInfos info = await api.GetWalletInfos(walletAddress);
 
-            string abiPath = Path.Combine(Application.dataPath, "ComethSDK/ABI", "delay.json");
-            string abi = File.ReadAllText(abiPath);
-
             string proxyDelayAddress = info.proxyDelayAddress;
-            var delayContract = web3.Eth.GetContract(abi, proxyDelayAddress);
+            var delayContract = web3.Eth.GetContract(Constants.DELAY_ABI, proxyDelayAddress);
 
             var txNonceFunction = delayContract.GetFunction("txNonce");
             var txNonce = await txNonceFunction.CallAsync<int>();
@@ -33,11 +29,8 @@ namespace ComethSDK.Scripts.Services
         {
             WalletInfos info = await api.GetWalletInfos(walletAddress);
 
-            string abiPath = Path.Combine(Application.dataPath, "ComethSDK/ABI", "delay.json");
-            string abi = File.ReadAllText(abiPath);
-
             string proxyDelayAddress = info.proxyDelayAddress;
-            var delayContract = web3.Eth.GetContract(abi, proxyDelayAddress);
+            var delayContract = web3.Eth.GetContract(Constants.DELAY_ABI, proxyDelayAddress);
 
             var txNonceFunction = delayContract.GetFunction("txNonce");
             var txNonce = await txNonceFunction.CallAsync<int>();
@@ -61,11 +54,8 @@ namespace ComethSDK.Scripts.Services
         {
             WalletInfos info = await api.GetWalletInfos(walletAddress);
 
-            string abiPath = Path.Combine(Application.dataPath, "ComethSDK/ABI", "delay.json");
-            string abi = File.ReadAllText(abiPath);
-
             string proxyDelayAddress = info.proxyDelayAddress;
-            var delayContract = web3.Eth.GetContract(abi, proxyDelayAddress);
+            var delayContract = web3.Eth.GetContract(Constants.DELAY_ABI, proxyDelayAddress);
 
             var txNonceFunction = delayContract.GetFunction("txNonce");
             var txNonce = await txNonceFunction.CallAsync<int>();
