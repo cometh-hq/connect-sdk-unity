@@ -14,8 +14,9 @@ namespace ComethSDK.Scripts.Adapters.Interfaces
 		public Task Logout();
 		public string GetAccount();
 		public ISignerBase GetSigner();
+		public Task<ISignerBase> GetSigner(string walletAddress);
 		public string GetWalletAddress();
 		public UserInfos GetUserInfos();
-		public Task<Signer> CreateNewSigner(string walletAddress);
+		public Task<ISignerBase> CreateNewSigner(string walletAddress);
 	}
 }

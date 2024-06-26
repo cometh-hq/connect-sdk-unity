@@ -11,6 +11,7 @@ using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Tools.Signers;
+using ComethSDK.Scripts.Tools.Signers.Interfaces;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
 using JetBrains.Annotations;
@@ -298,9 +299,14 @@ namespace ComethSDK.Scripts.Core
 			);
 		}
 
-		public Task<Signer> CreateNewSigner(string walletAddress)
+		public Task<ISignerBase> CreateNewSigner(string walletAddress)
 		{
 			return _authAdaptor.CreateNewSigner(walletAddress);
+		}
+
+		public Task<ISignerBase> GetSigner(string walletAddress)
+		{
+			return _authAdaptor.GetSigner(walletAddress);
 		}
 
 		public async Task<bool> OnGoingRecovery(string walletAddress)

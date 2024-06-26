@@ -90,7 +90,7 @@ namespace ComethSDK.Scripts.Adapters
 			return _walletAddress;
 		}
 
-		public async Task<Signer> CreateNewSigner(string walletAddress)
+		public async Task<ISignerBase> CreateNewSigner(string walletAddress)
 		{
 			var (signer, _) = await EoaFallbackService.CreateSigner(_api, walletAddress, _encryptionSalt);
 
