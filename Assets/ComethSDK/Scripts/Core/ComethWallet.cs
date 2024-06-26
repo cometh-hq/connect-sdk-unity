@@ -299,12 +299,12 @@ namespace ComethSDK.Scripts.Core
 			);
 		}
 
-		public Task<ISignerBase> CreateNewSigner(string walletAddress)
+		public Task<Signer> CreateNewSigner(string walletAddress)
 		{
 			return _authAdaptor.CreateNewSigner(walletAddress);
 		}
 
-		public Task<ISignerBase> GetSigner(string walletAddress)
+		public Task<Signer> GetSigner(string walletAddress)
 		{
 			return _authAdaptor.GetSigner(walletAddress);
 		}

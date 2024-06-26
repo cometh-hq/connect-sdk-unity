@@ -64,13 +64,13 @@ namespace ComethSDK.Scripts.Adapters
 			return _signer.GetAddress();
 		}
 
-		public ISignerBase GetSigner()
+		public Signer GetSigner()
 		{
 			CheckIfSignerIsSet();
 			return _signer;
 		}
 
-		public async Task<ISignerBase> GetSigner(string walletAddress)
+		public async Task<Signer> GetSigner(string walletAddress)
 		{
 			return await EoaFallbackService.GetSigner(walletAddress, _encryptionSalt);
 		}
@@ -90,7 +90,7 @@ namespace ComethSDK.Scripts.Adapters
 			return _walletAddress;
 		}
 
-		public async Task<ISignerBase> CreateNewSigner(string walletAddress)
+		public async Task<Signer> CreateNewSigner(string walletAddress)
 		{
 			var (signer, _) = await EoaFallbackService.CreateSigner(_api, walletAddress, _encryptionSalt);
 

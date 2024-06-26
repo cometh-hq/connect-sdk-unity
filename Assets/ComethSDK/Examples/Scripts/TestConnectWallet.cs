@@ -373,7 +373,7 @@ namespace ComethSDK.Examples.Scripts
 
 		private async void AddSignerRequestExamples()
 		{
-			var addSignerRequest = await _connectAuthAdaptor.InitNewSignerRequest(walletAddress);
+			var addSignerRequest = _connectAuthAdaptor.InitNewSignerRequest(walletAddress);
 			var newSignerRequests = await _connectAuthAdaptor.GetNewSignerRequests();
 
 			var newSignerRequest = newSignerRequests[0];
