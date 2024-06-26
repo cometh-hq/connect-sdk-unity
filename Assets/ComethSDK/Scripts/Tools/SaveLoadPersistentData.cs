@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using ComethSDK.Scripts.Types;
 using Newtonsoft.Json;
@@ -43,13 +42,13 @@ namespace ComethSDK.Scripts.Tools
 			if (!Directory.Exists(Path.GetDirectoryName(dataPath)))
 			{
 				Debug.LogError("Directory does not exist! " + dataPath);
-				throw new Exception("Directory does not exist! " + dataPath);
+				throw new DirectoryNotFoundException("Directory does not exist! " + dataPath);
 			}
 
 			if (!File.Exists(dataPath))
 			{
 				Debug.LogError("File does not exist! " + dataPath);
-				throw new Exception("File does not exist! " + dataPath);
+				throw new FileNotFoundException("File does not exist! " + dataPath);
 			}
 
 			// load in the save data as byte array

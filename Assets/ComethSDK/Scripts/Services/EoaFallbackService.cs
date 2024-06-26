@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using ComethSDK.Scripts.HTTP;
@@ -6,7 +7,6 @@ using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Types;
 using Nethereum.Signer;
-using UnityEngine;
 
 namespace ComethSDK.Scripts.Services
 {
@@ -48,22 +48,30 @@ namespace ComethSDK.Scripts.Services
 			return Encoding.UTF8.GetString(privateKey);
 		}
 
-		public static async Task<Signer> GetSigner(API api, string rpcUrl, string walletAddress,
-			string encryptionSalt)
+		public static async Task<Signer> GetSigner(string walletAddress, string encryptionSalt)
 		{
 			var storagePrivateKey = await GetSignerLocalStorage(walletAddress, encryptionSalt);
 
-			// TODO: this happens if the file is corrupted? Recreate the file?
 			if (string.IsNullOrEmpty(storagePrivateKey))
-				throw new Exception("New Domain detected. You need to add that domain as signer.");
+			{
+				throw new SignerInvalidException($"Storage private key is empty for address: {walletAddress}.");
+			}
 
 			var storageSigner = new Signer(new EthECKey(storagePrivateKey));
 
-			var isOwner = await SafeService.IsSigner(storageSigner.GetAddress(), walletAddress, rpcUrl, api);
-
-			if (!isOwner) throw new SignerUnauthorizedException("New Domain detected. You need to add that domain as signer.");
-
 			return storageSigner;
+		}
+
+		public static async Task<bool> CheckSignerIsOwner(Signer signer, API api, string rpcUrl, string walletAddress)
+		{
+			var isOwner = await SafeService.IsSigner(signer.GetAddress(), walletAddress, rpcUrl, api);
+
+			if (!isOwner)
+			{
+				throw new SignerUnauthorizedException("New Domain detected. You need to add that domain as signer.");
+			}
+
+			return true;
 		}
 
 		public static async Task<string> GetSignerLocalStorage(string walletAddress, string encryptionSalt)
@@ -74,21 +82,28 @@ namespace ComethSDK.Scripts.Services
 			{
 				localStorageV2 = SaveLoadPersistentData.Load(Constants.DEFAULT_DATA_FOLDER, walletAddress);
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
-				throw new SignerNotFoundException($"No signer available for this address: {walletAddress}.");
+				if (e.GetType() == typeof(DirectoryNotFoundException) || e.GetType() == typeof(FileNotFoundException))
+				{
+					throw new SignerNotFoundException($"No signer available for this address: {walletAddress}.");
+				}
+				else
+				{
+					throw new SignerInvalidException($"Signer is invalid for this address: {walletAddress}.");
+				}
 			}
 
 			if (localStorageV2 == null) return null;
 
 			if (string.IsNullOrEmpty(localStorageV2.encryptedPrivateKey) && string.IsNullOrEmpty(localStorageV2.iv))
-				throw new Exception("Local storage exists but no encryptedPrivateKey and ivs were inside.");
+				throw new SignerInvalidException("Local storage exists but no encryptedPrivateKey and ivs were inside.");
 
 			if (string.IsNullOrEmpty(localStorageV2.encryptedPrivateKey))
-				throw new Exception("Local storage exists but no encryptedPrivateKey was inside.");
+				throw new SignerInvalidException("Local storage exists but no encryptedPrivateKey was inside.");
 
 			if (string.IsNullOrEmpty(localStorageV2.iv))
-				throw new Exception("Local storage exists but no iv was inside.");
+				throw new SignerInvalidException("Local storage exists but no iv was inside.");
 
 			encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
 
@@ -107,6 +122,8 @@ namespace ComethSDK.Scripts.Services
 			var encryptedData = await EncryptEoaFallback(walletAddress, signer.GetPrivateKey(), encryptionSalt);
 			SaveLoadPersistentData.Save(encryptedData, Constants.DEFAULT_DATA_FOLDER, walletAddress);
 		}
+
+		// reset signer
 
 		public static async Task<(Signer signer, string walletAddress)> CreateSigner(API api, string walletAddress = "",
 			string encryptionSalt = "")

@@ -70,6 +70,11 @@ namespace ComethSDK.Scripts.Adapters
 			return _signer;
 		}
 
+		public async Task<ISignerBase> GetSigner(string walletAddress)
+		{
+			return await EoaFallbackService.GetSigner(walletAddress, _encryptionSalt);
+		}
+
 		public UserInfos GetUserInfos()
 		{
 			CheckIfSignerIsSet();
@@ -97,11 +102,13 @@ namespace ComethSDK.Scripts.Adapters
 			var wallet = await _api.GetWalletInfos(walletAddress);
 			if (wallet == null) throw new Exception("Wallet does not exist");
 
-			_signer = await EoaFallbackService.GetSigner(_api, _provider, walletAddress, _encryptionSalt);
+			_signer = await EoaFallbackService.GetSigner(walletAddress, _encryptionSalt);
 			_walletAddress = walletAddress;
+
+			await EoaFallbackService.CheckSignerIsOwner(_signer, _api, _provider, walletAddress);
 		}
 
-		public async Task<NewSignerRequestBody> InitNewSignerRequest(string walletAddress)
+		public NewSignerRequestBody InitNewSignerRequest(string walletAddress)
 		{
 			var ethEcKey = EthECKey.GenerateKey();
 			var privateKey = ethEcKey.GetPrivateKey();
