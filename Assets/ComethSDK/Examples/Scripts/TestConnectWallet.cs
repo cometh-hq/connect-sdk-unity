@@ -298,6 +298,13 @@ namespace ComethSDK.Examples.Scripts
 			PrintInConsole($"On Going Recovery: {onGoingRecovery}");
 		}
 
+		public async void TestRecoveryCooldown()
+		{
+			PrintInConsole($"Get recovery cooldown...");
+			var cooldown = await _wallet.RecoveryCooldown(walletAddress);
+			PrintInConsole($"Get recovery cooldown: {cooldown}");
+		}
+
 		public async void TestCancelRecovery()
 		{
 			PrintInConsole($"Cancel recovery...");
@@ -366,7 +373,7 @@ namespace ComethSDK.Examples.Scripts
 
 		private async void AddSignerRequestExamples()
 		{
-			var addSignerRequest = await _connectAuthAdaptor.InitNewSignerRequest(walletAddress);
+			var addSignerRequest = _connectAuthAdaptor.InitNewSignerRequest(walletAddress);
 			var newSignerRequests = await _connectAuthAdaptor.GetNewSignerRequests();
 
 			var newSignerRequest = newSignerRequests[0];

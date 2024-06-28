@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using ComethSDK.Scripts.Types;
 using Newtonsoft.Json;
@@ -43,13 +42,13 @@ namespace ComethSDK.Scripts.Tools
 			if (!Directory.Exists(Path.GetDirectoryName(dataPath)))
 			{
 				Debug.LogError("Directory does not exist! " + dataPath);
-				throw new Exception("Directory does not exist! " + dataPath);
+				throw new DirectoryNotFoundException("Directory does not exist! " + dataPath);
 			}
 
 			if (!File.Exists(dataPath))
 			{
 				Debug.LogError("File does not exist! " + dataPath);
-				throw new Exception("File does not exist! " + dataPath);
+				throw new FileNotFoundException("File does not exist! " + dataPath);
 			}
 
 			// load in the save data as byte array
@@ -87,10 +86,10 @@ namespace ComethSDK.Scripts.Tools
 			string filePath;
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
 			// mac
-			filePath = Path.Combine(Application.persistentDataPath, ("data/" + folderName));
+			filePath = Path.Combine(Application.persistentDataPath, "data/" + folderName);
 
 			if (fileName != "")
-				filePath = Path.Combine(filePath, (fileName + ".txt"));
+				filePath = Path.Combine(filePath, fileName + ".txt");
 #elif UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 			// windows
 			filePath = Path.Combine(Application.persistentDataPath, "data/" + folderName);
@@ -99,16 +98,16 @@ namespace ComethSDK.Scripts.Tools
 				filePath = Path.Combine(filePath, fileName + ".txt");
 #elif UNITY_ANDROID
         // android
-        filePath = Path.Combine(Application.persistentDataPath, ("data/" + FolderName));
+        filePath = Path.Combine(Application.persistentDataPath, ("data/" + folderName));
 
-        if(FileName != "")
-            filePath = Path.Combine(filePath, (FileName + ".txt"));
+        if(fileName != "")
+            filePath = Path.Combine(filePath, (fileName + ".txt"));
 #elif UNITY_IOS
         // ios
-        filePath = Path.Combine(Application.persistentDataPath, ("data/" + FolderName));
+        filePath = Path.Combine(Application.persistentDataPath, ("data/" + folderName));
 
-        if(FileName != "")
-            filePath = Path.Combine(filePath, (FileName + ".txt"));
+        if(fileName != "")
+            filePath = Path.Combine(filePath, (fileName + ".txt"));
 #endif
 			return filePath;
 		}

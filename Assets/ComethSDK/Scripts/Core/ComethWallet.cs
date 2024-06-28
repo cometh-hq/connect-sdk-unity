@@ -11,6 +11,7 @@ using ComethSDK.Scripts.Interfaces;
 using ComethSDK.Scripts.Services;
 using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Tools.Signers;
+using ComethSDK.Scripts.Tools.Signers.Interfaces;
 using ComethSDK.Scripts.Types;
 using ComethSDK.Scripts.Types.MessageTypes;
 using JetBrains.Annotations;
@@ -146,7 +147,12 @@ namespace ComethSDK.Scripts.Core
 
 		public async Task<List<string>> GetOwners()
 		{
-			return await SafeService.GetOwners(_walletAddress, _provider);
+			return await GetOwners(_walletAddress);
+		}
+
+		public async Task<List<string>> GetOwners(string walletAddress)
+		{
+			return await SafeService.GetOwners(walletAddress, _provider);
 		}
 
 		public void CancelWaitingForEvent()
@@ -298,9 +304,26 @@ namespace ComethSDK.Scripts.Core
 			return _authAdaptor.CreateNewSigner(walletAddress);
 		}
 
+		public Task<Signer> GetSigner(string walletAddress)
+		{
+			return _authAdaptor.GetSigner(walletAddress);
+		}
+
 		public async Task<bool> OnGoingRecovery(string walletAddress)
 		{
 			return await DelayService.OnGoingRecovery(walletAddress, _api, _web3);
+		}
+
+		public async Task<long> RecoveryCooldown(string walletAddress)
+		{
+			bool onGoingRecovery = await DelayService.OnGoingRecovery(walletAddress, _api, _web3);
+
+			if (!onGoingRecovery)
+			{
+				throw new InvalidOperationException("No on going recovery found");
+			}
+
+			return await DelayService.RecoveryCooldown(walletAddress, _api, _web3);
 		}
 
 		public async Task<string> CancelRecovery()
@@ -311,7 +334,6 @@ namespace ComethSDK.Scripts.Core
 
 			if (!onGoingRecovery)
 			{
-				Debug.Log("No on going recovery found");
 				throw new InvalidOperationException("No on going recovery found");
 			}
 
@@ -338,13 +360,20 @@ namespace ComethSDK.Scripts.Core
 				var functionSelector = SafeService.GetFunctionSelector(safeTxData);
 				var sponsoredAddress = ToSponsoredAddress(safeTxData.to);
 
-				if (!sponsoredAddress && !Constants.SPONSORED_FUNCTIONS.Contains(functionSelector))
+				if (!sponsoredAddress && !IsSponsoredFunction(functionSelector, safeTxData.to))
 				{
 					return false;
 				}
 			}
 
 			return true;
+		}
+
+		private bool IsSponsoredFunction(string functionSelector, string address)
+		{
+			// TODO: check the combination of functionSelector and address
+
+			return Constants.SPONSORED_FUNCTIONS.Contains(functionSelector);
 		}
 
 		private bool ToSponsoredAddress(string to)
