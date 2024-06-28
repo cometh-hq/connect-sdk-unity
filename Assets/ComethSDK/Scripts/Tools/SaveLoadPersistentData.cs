@@ -86,7 +86,7 @@ namespace ComethSDK.Scripts.Tools
 			string filePath;
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
 			// mac
-			filePath = Path.Combine(Application.persistentDataPath, ("data/" + folderName));
+			filePath = Path.Combine(Application.persistentDataPath, "data/" + folderName);
 
 			if (fileName != "")
 				filePath = Path.Combine(filePath, (fileName + ".txt"));
@@ -98,13 +98,13 @@ namespace ComethSDK.Scripts.Tools
 				filePath = Path.Combine(filePath, fileName + ".txt");
 #elif UNITY_ANDROID
         // android
-        filePath = Path.Combine(Application.persistentDataPath, ("data/" + FolderName));
+        filePath = Path.Combine(Application.persistentDataPath, ("data/" + folderName));
 
         if(FileName != "")
             filePath = Path.Combine(filePath, (FileName + ".txt"));
 #elif UNITY_IOS
         // ios
-        filePath = Path.Combine(Application.persistentDataPath, ("data/" + FolderName));
+        filePath = Path.Combine(Application.persistentDataPath, ("data/" + folderName));
 
         if(FileName != "")
             filePath = Path.Combine(filePath, (FileName + ".txt"));
