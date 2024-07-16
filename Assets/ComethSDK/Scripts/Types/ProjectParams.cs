@@ -5,7 +5,9 @@
 		public string ChainId;
 		public string MultiSendContractAddress;
 		public string P256FactoryContractAddress;
-		public string SafeSingletonAddress;
-		public string SafeTxAccessorAddress;
+		public string SingletonAddress;
+		public string SimulateTxAcessorAddress;
+		public string DeploymentManagerAddress;
+		public string GuardianId;
 	}
 }

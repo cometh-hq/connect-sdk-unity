@@ -234,8 +234,8 @@ namespace ComethSDK.Scripts.Core
 			{
 				safeTx = await GasService.SetTransactionGasWithSimulate(safeTx, _walletAddress,
 					_projectParams.MultiSendContractAddress,
-					_projectParams.SafeSingletonAddress,
-					_projectParams.SafeTxAccessorAddress
+					_projectParams.SingletonAddress,
+					_projectParams.SimulateTxAcessorAddress
 					, _provider);
 				await GasService.VerifyHasEnoughBalance(_walletAddress, safeTxDataArray[0].to, safeTxDataArray[0].value,
 					safeTxDataArray[0].data, nonce, _provider);
@@ -267,8 +267,8 @@ namespace ComethSDK.Scripts.Core
 			{
 				var safeTxGasString = await GasService.EstimateSafeTxGasWithSimulate(_walletAddress, safeTxData,
 					_projectParams.MultiSendContractAddress,
-					_projectParams.SafeSingletonAddress,
-					_projectParams.SafeTxAccessorAddress,
+					_projectParams.SingletonAddress,
+					_projectParams.SimulateTxAcessorAddress,
 					_provider);
 
 				var gasEstimates = new GasEstimates
