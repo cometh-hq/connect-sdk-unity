@@ -102,7 +102,7 @@ namespace ComethSDK.Examples.Scripts
 				return;
 			}
 
-			var value = "0";
+			var value = "10000000000";
 			var data = "0x";
 
 			PrintInConsole("Sending transaction...");
@@ -282,7 +282,7 @@ namespace ComethSDK.Examples.Scripts
 			var data = "0x00";
 			var to = "0x6e13dA17777a7325DcCF7FAa2358Ef3Db6E452cE";
 
-			EstimateGasAndShowWithSimulate(to, value, data);
+			//EstimateGasAndShowWithSimulate(to, value, data);
 			EstimateGasAndShow(to, value, data);
 		}
 
@@ -334,25 +334,6 @@ namespace ComethSDK.Examples.Scripts
 
 			var estimates = await GasService.EstimateTransactionGas(safeTxDataArray, walletAddress, rpcUrl);
 			PrintInConsole("Estimated safeTxGas Normal: " + estimates);
-		}
-
-		private async void EstimateGasAndShowWithSimulate(string to, string value, string data)
-		{
-			var rpcUrl = Constants.GetNetworkByChainID(_connectAuthAdaptor.ChainId).RPCUrl;
-			var txData = new SafeTx
-			{
-				to = to,
-				value = value,
-				data = data
-			};
-
-			var txDataArray = new IMetaTransactionData[] { txData };
-			var gas = await GasService.EstimateSafeTxGasWithSimulate(walletAddress, txDataArray, "",
-				Constants.GetNetworkByChainID(chainId.ToString()).SafeSingletonAddress,
-				Constants.GetNetworkByChainID(chainId.ToString()).SafeTxAccessorAddress,
-				rpcUrl);
-
-			PrintInConsole("Estimated safeTxGas gas Simulated: " + gas);
 		}
 
 		private void SeeTransactionReceiptOnBlockExplorer(string txHash, string chainId)

@@ -270,13 +270,6 @@ namespace ComethSDK.Scripts.Core
 					_projectParams.SimulateTxAcessorAddress,
 					_provider);
 
-				var gasEstimates = new GasEstimates
-				{
-					baseGas = BASE_GAS,
-					gasPrice = await GasService.GetGasPrice(_provider),
-					safeTxGas = BigInteger.Parse(safeTxGasString)
-				};
-
 				var txValue = SafeService.GetTransactionsTotalValue(safeTxData);
 				await GasService.VerifyHasEnoughBalance(_walletAddress, totalGasCost, txValue, _provider);
 			}
