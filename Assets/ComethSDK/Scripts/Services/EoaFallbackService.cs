@@ -30,18 +30,28 @@ namespace ComethSDK.Scripts.Services
 			return new EncryptionData
 			{
 				encryptedPrivateKey = Convert.ToBase64String(encryptedPrivateKey),
-				iv = Convert.ToBase64String(iv)
+				iv = Convert.ToBase64String(iv),
+				iterations = Constants.PBKDF2_ITERATIONS
 			};
 		}
 
 		public static async Task<string> DecryptEoaFallback(
-			string walletAddress, byte[] encryptedPrivateKey, byte[] iv, string salt)
+			string walletAddress, byte[] encryptedPrivateKey, byte[] iv, int iterations, string salt)
 		{
 			var encodedWalletAddress = Encoding.UTF8.GetBytes(walletAddress);
 			var encodedSalt = Encoding.UTF8.GetBytes(salt);
 
-			var encryptionKey =
-				await CryptoService.Pbkdf2(encodedWalletAddress, encodedSalt, Constants.PBKDF2_ITERATIONS);
+			// Handle legacy iterations
+			if (iterations != Constants.PBKDF2_ITERATIONS)
+			{
+				iterations = 1000000;
+			}
+
+			var encryptionKey = await CryptoService.Pbkdf2(
+				encodedWalletAddress,
+				encodedSalt,
+				iterations
+			);
 
 			var privateKey = await CryptoService.DecryptAESCBC(encryptionKey, iv, encryptedPrivateKey);
 
@@ -111,7 +121,13 @@ namespace ComethSDK.Scripts.Services
 				walletAddress,
 				Convert.FromBase64String(localStorageV2.encryptedPrivateKey),
 				Convert.FromBase64String(localStorageV2.iv),
+				localStorageV2.iterations,
 				encryptionSalt);
+
+			if (localStorageV2.iterations != Constants.PBKDF2_ITERATIONS)
+			{
+				await SetSignerLocalStorage(walletAddress, new Signer(new EthECKey(privateKey)), encryptionSalt);
+			}
 
 			return privateKey;
 		}
