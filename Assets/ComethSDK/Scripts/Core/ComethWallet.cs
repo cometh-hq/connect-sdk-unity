@@ -237,6 +237,9 @@ namespace ComethSDK.Scripts.Core
 					_projectParams.SingletonAddress,
 					_projectParams.SimulateTxAcessorAddress
 					, _provider);
+
+				safeTx.safeTxGas += 300000; // safeTxGas manual hack
+
 				await GasService.VerifyHasEnoughBalance(_walletAddress, safeTxDataArray[0].to, safeTxDataArray[0].value,
 					safeTxDataArray[0].data, nonce, _provider);
 			}
