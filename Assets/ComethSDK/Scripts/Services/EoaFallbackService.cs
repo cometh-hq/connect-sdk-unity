@@ -7,6 +7,7 @@ using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Types;
 using Nethereum.Signer;
+using UnityEngine;
 
 namespace ComethSDK.Scripts.Services
 {
@@ -40,12 +41,6 @@ namespace ComethSDK.Scripts.Services
 		{
 			var encodedWalletAddress = Encoding.UTF8.GetBytes(walletAddress);
 			var encodedSalt = Encoding.UTF8.GetBytes(salt);
-
-			// Handle legacy iterations
-			if (iterations != Constants.PBKDF2_ITERATIONS)
-			{
-				iterations = 1000000;
-			}
 
 			var encryptionKey = await CryptoService.Pbkdf2(
 				encodedWalletAddress,
@@ -117,15 +112,25 @@ namespace ComethSDK.Scripts.Services
 
 			encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
 
+			int iterations = localStorageV2.iterations;
+
+			// Handle legacy iterations
+			if (iterations != Constants.PBKDF2_ITERATIONS)
+			{
+				iterations = 1000000;
+			}
+
 			var privateKey = await DecryptEoaFallback(
 				walletAddress,
 				Convert.FromBase64String(localStorageV2.encryptedPrivateKey),
 				Convert.FromBase64String(localStorageV2.iv),
-				localStorageV2.iterations,
+				iterations,
 				encryptionSalt);
 
-			if (localStorageV2.iterations != Constants.PBKDF2_ITERATIONS)
+			// Rewrite the storage with the new iterations
+			if (iterations != Constants.PBKDF2_ITERATIONS)
 			{
+				Debug.LogWarning("Updating iterations to " + Constants.PBKDF2_ITERATIONS);
 				await SetSignerLocalStorage(walletAddress, new Signer(new EthECKey(privateKey)), encryptionSalt);
 			}
 
