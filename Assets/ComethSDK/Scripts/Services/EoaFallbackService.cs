@@ -7,6 +7,7 @@ using ComethSDK.Scripts.Tools;
 using ComethSDK.Scripts.Tools.Signers;
 using ComethSDK.Scripts.Types;
 using Nethereum.Signer;
+using UnityEngine;
 
 namespace ComethSDK.Scripts.Services
 {
@@ -30,18 +31,22 @@ namespace ComethSDK.Scripts.Services
 			return new EncryptionData
 			{
 				encryptedPrivateKey = Convert.ToBase64String(encryptedPrivateKey),
-				iv = Convert.ToBase64String(iv)
+				iv = Convert.ToBase64String(iv),
+				iterations = Constants.PBKDF2_ITERATIONS
 			};
 		}
 
 		public static async Task<string> DecryptEoaFallback(
-			string walletAddress, byte[] encryptedPrivateKey, byte[] iv, string salt)
+			string walletAddress, byte[] encryptedPrivateKey, byte[] iv, int iterations, string salt)
 		{
 			var encodedWalletAddress = Encoding.UTF8.GetBytes(walletAddress);
 			var encodedSalt = Encoding.UTF8.GetBytes(salt);
 
-			var encryptionKey =
-				await CryptoService.Pbkdf2(encodedWalletAddress, encodedSalt, Constants.PBKDF2_ITERATIONS);
+			var encryptionKey = await CryptoService.Pbkdf2(
+				encodedWalletAddress,
+				encodedSalt,
+				iterations
+			);
 
 			var privateKey = await CryptoService.DecryptAESCBC(encryptionKey, iv, encryptedPrivateKey);
 
@@ -107,11 +112,27 @@ namespace ComethSDK.Scripts.Services
 
 			encryptionSalt = Utils.GetEncryptionSaltOrDefault(encryptionSalt);
 
+			int iterations = localStorageV2.iterations;
+
+			// Handle legacy iterations
+			if (iterations != Constants.PBKDF2_ITERATIONS)
+			{
+				iterations = 1000000;
+			}
+
 			var privateKey = await DecryptEoaFallback(
 				walletAddress,
 				Convert.FromBase64String(localStorageV2.encryptedPrivateKey),
 				Convert.FromBase64String(localStorageV2.iv),
+				iterations,
 				encryptionSalt);
+
+			// Rewrite the storage with the new iterations
+			if (iterations != Constants.PBKDF2_ITERATIONS)
+			{
+				Debug.LogWarning("Updating iterations to " + Constants.PBKDF2_ITERATIONS);
+				await SetSignerLocalStorage(walletAddress, new Signer(new EthECKey(privateKey)), encryptionSalt);
+			}
 
 			return privateKey;
 		}

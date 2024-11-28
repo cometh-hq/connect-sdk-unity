@@ -69,7 +69,7 @@ namespace ComethSDK.Scripts.Services
 			var safeTxGas = BigInteger.Zero;
 
 			foreach (var safeTxData in safeTxDataArray)
-				safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to, from, rpcUrl);
+				safeTxGas += await CalculateSafeTxGas(safeTxData.data, safeTxData.to, from, safeTxData.value, rpcUrl);
 
 			return safeTxGas;
 		}
@@ -110,7 +110,7 @@ namespace ComethSDK.Scripts.Services
 		}
 
 		public static async Task<string> EstimateSafeTxGasWithSimulate(string walletAddress,
-			IMetaTransactionData[] safeTxData, string multiSendAddress, string singletonAddress, 
+			IMetaTransactionData[] safeTxData, string multiSendAddress, string singletonAddress,
 			string simulateTxAccessorAddress, string rpcUrl)
 		{
 			IMetaTransactionData transaction;
@@ -181,7 +181,7 @@ namespace ComethSDK.Scripts.Services
 			return gasNum.ToString();
 		}
 
-		private static async Task<BigInteger> CalculateSafeTxGas(string data, string to, string from, string rpcUrl)
+		private static async Task<BigInteger> CalculateSafeTxGas(string data, string to, string from, string value, string rpcUrl)
 		{
 			var web3 = new Web3(rpcUrl);
 			var ethEstimateGas = new EthEstimateGas(web3.Client);
@@ -190,7 +190,8 @@ namespace ComethSDK.Scripts.Services
 			{
 				Data = data,
 				To = to,
-				From = from
+				From = from,
+				Value = value != default ? BigInteger.Parse(value).ToHexBigInteger() : null
 			};
 			return await ethEstimateGas.SendRequestAsync(transactionInput); // Will return an error if contract is not deployed
 		}
